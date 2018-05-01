@@ -71,10 +71,10 @@ mgc.py
 1. Download Data from the link below
 
    GTZAN Dataset
-   https://drive.google.com/drive/folders/16YkvirrRcdhqxix_0DBBjZeri4bjcfff?usp=sharing
+   https://drive.google.com/open?id=16YkvirrRcdhqxix_0DBBjZeri4bjcfff
 
    FeatureMap
-   https://drive.google.com/drive/folders/1T9CUdpnPNwBz4QHNcUiq3K-Jiuzzb9zr?usp=sharing
+   https://drive.google.com/open?id=1T9CUdpnPNwBz4QHNcUiq3K-Jiuzzb9zr
 
 2. Locate the data in your working directory
 
