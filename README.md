@@ -57,9 +57,20 @@ Finally, the framed signals are inputted into a matrix and the silence removal i
 ### Documentation
 
 ### Complete Installation
+
+1. Download Data
+
 GTZAN Dataset
 https://drive.google.com/open?id=16YkvirrRcdhqxix_0DBBjZeri4bjcfff
+FeatureMap
 
+2. Locate these data above in your working directory
+
+3. run "mgc.py" (Comment out unnecessary classifiers)
+
+4. If you use CNN, run "traintest.py" before you run "mgc.py"
+
+5. Please give me any advice
 
 ## References
 [1] B. L.Sturm, "The GTZAN dataset: Its contents, its faults, their effects on evaluation, and its
