@@ -54,9 +54,9 @@ Multilayer Perceptron
 Convolutional Neural Network
 
 ## Results
-k-NN: 
-MLP:
-CNN:
+k-NN: 62.0%
+MLP: 78.0%
+CNN: 40.6%
 
 ## Code
 mgc.py
