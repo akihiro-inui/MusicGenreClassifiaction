@@ -74,8 +74,8 @@ MLP: 78.0%
 
 CNN: 46.3% (Need to find more suitable parameters, seems overfitting)
 <p>
-<img src="assets/CNN accuracy.png?raw=true" alt="Feature Extraction" width="350", align="left">
-<img src="assets/CNN loss.png?raw=true" alt="Feature Extraction" width="350",align="right">
+<img src="assets/CNN accuracy.png?raw=true" alt="Feature Extraction" width="400", align="left">
+<img src="assets/CNN loss.png?raw=true" alt="Feature Extraction" width="400",align="right">
 </p>
 
 
