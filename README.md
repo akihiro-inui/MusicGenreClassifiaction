@@ -53,6 +53,8 @@ Ten types of low-level feature—six short-term and four long-term features—no
 </p>
 
 Over a texture window which consists of 64 analysis windows, short-term features are integrated with mean values.
+Also, extracted features from audio files were plotted in a figure like below and called featuremaps.
+
 
 <p align="center">
 <img src="assets/FMap.png?raw=true" alt="Feature Extraction" width="400">
