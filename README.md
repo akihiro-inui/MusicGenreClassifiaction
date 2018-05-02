@@ -70,7 +70,15 @@ Fuzzy k-NN, a combination of fuzzy logic and k-NN, was proposed to address the p
 
 Multilayer Perceptron
 
+The multilayer Perceptron to this project consists of 3 layers with relu function. The training data is splitted into 10% for the validation and 90% for the training. It loads the data from "Data.csv".
+
+
 Convolutional Neural Network
+
+Based on the blog from an intern at Spotify[6], the convolutional neural network was applied to the dataset "Featuremaps" instead of Mel-spectrograms. It consists of 3 convolutional layers with 3 times maxpooling.
+
+To be updated.
+
 
 ## Results
 k-NN: 62.0%
@@ -164,16 +172,14 @@ Sampling," in ISMIR, pp. 387-392, August, 2010.
 Expo (ICME), 2013 IEEE International Conference on (pp. 1-6). IEEE, July, 2013.
 
 [5] Keller, M. R. Gray and J. A. Givens, A fuzzy k-nearest neighbor algorithm. IEEE
-
 transactions on systems, man, and cybernetics, (4), pp.580-585, 1985.
 
+[6] http://benanne.github.io/2014/08/05/spotify-cnns.html
 
 ## Author
 
 Akihiro Inui
 http://www.portfolio.akihiroinui.com
-
-### attribution
 
 
 ## License
