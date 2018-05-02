@@ -70,8 +70,8 @@ Convolutional Neural Network
 
 ## Results
 k-NN: 62.0%
-MLP: 78.0%
-CNN: 46.3%
+MLP: 78.0% 
+CNN: 46.3% (Need to find more suitable parameters, seems overfitting)
 
 ## Code
 mgc.py
