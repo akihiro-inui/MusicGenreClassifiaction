@@ -16,7 +16,7 @@ import os
 #==============================================================================
 # Path to Data
 #==============================================================================
-path = "/Users/akihiro/Documents/Codes/Github/MusicGenreClassification-Python-"
+path = "[Your Working Directory]"
 os.chdir(path)
 #==============================================================================
 # 1. Feature Extraction to Data
