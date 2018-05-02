@@ -90,28 +90,28 @@ CNN: 46.3% (Need to find more suitable parameters, seems overfitting)
 
 
 ## Code
-mgc.py
+"mgc.py"
 Entire process including feature extraction and all the classification above.
 
-ExtractAll.py
+"ExtractAll.py"
 Feature extraction to all files in GTZAN
 
-FeatureExtraction.py
+"FeatureExtraction.py"
 Feature extraction to an audio file
 
-datacleaner.py
+"datacleaner.py"
 Exclude invalid data including NaN or Inf
 
-traintest.py
+"traintest.py"
 Devide image or matrix data into train/test dataset with the provide train rate.
 
-dctmatrix.py, melfilter.py
+"dctmatrix.py, melfilter.py"
 for mfcc
 
-centoid.py, rolloff.py, osc.py, zerocrossing.py
+"centoid.py, rolloff.py, osc.py, zerocrossing.py"
 Compute each feature extraction
 
-normalise.py, standardise.py
+"normalise.py, standardise.py"
 Compute normalisation, standardisation
 
 ### Dependency
