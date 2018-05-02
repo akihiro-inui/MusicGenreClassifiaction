@@ -79,7 +79,9 @@ mgc.py
 
 
 
-### Documentation
+### Dependency
+Python3.6.5
+
 
 ### Complete Installation
 
