@@ -73,7 +73,7 @@ Multilayer Perceptron
 The multilayer Perceptron to this project consists of 3 layers with relu function. The training data is splitted into 10% for the validation and 90% for the training. It loads the data from "Data.csv".
 
 
-Convolutional Neural Network
+Convolutional Neural Network (Recent trial)
 
 Based on the blog from an intern at Spotify[6], the convolutional neural network was applied to the dataset "Featuremaps" instead of Mel-spectrograms. It consists of 3 convolutional layers with 3 times maxpooling.
 
