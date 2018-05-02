@@ -146,7 +146,7 @@ PIL    version 5.0.0
    FeatureMap
    https://drive.google.com/open?id=1yBGJUJL2UO9uatPtEDtRuAACqRTbdeiY
 
-2. Locate the data in your working directory
+2. Locate the data in your working directory and change the path in codes
 
 3. Download and install libraries (See Dependancy)
 
