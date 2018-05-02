@@ -81,11 +81,17 @@ mgc.py
 
 ### Dependency
 Python 3.6.5
+
 numpy  version 1.14.2
+
 pandas version 0.22.0
+
 scipy  version 1.0.1
+
 keras  version 2.1.3
+
 PIL    version 5.0.0
+
 
 ### Complete Installation
 
