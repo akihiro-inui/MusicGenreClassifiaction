@@ -25,7 +25,7 @@ import random
 # Input target data folder
 Data_Folder = str(input('Target Folder?:'))
 Data_Type = int(input('Data Type? (Image:0,Vector:1)'))
-Data_Path = "/Users/akihiro/Documents/Codes/Github/MusicGenreClassification-Python-" + "/" + Data_Folder
+Data_Path = "[Your Working Directory]" + "/" + Data_Folder
 Train_Rate = float(input('Train Rate?:'))
 
 # Destination folder names
