@@ -23,7 +23,7 @@ import datacleaner
 import FeatureExtraction
 import normalise
 from standardise import standardise
-file_path = "/Users/akihiro/Documents/Codes/Github/MusicGenreClassification-Python-/"
+file_path = "[Your Working Directory]"
 os.chdir(file_path)
 #==============================================================================
 # 1. Custom User Input
