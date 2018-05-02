@@ -231,10 +231,24 @@ class Classification:
         #predictions = my_model.predict(TestData)
         
         ## Create the plot for training history
-        #plt.plot(model_training.history['val_loss'], 'r')
-        #plt.xlabel('Epochs')
-        #plt.ylabel('Validation score')
-        #plt.show()
+        # Accuracy
+        plt.plot(model_training.history['acc'])
+        plt.plot(model_training.history['val_acc'])
+        plt.title('model accuracy')
+        plt.ylabel('accuracy')
+        plt.xlabel('epoch')
+        plt.legend(['train', 'test'], loc='upper left')
+        plt.show()
+        
+        #Loss
+        plt.plot(model_training.history['loss'])
+        plt.plot(model_training.history['val_loss'])
+        plt.title('model loss')
+        plt.ylabel('loss')
+        plt.xlabel('epoch')
+        plt.legend(['train', 'test'], loc='upper left')
+        plt.show()
+        
         
         # Evaluation with test data
         score = my_model.evaluate(TestData,TestLabel)

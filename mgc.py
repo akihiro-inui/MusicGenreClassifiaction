@@ -40,8 +40,8 @@ Dataset = Target.mkdataset(train)
 # Classify (Comment out if it's not neccesary)
 
 #accuracykNN = Target.kNN(Dataset,5)
-#accuracyMLP = Target.mlp(Dataset)
-accuracyCNN = Target.cnn("Featuremap")
+accuracyMLP = Target.mlp(Dataset)
+#accuracyCNN = Target.cnn("Featuremap")
 
 #==============================================================================
 # 3. Result
@@ -49,5 +49,5 @@ accuracyCNN = Target.cnn("Featuremap")
 
 # Print out the result
 #print("Accuracy with {0} is {1}%".format("kNN",accuracykNN))
-#print("Accuracy with {0} is {1}%".format("MLP",accuracyMLP))
-print("Accuracy with {0} is {1}%".format("CNN",accuracyCNN))
+print("Accuracy with {0} is {1}%".format("MLP",accuracyMLP))
+#print("Accuracy with {0} is {1}%".format("CNN",accuracyCNN))
