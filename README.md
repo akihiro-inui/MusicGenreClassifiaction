@@ -101,15 +101,17 @@ PIL    version 5.0.0
    https://drive.google.com/open?id=16YkvirrRcdhqxix_0DBBjZeri4bjcfff
 
    FeatureMap
-   https://drive.google.com/open?id=1T9CUdpnPNwBz4QHNcUiq3K-Jiuzzb9zr
+   https://drive.google.com/open?id=1yBGJUJL2UO9uatPtEDtRuAACqRTbdeiY
 
 2. Locate the data in your working directory
 
-3. run "mgc.py" (Comment out unnecessary classifiers)
+3. Download and install libraries (See Dependancy)
 
-4. If you use CNN, run "traintest.py" before you run "mgc.py"
+4. run "mgc.py" (Comment out unnecessary classifiers)
 
-5. Give me any advice
+5. If you use CNN, run "traintest.py" before you run "mgc.py"
+
+6. Give me any advice
 
 
 ## References
