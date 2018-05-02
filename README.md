@@ -46,6 +46,14 @@ Finally, the framed signals are inputted into a matrix and the silence removal i
 <img src="assets/Ex.png?raw=true" alt="Feature Extraction" width="600">
 </p>
 
+Ten types of low-level feature—six short-term and four long-term features—noted are extracted from the analysis windows and texture windows, respectively. In order to characterise the temporal evaluation of the audio signal, long-term features are computed by aggregating the short-term features.
+
+<p align="center">
+<img src="assets/Features.png?raw=true" alt="Feature Extraction" width="600">
+</p>
+
+Over a texture window which consists of 64 analysis windows, short-term features are integrated with mean values.
+
 ## Classifier
 Fuzzy k-NN
 
@@ -82,7 +90,7 @@ mgc.py
 
 4. If you use CNN, run "traintest.py" before you run "mgc.py"
 
-5. Please give me any advice
+5. Give me any advice
 
 
 ## References
