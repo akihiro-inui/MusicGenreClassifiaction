@@ -16,7 +16,7 @@ Created on Fri Mar 23 02:01:21 2018
 # Program author: Akihiro Inui
 # Feature Extraction to audio file
 #==============================================================================
-path = "/Users/akihiro/Documents/Codes/Github/MusicGenreClassification-Python-"
+path = "[Your Working Directory]"
 import os
 os.chdir(path)
 #==============================================================================
