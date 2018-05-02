@@ -75,6 +75,7 @@ Convolutional Neural Network
 ## Results
 k-NN: 62.0%
 
+
 MLP: 83.6%
 <p>
 <img src="assets/MLP accuracy.png?raw=true" alt="MLP accuracy" width="400", align="left">
@@ -90,9 +91,28 @@ CNN: 46.3% (Need to find more suitable parameters, seems overfitting)
 
 ## Code
 mgc.py
+Entire process including feature extraction and all the classification above.
 
+ExtractAll.py
+Feature extraction to all files in GTZAN
 
+FeatureExtraction.py
+Feature extraction to an audio file
 
+datacleaner.py
+Exclude invalid data including NaN or Inf
+
+traintest.py
+Devide image or matrix data into train/test dataset with the provide train rate.
+
+dctmatrix.py, melfilter.py
+for mfcc
+
+centoid.py, rolloff.py, osc.py, zerocrossing.py
+Compute each feature extraction
+
+normalise.py, standardise.py
+Compute normalisation, standardisation
 
 ### Dependency
 Python 3.6.5
