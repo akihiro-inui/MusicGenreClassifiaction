@@ -54,6 +54,11 @@ Ten types of low-level feature—six short-term and four long-term features—no
 
 Over a texture window which consists of 64 analysis windows, short-term features are integrated with mean values.
 
+<p align="center">
+<img src="assets/FMap.png?raw=true" alt="Feature Extraction" width="400">
+</p>
+
+
 ## Classifier
 Fuzzy k-NN
 
