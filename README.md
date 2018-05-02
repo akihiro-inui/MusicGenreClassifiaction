@@ -64,6 +64,10 @@ Also, extracted features from audio files were plotted in a figure like below. T
 ## Classifier
 Fuzzy k-NN
 
+This method uses Euclidean distance between training and testing data. Each test sample is classified depending on the k number of training samples that surround the test sample. In the case of dissimilarity ties, the class appearing most often among the k nearest training observations will be the predicted answer. However, only a class label is assigned the test sample, and it does not have information on the strength of membership in that class
+
+Fuzzy k-NN, a combination of fuzzy logic and k-NN, was proposed to address the problem [5]. It has two steps: 1) fuzzy labelling, which computes fuzzy vectors of training data, and 2) fuzzy classification, which computes the fuzzy vectors of test data.
+
 Multilayer Perceptron
 
 Convolutional Neural Network
@@ -133,6 +137,10 @@ Sampling," in ISMIR, pp. 387-392, August, 2010.
 
 [4] B. L. Sturm, "On music genre classification via compressive sampling," in Multimedia and
 Expo (ICME), 2013 IEEE International Conference on (pp. 1-6). IEEE, July, 2013.
+
+[5] Keller, M. R. Gray and J. A. Givens, A fuzzy k-nearest neighbor algorithm. IEEE
+
+transactions on systems, man, and cybernetics, (4), pp.580-585, 1985.
 
 
 ## Author
