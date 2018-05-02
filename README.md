@@ -74,12 +74,17 @@ Convolutional Neural Network
 
 ## Results
 k-NN: 62.0%
-MLP: 78.0% 
+
+MLP: 83.6%
+<p>
+<img src="assets/MLP accuracy.png?raw=true" alt="MLP accuracy" width="400", align="left">
+<img src="assets/MLP loss.png?raw=true" alt="MLP loss" width="400",align="right">
+</p>
 
 CNN: 46.3% (Need to find more suitable parameters, seems overfitting)
 <p>
-<img src="assets/CNN accuracy.png?raw=true" alt="Feature Extraction" width="400", align="left">
-<img src="assets/CNN loss.png?raw=true" alt="Feature Extraction" width="400",align="right">
+<img src="assets/CNN accuracy.png?raw=true" alt="CNN accuracy" width="400", align="left">
+<img src="assets/CNN loss.png?raw=true" alt="CNN loss" width="400",align="right">
 </p>
 
 
