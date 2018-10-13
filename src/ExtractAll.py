@@ -19,10 +19,9 @@ import time
 import pandas as pd
 import numpy as np
 import os
-import datacleaner
-import FeatureExtraction
-import normalise
-from standardise import standardise
+from src import FeatureExtraction, datacleaner
+from src.preprocess import normalise
+from src.preprocess.standardise import standardise
 file_path = "[Your Working Directory]"
 os.chdir(file_path)
 #==============================================================================
@@ -141,7 +140,7 @@ def ExtractAll(custom):
     FeatureMat = FeatureMat[1:]
     
     # Clean data    
-    FeatureMat = datacleaner.datacleaner(FeatureMat,0,0)
+    FeatureMat = datacleaner.datacleaner(FeatureMat, 0, 0)
     Data = pd.DataFrame(FeatureMat)
     
     # Separation to data and label
@@ -154,7 +153,7 @@ def ExtractAll(custom):
     if Rescale == 0: 
         # Normalise FeatureA
         Content = Data.iloc[:,0:Data.shape[1]-1]
-        Content = pd.DataFrame(normalise(Content.values,0))
+        Content = pd.DataFrame(normalise(Content.values, 0))
         
     # Standardise
     elif Rescale == 1:

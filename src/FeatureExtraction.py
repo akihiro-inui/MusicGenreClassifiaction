@@ -25,13 +25,13 @@ os.chdir(path)
 import math
 import numpy as np
 from scipy.io.wavfile import read
-from centroid import centroid
-from dctmatrix import dctmatrix
-from melfilter import melfilter
+from src.centroid import centroid
+from src.dctmatrix import dctmatrix
+from src.melfilter import melfilter
 from osc import osc
-from rolloff import rolloff
-from zerocrossing import zerocrossing
-from datacleaner import datacleaner
+from src.rolloff import rolloff
+from src.zerocrossing import zerocrossing
+from src.datacleaner import datacleaner
 #==============================================================================
 # 1. Preamble and Parameter setting
 #==============================================================================

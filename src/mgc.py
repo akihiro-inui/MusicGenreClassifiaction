@@ -10,8 +10,7 @@ Created on Sun Apr 29 19:12:51 2018
 # Program author: Akihiro Inui
 # Implement Music Genre Classification
 #==============================================================================
-import ExtractAll
-import Classification as cl
+from src import Classification as cl
 import os
 #==============================================================================
 # Path to Data
