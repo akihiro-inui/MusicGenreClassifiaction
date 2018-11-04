@@ -1,9 +1,9 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-Write file related utilities like checking valid file, valid directory, zip files etc.
-Do not use for it writing and reading files where line counting and other variables are used at class level
-use file_reader_writer.py for that purpose
+Created on Fri Mar 23 02:01:21 2018
 
-@author: Dinakar Maurya
+@author: Akihiro Inui
 """
 import os
 
