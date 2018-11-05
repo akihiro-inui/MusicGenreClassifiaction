@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Fri Mar 23 02:01:21 2018
-utils for audio file process such as read/write, volume as such.
+Created on Tue Nov 6 2018
+
 @author: Akihiro Inui
 """
 
@@ -11,20 +11,21 @@ from scipy.io.wavfile import read, write
 
 class AudioUtil:
     @staticmethod
-    def is_wav_file(input_audio_file: str):
+    def is_wav_file(input_audio_file: str) -> bool:
         """
         Check the file is wav file
         :param input_audio_file: the name of the file to read in
         """
-        assert input_audio_file.endswith(".wav") == True, "{0} is not wav file".format(input_audio_file)
+        assert input_audio_file.endswith(".wav") is True, "{0} is not wav file".format(input_audio_file)
         return True
 
     @staticmethod
     def audio_read(input_audio_file: str, normalize: bool = True) -> dict:
         """
         Read audio file
-        :param input_audio_file: the name of the file to read in
-        :param normalize: normalise audio data to between -1 to 1
+        :param  input_audio_file: the name of the file to read in
+        :param  normalize: normalise audio data to between -1 to 1
+        :return Dictionary of audio file parameters{key:name of information, value: parameters}
         """
         try:
             # Read audio file
