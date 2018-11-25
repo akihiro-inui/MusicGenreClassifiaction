@@ -65,7 +65,7 @@ class AudioFeatureExtraction:
     # Feature extraction to one frame
     def extract_frame(self, framed_audio: tuple) -> dict:
         """
-        Pre-processing to audio file
+        Feature extraction to one frame
         :param  framed_audio: tuple of framed audio data from audio file
         :return dictionary of extracted features from framed audio data
                 {key: name of feature, value: tuple of features from all frames}
@@ -89,10 +89,10 @@ class AudioFeatureExtraction:
     # Feature extraction to one audio file
     def extract_file(self, audio_file: str) -> dict:
         """
-        Pre-processing to audio file
-        :param  audio_file: name of aufio file
+        Feature extraction to one audio file
+        :param  audio_file: name of the audio file
         :return dictionary of extracted features from audio file
-                {key: name of feature, value: list of array(number of frame)}
+                {key: name of feature, value: list of array(number of frames)}
         """
         # Pre-processing to audio file
         processed_audio = self.preprocessing(audio_file)
@@ -105,18 +105,20 @@ class AudioFeatureExtraction:
                 feature_frame_dict.setdefault(feature, []).append(frame_feature_dict[feature])
         return feature_frame_dict
 
-    #
-    # def get_feature_stats(self, feature_dict: dict, stat_type: str) -> dict:
-    #     """
-    #     # Store statistics from features into dictionary
-    #     :TODO make a function to get stats over features
-    #     """
-    #     # For each feature, compute statistical operation
-    #     feature_stat_dict = {}
-    #     if stat_type == "mean":
-    #         for frame_num, feature in feature_dict.items():
-    #             print(feature_dict[frame_num])
-    #                 feature_stat_dict[feature] = get_mean(feature_dict[feature], "r")
-    #     return feature_stat_dict
+    @staticmethod
+    def get_feature_stats(feature_frame_dict: dict, stat_type: str) -> dict:
+        """
+        # Store statistics from features into dictionary
+        :param  feature_frame_dict:dictionary of extracted features from audio file
+                {key: name of feature, value: list of array(number of frames)}
+        :return feature_stat_dict: features from one audio file with statistics
+                {key: name of feature, value: array or single value}
+        """
+        # For each feature, compute statistical operation
+        feature_stat_dict = {}
+        for feature, frame in feature_frame_dict.items():
+            if stat_type == "mean":
+                feature_stat_dict[feature] = get_mean(feature_frame_dict[feature], "r")
+        return feature_stat_dict
 
 
