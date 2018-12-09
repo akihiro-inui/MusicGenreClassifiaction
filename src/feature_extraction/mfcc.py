@@ -12,6 +12,13 @@ import math
 
 class MFCC:
     def __init__(self, mfcc_coeff: int, sampling_rate: int, fft_size: int, total_filters: int):
+        """
+        Mel Frequency Cepstral Coefficient
+        :param  mfcc_coeff: number of  coefficients
+        :param  sampling_rate: int
+        :param  fft_size: size of fft
+        :param  total_filters: number of mel filters
+        """
         self.total_filters = total_filters
         self.mfcc_coeff = mfcc_coeff
         self.fft_size = fft_size
@@ -20,12 +27,24 @@ class MFCC:
         self.__init_dct_matrix()
 
     def __init_dct_matrix(self):
+        """
+        Init DCT matrix
+        """
         self.dct_matrix = self.dctmatrix(self.total_filters, self.mfcc_coeff)
 
     def __init_melfilter(self):
+        """
+        Init Mel filter
+        """
         self.mel_filter = self.melfilter(self.sampling_rate, self.total_filters)
 
-    def melfilter(self, sampling_rate, total_filters):
+    def melfilter(self, sampling_rate, total_filters) -> list:
+        """
+        Mel filter
+        :param  sampling_rate: int
+        :param  total_filters: number of mel filters
+        :return  Mel filter in list
+        """
         # Maximum frequency of filter (avoid aliasing)
         maxF = sampling_rate / 2
 
@@ -49,12 +68,12 @@ class MFCC:
 
         # Create Triangle filters by each row
         for n in range(0, total_filters):
-            low = int(DFTbins[n])  # Triangle start
+            low = int(DFTbins[n])         # Triangle start
             center = int(DFTbins[n + 1])  # Top of the Triangle
-            high = int(DFTbins[n + 2])  # Triangle end
+            high = int(DFTbins[n + 2])    # Triangle end
 
-            UpSlope = center - low  # Number of DFT points in lower side of Triangle
-            DownSlope = high - center  # Number of DFT points in upper side of Triangle
+            UpSlope = center - low        # Number of DFT points in lower side of Triangle
+            DownSlope = high - center     # Number of DFT points in upper side of Triangle
 
             # Create lower side slope
             MelFilter[n, range(low - 1, center)] = np.arange(0, UpSlope + 1) / UpSlope
@@ -64,16 +83,26 @@ class MFCC:
 
         return MelFilter
 
-    def dctmatrix(self, totalfilters, mfcccoeff):
+    def dctmatrix(self, total_filters: int, mfcc_coeff: int) -> bytearray:
+        """
+        DCT matrix
+        :param  total_filters: number of mel filters
+        :param  mfcc_coeff: number of  coefficients
+        """
         # Create an matrix (mfcccoeff * totalfilters)
-        [cc, rr] = np.meshgrid(range(0, totalfilters), range(0, mfcccoeff))
+        [cc, rr] = np.meshgrid(range(0, total_filters), range(0, mfcc_coeff))
 
         # Calculate DCT
-        dct_matrix = np.sqrt(2 / totalfilters) * np.cos(math.pi * (2 * cc + 1) * rr / (2 * totalfilters))
+        dct_matrix = np.sqrt(2 / total_filters) * np.cos(math.pi * (2 * cc + 1) * rr / (2 * total_filters))
         dct_matrix[0, :] = dct_matrix[0, :] / np.sqrt(2)
         return dct_matrix
 
     def main(self, input_spectrum: list) -> list:
+        """
+        Main function for Mel Frequency Cepstral Coefficient
+        :param  input_spectrum: spectrum in list
+        :return mfcc: mfccs in list
+        """
         # Apply Mel scale filter
         mel_fft = np.matmul(self.mel_filter, input_spectrum)
 
@@ -81,6 +110,4 @@ class MFCC:
         ear_mag = np.log10(mel_fft ** 2)
 
         # Apply DCT to cepstrum
-        mfcc = self.dct_matrix.dot(ear_mag)
-
-        return mfcc
+        return self.dct_matrix.dot(ear_mag)
