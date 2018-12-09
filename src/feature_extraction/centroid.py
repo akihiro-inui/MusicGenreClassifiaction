@@ -2,19 +2,24 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sat Mar 17 23:14:28 2018
-
 @author: akihiro inui
 """
 
 import numpy as np
 
-def centroid (X1,fft_size,Fs):
-    
+def centroid (power_spectrum:list, fft_size:int, sampling_rate:int) -> float:
+    """
+    Spectral centroid
+    :param  power_spectrum: power spectrum in list
+    :param  fft_size: size of fft
+    :param  sampling_rate: int
+    :return spectral centroid
+    """
     # Calculate frequency bins
-    k = (Fs/fft_size)*np.arange(0, int(fft_size/2))
+    bins = (sampling_rate/fft_size)*np.arange(0, int(fft_size/2))
 
     # Calculate Spectral Centroid
-    c = sum(k*X1)/sum(X1)
+    centroid = sum(bins*power_spectrum)/sum(power_spectrum)
 
     # Output normalized spectral centroid
-    return c/(Fs/2)
+    return centroid/(sampling_rate/2)
