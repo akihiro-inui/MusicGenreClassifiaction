@@ -11,7 +11,7 @@ from preprocess.audio_preprocess import AudioPreProcess
 from feature_extraction.fft import FFT
 from feature_extraction.mfcc import MFCC
 from feature_extraction.centroid import centroid
-from data_process.stats_tool import get_mean
+from utils.stats_tool import get_mean
 
 class AudioFeatureExtraction:
     """
@@ -76,14 +76,12 @@ class AudioFeatureExtraction:
         # Apply feature extraction to a framed audio and store into a dictionary
         for feature in self.feature_list:
             # Apply feature extraction only the feature type is set as True
-            if feature == "fft":
-                feature_dict[feature] = FFT.fft(framed_audio, self.fft_size)
-                self.spectrum = FFT.fft(framed_audio, self.fft_size)
-                self.power_spectrum = FFT.power_fft(framed_audio, self.fft_size)
+            spectrum = FFT.fft(framed_audio, self.fft_size)
+            power_spectrum = FFT.power_fft(framed_audio, self.fft_size)
             if feature == "mfcc":
                 feature_dict[feature] = self.mfcc.main(FFT.fft(framed_audio, self.fft_size))
             if feature == "centroid":
-                feature_dict[feature] = centroid(self.power_spectrum, self.fft_size, self.sampling_rate)
+                feature_dict[feature] = centroid(power_spectrum, self.fft_size, self.sampling_rate)
         return feature_dict
 
     # Feature extraction to one audio file

@@ -18,3 +18,12 @@ def get_mean(input_data, axis:str = None):
             return np.mean(input_data, axis=0)
         elif axis == "c":
             return np.mean(input_data, axis=1)
+
+def get_std(input_data, axis:str = None):
+    if np.shape(input_data)[0] == 1:
+        return np.mean(input_data)
+    else:
+        if axis == "r":
+            return np.std(input_data, axis=0)
+        elif axis == "c":
+            return np.std(input_data, axis=1)

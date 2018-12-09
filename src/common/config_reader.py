@@ -6,21 +6,21 @@ Created on Fri Mar 23 02:01:21 2018
 """
 
 import configparser
-from utils.file_utils import FileUtils
+from utils.file_utils import FileUtil
 
 
 class ConfigReader:
     """
     Reading configuration file data. Define module specific configuration in different functions.
     """
-    def __init__(self, i_config_path: str="config/master_config.ini"):
+    def __init__(self, i_config_path: str):
         """
         Read common configuration data from configuration file
         """
         cfg = configparser.ConfigParser()
         self.cfg = cfg
         config_file = i_config_path
-        assert FileUtils.is_valid_file(config_file), config_file + " is not a valid configuration file!"
+        assert FileUtil.is_valid_file(config_file), config_file + " is not a valid configuration file!"
         cfg.read(config_file)
 
         # Dataset directory
@@ -30,6 +30,9 @@ class ConfigReader:
         self.__init_audio_preprocess(cfg)
         self.__init_feature_selection(cfg)
         self.__init_feature_extraction(cfg)
+        self.__init_dataset(cfg)
+        self.__init_classifier_selection(cfg)
+        self.__init_classification(cfg)
 
     def __init_audio_preprocess(self, cfg):
         # Parameters for pre-process
@@ -40,7 +43,9 @@ class ConfigReader:
 
     def __init_feature_selection(self, cfg):
         # Parameters for feature selection
-        self.fft = bool(cfg.get('feature_selection', 'fft'))
+        self.mfcc = bool(cfg.get('feature_selection', 'mfcc'))
+        self.rms = bool(cfg.get('feature_selection', 'rms'))
+        self.centroid = bool(cfg.get('feature_selection', 'centroid'))
 
     def __init_feature_extraction(self, cfg):
         # Parameters for feature extraction
@@ -48,7 +53,24 @@ class ConfigReader:
         self.mfcc_coeff = int(cfg.get('feature_extraction', 'mfcc_coeff'))
         self.mfcc_total_filters = int(cfg.get('feature_extraction', 'mfcc_total_filters'))
 
-    def section_reader(self,section_name: str) -> dict:
+    def __init_dataset(self, cfg):
+        # Parameters for data set creation
+        self.test_rate = float(cfg.get('dataset', 'test_rate'))
+        self.label_name = str(cfg.get('dataset', 'label_name'))
+        self.iteration = bool(cfg.get('dataset', 'shuffle'))
+
+    def __init_classifier_selection(self, cfg):
+        # Parameters for classifier selection
+        self.kNN = bool(cfg.get('classifier_selection', 'knn'))
+        self.MLP = bool(cfg.get('classifier_selection', 'mlp'))
+
+    def __init_classification(self, cfg):
+        # Parameters for classification
+        self.validation_rate = float(cfg.get('classification', 'validation_rate'))
+        self.iteration = int(cfg.get('classification', 'iteration'))
+        self.k = int(cfg.get('classification', 'k'))
+
+    def section_reader(self, section_name: str) -> dict:
         # Read parameters from a given section
         param_dict = {}
         options = self.cfg.options(section_name)
@@ -61,15 +83,3 @@ class ConfigReader:
                 print("exception on %s!" % option)
                 param_dict[option] = None
         return param_dict
-
-if __name__ == '__main__':
-    """
-    usage of config reader
-    """
-    configuration_reader = ConfigReader()
-    print(configuration_reader.input_directory)
-    print(configuration_reader.output_directory)
-    print(configuration_reader.corpus_file_name)
-    print(configuration_reader.corpus_file)
-    print(configuration_reader.sub_document_directory)
-    print(configuration_reader.temp_dir)

@@ -22,6 +22,7 @@ class AudioPreProcess:
         self.overlap_rate = overlap_rate
         self.window_type = window_type
 
+
     def read_audio_file(self, filename: str) -> dict:
         """
         Read audio file
@@ -30,6 +31,15 @@ class AudioPreProcess:
         """
         if AudioUtil.is_wav_file(filename):
             return AudioUtil.audio_read(filename)
+
+    @staticmethod
+    def add_eps(audio_data: list) -> list:
+        """
+        Read audio file
+        :param audio_data: list of audio data
+        :return list of audio data with eps
+        """
+        return audio_data + np.finfo(float).eps
 
     def framing(self, audio_dict: dict) -> tuple:
         """
@@ -46,6 +56,9 @@ class AudioPreProcess:
 
         # Calculate number of frames
         frame_number = int(math.floor((len(audio_dict["data"]) - step_samples) / step_samples))
+
+        # Add eps to raw audio data
+        audio_dict["data"] = AudioPreProcess.add_eps(audio_dict["data"])
 
         # Store framed audio input into tuple
         framed_audio_list = []
