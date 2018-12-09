@@ -24,7 +24,7 @@ class MusicGenreClassification:
     # 1. Frame based feature extraction
     # 2. Data processing (Normalization, Factorize label)
     # 3. Make data set (Shuffle order, train/test separation)
-    # 4. Classification ()
+    # 4. Classification (train/test split, make prediction)
     """
 
     def __init__(self, audio_feature_extraction, classifier, dataset_path: str, setting_file: str):
@@ -89,17 +89,15 @@ class MusicGenreClassification:
         return train_data, test_data, train_label, test_label
 
     def classify(self, dataframe, label_name: str):
-        # Initialize classifier
-        CLS = Classifier(self.setting_file)
         # Iteration
         accuracy_list = []
         for itr in range(self.cfg.iteration):
             # Make data set from extracted features
             train_data, test_data, train_label, test_label = self.make_dataset(dataframe, label_name, self.cfg.test_rate)
             # Train classifier
-            model = CLS.training(train_data, train_label)
+            model = self.CLF.training(train_data, train_label)
             # Make predictions
-            accuracy_list.append(CLS.predict(test_data, test_label, model))
+            accuracy_list.append(self.CLF.predict(test_data, test_label, model))
         return np.average(accuracy_list)
 
 
