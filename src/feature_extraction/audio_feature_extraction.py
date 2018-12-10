@@ -16,6 +16,7 @@ from utils.stats_tool import get_mean
 class AudioFeatureExtraction:
     """
     Audio feature extraction to one audio file
+    Supported features: mfcc, spectral centroid,
     """
 
     # Initialization
