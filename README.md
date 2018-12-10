@@ -18,7 +18,7 @@ Music Genre Classification to the most widely used dataset; GTZAN was implemente
 
 For the further information about the feature extraction methods, please have a look the papers in the reference.
 
-## The Dataset
+## Dataset
 The GTZAN Music Genre Dataset, which is a collection of 1000 songs in 10 genres, is the most widely used dataset. 
 
 Although many studies have been conducted using GTZAN, several faults have been pointed out. Sturm[1], for example, identified and analysed the contents of GTZAN and provided a catalogue of its faults. As it is the most used dataset, however, the system performance of MGC in this project should first be evaluated with GTZAN in order to compare against other systems used in other studies.
