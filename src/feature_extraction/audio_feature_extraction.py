@@ -13,6 +13,7 @@ from feature_extraction.mfcc import MFCC
 from feature_extraction.centroid import centroid
 from utils.stats_tool import get_mean
 
+
 class AudioFeatureExtraction:
     """
     Audio feature extraction to one audio file
@@ -98,7 +99,7 @@ class AudioFeatureExtraction:
 
         # Apply feature extraction to all frames and store into dictionary
         feature_frame_dict = {}
-        for frame in range(0, len(processed_audio[0])-1):
+        for frame in range(0, len(processed_audio[0]) - 1):
             frame_feature_dict = self.extract_frame(processed_audio[frame])
             for feature in self.feature_list:
                 feature_frame_dict.setdefault(feature, []).append(frame_feature_dict[feature])
@@ -119,5 +120,3 @@ class AudioFeatureExtraction:
             if stat_type == "mean":
                 feature_stat_dict[feature] = get_mean(feature_frame_dict[feature], "r")
         return feature_stat_dict
-
-

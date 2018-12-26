@@ -43,56 +43,51 @@ class MLP:
         """
         model.save(model_file_name)
 
-    def training(self, train_data, train_label, model_file_name: str=None):
+    def training(self, train_data, train_label):
         """
         Training for Multi layer perceptron
         :param  train_data: training data
         :param  train_label: train label
-        :param  model_file_name: name of model file to load
         :return model: trained model
         """
-        if model_file_name is not None:
-            # Pass trained model if it exists
-            return self.load_model(model_file_name)
-        else:
-            # One hot encode
-            onehot_train_label = pd.get_dummies(train_label)
+        # One hot encode
+        onehot_train_label = pd.get_dummies(train_label)
 
-            # Define early_stopping_monitor
-            early_stopping_monitor = EarlyStopping(patience=2)
+        # Define early_stopping_monitor
+        early_stopping_monitor = EarlyStopping(patience=2)
 
-            # Set up the model: model
-            model = Sequential()
+        # Set up the model: model
+        model = Sequential()
 
-            # Learning Rate
-            LearningRate = 0.001
+        # Learning Rate
+        LearningRate = 0.001
 
-            # Add the first layer
-            model.add(Dense(200, activation='relu', input_shape=(train_data.shape[1],)))
+        # Add the first layer
+        model.add(Dense(200, activation='relu', input_shape=(train_data.shape[1],)))
 
-            # Add the second layer
-            model.add(Dense(150, activation='relu'))
+        # Add the second layer
+        model.add(Dense(150, activation='relu'))
 
-            # Add the second layer
-            model.add(Dense(150, activation='relu'))
+        # Add the second layer
+        model.add(Dense(150, activation='relu'))
 
-            # Add the output layer
-            model.add(Dense(10))
+        # Add the output layer
+        model.add(Dense(10))
 
-            # Create optimizer
-            my_optimizer = SGD(lr=LearningRate)
+        # Create optimizer
+        my_optimizer = SGD(lr=LearningRate)
 
-            # Compile the model
-            model.compile(optimizer='adam', loss='mean_squared_error', metrics=['accuracy'])
-            # model.compile(optimizer='adam', loss='categorical_crossentropy',metrics=['accuracy'])
-            # model.compile(optimizer=my_optimizer, loss='mean_squared_error',metrics=['accuracy'])
-            # model.compile(optimizer=my_optimizer, loss='categorical_crossentropy',metrics=['accuracy'])
+        # Compile the model
+        model.compile(optimizer='adam', loss='mean_squared_error', metrics=['accuracy'])
+        # model.compile(optimizer='adam', loss='categorical_crossentropy',metrics=['accuracy'])
+        # model.compile(optimizer=my_optimizer, loss='mean_squared_error',metrics=['accuracy'])
+        # model.compile(optimizer=my_optimizer, loss='categorical_crossentropy',metrics=['accuracy'])
 
-            # Fit the model
-            model.fit(train_data, onehot_train_label, callbacks=[early_stopping_monitor],
-                                       nb_epoch=50, shuffle=False, validation_split=self.validation_rate)
+        # Fit the model
+        model.fit(train_data, onehot_train_label, callbacks=[early_stopping_monitor],
+                  nb_epoch=50, shuffle=False, validation_split=self.validation_rate)
 
-            return model
+        return model
 
     def predict(self, model, test_data, test_label):
         """

@@ -3,9 +3,8 @@
 """
 Created on Sat Mar 17 23:14:28 2018
 
-@author: akihiro inui
+@author: Akihiro Inui
 """
-
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
 
@@ -15,6 +14,7 @@ class kNN:
     K Nearest Neighbors
     :param  k: number of k
     """
+
     def __init__(self, k: int):
         """
         Init

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sat Mar 17 23:14:28 2018
+Created on Christmas 2018
 
-@author: akihiro inui
+@author: Akihiro Inui
 """
 
 import os
@@ -14,7 +14,6 @@ from utils.file_utils import FileUtil
 from classifier.classifier import Classifier
 from common.config_reader import ConfigReader
 from data_process.data_process import DataProcess
-from sklearn.model_selection import train_test_split
 from feature_extraction.audio_feature_extraction import AudioFeatureExtraction
 
 
@@ -22,10 +21,10 @@ class MusicGenreClassification:
     """
     # Content-based music genre classification
     # 1. Frame based feature extraction
-    # 2. Data processing (Normalization, Factorize label)
-    # 3. Make data set (Shuffle order, train/test separation)
-    # 4. Train model
-    # 5. Evaluate performance for n time iteration
+    # 2. Data processing (Normalization, Factorize label(str->num))
+    # 3. Make data set (Shuffle order, train/test separation, write train.csv/test.csv in "feature" directory)
+    # 4. Train model / Save model
+    # 5. Make prediction
     """
 
     def __init__(self, audio_feature_extraction, classifier, dataset_path: str, setting_file: str):
@@ -80,7 +79,40 @@ class MusicGenreClassification:
 
         return final_dataframe
 
-    def data_process(self, dataframe, label_name: str):
+    def make_dataset(self, dataframe, output_directory: str):
+        """
+        Make data set
+        :param  dataframe:   extracted feature in data frame
+        :param  output_directory: output directory to write out the train and test data
+        :return train_data:  train data
+        :return train_label: train label
+        :return test_data:   test data
+        :return test_label:  test label
+        """
+        # Get time and make a new directory name
+        directory_name_with_time = os.path.join(output_directory, FileUtil.get_time())
+
+        train_data, test_data, train_label, test_label = DataProcess.make_dataset(dataframe, self.cfg.label_name,
+                                                                                  self.cfg.test_rate, self.cfg.shuffle,
+                                                                                  directory_name_with_time)
+        return train_data, test_data, train_label, test_label
+
+    def read_dataset(self, input_data_directory_with_date):
+        """
+        Read data set
+        :param  input_data_directory_with_date: name of the directory where train and test data exist
+        :return train_data:  train data
+        :return train_label: train label
+        :return test_data:   test data
+        :return test_label:  test label
+        """
+        # Read data set
+        train_data, test_data, train_label, test_label = DataProcess.read_dataset(input_data_directory_with_date,
+                                                                                  self.cfg.label_name)
+
+        return train_data, test_data, train_label, test_label
+
+    def data_process(self, dataframe):
         """
         Apply data process to features
         :param  dataframe:            extracted feature in data frame
@@ -90,91 +122,72 @@ class MusicGenreClassification:
         # Make a copy of dataframe
         processed_dataframe = dataframe.copy()
         # Apply normalization to data frame
-        processed_dataframe = DataProcess.normalize_dataframe(processed_dataframe, label_name)
+        processed_dataframe = DataProcess.normalize_dataframe(processed_dataframe, self.cfg.label_name)
         # Factorize label
-        processed_dataframe = DataProcess.factorize_lebel(processed_dataframe, label_name)
+        processed_dataframe = DataProcess.factorize_lebel(processed_dataframe, self.cfg.label_name)
         return processed_dataframe
 
-    def make_dataset(self, dataframe, label_name: str, test_size: float):
+    def training(self, train_data, train_label, output_directory):
         """
-        Make dataset
-        :param  dataframe:   extracted feature in data frame
-        :param  label_name:  name of label column in data frame
-        :param  test_size:   size of test data set
-        :return train_data:  train data
-        :return train_label: train label
-        :return test_data:   test data
-        :return test_label:  test label
+        Train model and save it under output_directory
+        :param  train_data:  train data
+        :param  train_label: train label
+        :return trained model
         """
-        # Split data and label
-        label, data = DataProcess.data_label_split(dataframe, label_name)
-        # Train/Test separation
-        train_data, test_data, train_label, test_label = train_test_split(data,
-                                                                          label,
-                                                                          test_size=test_size,
-                                                                          shuffle=True)
-        return train_data, test_data, train_label, test_label
+        # Train classifier
+        model = self.CLF.training(train_data, train_label)
 
-    def classification(self, dataframe, label_name: str, model_file_name: str) -> float:
+        # Name the model with current time
+        output_directory_with_time = os.path.join(output_directory, FileUtil.get_time())
+
+        # Save mode
+        self.CLF.save_model(model, output_directory_with_time)
+        return model
+
+    def test(self, model, test_data, test_label) -> float:
         """
-        Classification to data set
-        :param  dataframe:       extracted feature in data frame
-        :param  label_name:      name of label column in data frame
-        :param  model_file_name: name of model file to load/save
+        Make predictions to test data set
+        :param  model:       trained model
+        :param  test_data:   test data
+        :param  test_label:  test label
         :return prediction accuracy
         """
-        # Make data set from extracted features
-        train_data, test_data, train_label, test_label = self.make_dataset(dataframe, label_name, self.cfg.test_rate)
-        # Train classifier
-        model = self.CLF.training(train_data, train_label, model_file_name)
         # Make prediction
         return self.CLF.predict(model, test_data, test_label)
-
-    def classification_with_iteration(self, dataframe, label_name: str, model_file_name: str):
-        """
-        Classification to data set with iteration
-        :param  dataframe:   extracted feature in data frame
-        :param  label_name:  name of label column in data frame
-        :param  model_file_name: name of model file to load/save
-        :return prediction accuracy
-        """
-        # Iteration
-        accuracy_list = []
-        for itr in range(self.cfg.iteration):
-            # Make data set from extracted features
-            train_data, test_data, train_label, test_label = self.make_dataset(dataframe, label_name, self.cfg.test_rate)
-            # Train classifier
-            model = self.CLF.training(train_data, train_label, model_file_name)
-            # Make predictions
-            accuracy_list.append(self.CLF.predict(model, test_data, test_label))
-        return np.average(accuracy_list)
 
 
 def main():
     # File location
     setting_file = "../config/master_config.ini"
-    model_file = "../model/mlp.h5"
-    dataset_path = "../data"
-    csv_file = "../feature/data.csv"
+    music_dataset_path = "../data"
+    model_directory_path = "../model"
+    output_data_directory = "../feature"
+    feature_extraction = True
+    training = True
+    # input_data_directory = "../feature/2018-12-26_02:06:01.254270"
+    # model_file = "model/2018-12-26_15:39:28.242417/mlp.h5"
 
     # Instantiate mgc class
-    MGC = MusicGenreClassification(AudioFeatureExtraction, Classifier, dataset_path, setting_file)
+    MGC = MusicGenreClassification(AudioFeatureExtraction, Classifier, music_dataset_path, setting_file)
 
     # Apply feature extraction and write out csv file if it does not exist
-    if not os.path.exists(csv_file):
+    if feature_extraction is True:
         # Apply feature extraction to all audio files
         print("Start feature extraction")
         extracted_feature_dataframe = MGC.feature_extraction()
-        FileUtil.dataframe2csv(extracted_feature_dataframe, csv_file)
+        # Apply data process
+        clean_dataframe = MGC.data_process(extracted_feature_dataframe)
+        train_data, test_data, train_label, test_label = MGC.make_dataset(clean_dataframe, output_data_directory)
+    else:
+        # Read data from directory
+        train_data, test_data, train_label, test_label = MGC.read_dataset(input_data_directory)
 
-    # Read data from csv file
-    dataframe = FileUtil.csv2dataframe(csv_file)
+    # Training model
+    model = MGC.training(train_data, train_label, model_directory_path)
 
-    # Apply data process
-    clean_data = MGC.data_process(dataframe, "category")
+    # Make predictions
+    accuracy = MGC.test(model, test_data, test_label)
 
-    # Classify
-    accuracy = MGC.classification(clean_data, "category", model_file)
     print("Start prediction")
     print("Final accuracy is {0}".format(accuracy))
 

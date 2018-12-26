@@ -13,6 +13,7 @@ class ConfigReader:
     """
     Reading configuration file data. Define module specific configuration in different functions.
     """
+
     def __init__(self, i_config_path: str):
         """
         Read common configuration data from configuration file
@@ -57,7 +58,7 @@ class ConfigReader:
         # Parameters for data set creation
         self.test_rate = float(cfg.get('dataset', 'test_rate'))
         self.label_name = str(cfg.get('dataset', 'label_name'))
-        self.iteration = bool(cfg.get('dataset', 'shuffle'))
+        self.shuffle = bool(cfg.get('dataset', 'shuffle'))
 
     def __init_classifier_selection(self, cfg):
         # Parameters for classifier selection
