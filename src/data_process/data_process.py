@@ -6,9 +6,11 @@ Created on Tue Nov 6 2018
 @author: Akihiro Inui
 """
 
+import os
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
+from utils.file_utils import FileUtil
 
 
 class DataProcess:
@@ -154,7 +156,10 @@ class DataProcess:
         :param  label_name: name of label column
         :param  test_size: name of label column
         :param  shuffle: Bool: True for shuffle
-        :return train/test data and label
+        :return train_data:  train data
+        :return train_label: train label
+        :return test_data:   test data
+        :return test_label:  test label
         """
         # Case of data frame has data and target information
         if input_dataframe.target and input_dataframe.data:
@@ -170,4 +175,72 @@ class DataProcess:
                 input_dataframe[label_name],
                 test_size=test_size,
                 shuffle=shuffle)
+        return train_data, test_data, train_label, test_label
+
+    @staticmethod
+    def make_dataset(dataframe, label_name: str, test_size: float, shuffle: bool = False, output_directory: str = None):
+        """
+        Make data set and save the train/test data under output_directory
+        1. Split label and data from the input dataframe
+        2. Split them into train/test data and train/test label
+        3. If output_directory is given, writes out them in csv format to the directory with current time
+        4. Data and label are respectively saved as "train.csv" and "test.csv"
+
+        :param  dataframe:   extracted feature in data frame
+        :param  label_name:  name of label column in data frame
+        :param  test_size:   size of test data set
+        :param  shuffle:     set True for randomisation
+        :param  output_directory: output directory to save train and test data
+        :return train_data:  train data
+        :return train_label: train label
+        :return test_data:   test data
+        :return test_label:  test label
+        """
+        # Split data and label
+        label, data = DataProcess.data_label_split(dataframe, label_name)
+        # Train/Test separation
+        train_data, test_data, train_label, test_label = train_test_split(data,
+                                                                          label,
+                                                                          test_size=test_size,
+                                                                          shuffle=shuffle)
+
+        # Write out test and train data as csv files if output directory name is given
+        if output_directory:
+            # Return error of the target directory already exist
+            assert os.path.exists(output_directory) is False, "Target output data folder already exist"
+            os.mkdir(output_directory)
+            FileUtil.dataframe2csv(pd.concat([train_data, train_label], axis=1),
+                                   os.path.join(output_directory, "train.csv"))
+            FileUtil.dataframe2csv(pd.concat([test_data, test_label], axis=1),
+                                   os.path.join(output_directory, "test.csv"))
+        else:
+            print("Data set is created but not saved")
+
+        return train_data, test_data, train_label, test_label
+
+    @staticmethod
+    def read_dataset(input_data_directory_with_date: str, label_name: str):
+        """
+        Read data set under the given directory, return data and label
+        :param  input_data_directory_with_date: input data directory with time where train.csv and test.csv exist
+        :param  label_name: name of label column in dataframe
+        :return data: data in dataframe
+        :return label: label in series
+        """
+        # Get file names
+        train_file_path = os.path.join(input_data_directory_with_date, "train.csv")
+        test_file_path = os.path.join(input_data_directory_with_date, "test.csv")
+
+        # Check if the given data set exist
+        FileUtil.is_valid_file(train_file_path)
+        FileUtil.is_valid_file(test_file_path)
+
+        # Read csv file
+        train_dataframe = FileUtil.csv2dataframe(train_file_path)
+        test_dataframe = FileUtil.csv2dataframe(test_file_path)
+
+        # Split data and label
+        train_label, train_data = DataProcess.data_label_split(train_dataframe, label_name)
+        test_label, test_data = DataProcess.data_label_split(test_dataframe, label_name)
+
         return train_data, test_data, train_label, test_label

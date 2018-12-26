@@ -38,7 +38,8 @@ class Classifier:
         :return selected classifier name
         """
         # Search which classifier is True
-        self.selected_classifier = [classifier for classifier, switch in self.classifier_selection_dict.items() if switch == "True"]
+        self.selected_classifier = [classifier for classifier, switch in self.classifier_selection_dict.items() if
+                                    switch == "True"]
         assert len(self.selected_classifier) == 1, "You can select only one classifier at one time"
         return str(self.selected_classifier[0])
 
@@ -47,54 +48,54 @@ class Classifier:
         Initialize classifier class
         :return Initialized classifier
         """
+        classifier = None
         # Initialize chosen classifier
         if self.selected_classifier == "knn":
             classifier = kNN(self.k)
         elif self.selected_classifier == "mlp":
             classifier = MLP(self.validation_rate)
+        assert classifier is not None, "No classifier selected"
         return classifier
 
-    def load_model(self, model_file_name: str):
+    def load_model(self, input_model_file_name: str):
         """
         Load trained model
-        :param  model_file_name: model file name
+        :param  input_model_file_name: model file name
         :return trained model
         """
-        return self.classifier.load_model(model_file_name)
+        assert os.path.exists(input_model_file_name), "Selected model does not exist"
+        return self.classifier.load_model(input_model_file_name)
 
-    def training(self, train_data, train_label, model_file_name: str=None):
+    def save_model(self, model, output_directory: str):
         """
-        Execute training
-        Case A:  Load trained model
-        Case B:  Train model
+        Save trained model
+        :param  model: trained model
+        :param  output_directory: model file name
+        :return trained model
+        """
+        # Make output directory if it does not exist
+        if os.path.exists(output_directory) is False:
+            os.mkdir(output_directory)
+
+        # Make model file name
+        model_filename = "{}.h5".format(self.selected_classifier)
+
+        # Save model
+        self.classifier.save_model(model, os.path.join(output_directory, model_filename))
+
+    def training(self, train_data, train_label):
+        """
+        Training with train data set
         :param   train_data:  training data
         :param   train_label: test data
-        :param   model_file_name: model file name
         :return  model: trained   model
         """
-        # Start training model if it does not receive model file name (Case B)
-        if model_file_name is None:
-            # Train model
-            model = self.classifier.training(train_data, train_label)
-            # Save model
-            self.classifier.save_model(model, "../model/{0}.h5".format(self.selected_classifier))
-            return model
-        else:
-            # Pass trained model file if it exists (Case A)
-            if os.path.exists(model_file_name):
-                return self.load_model(model_file_name)
-            # Train model if given model file does not exist (Case B)
-            else:
-                print("Given model file does not exist, start training")
-                # Train model
-                model = self.classifier.training(train_data, train_label)
-                # Save model
-                self.classifier.save_model(model, "../model/{0}.h5".format(self.selected_classifier))
-                return model
+        # Train model
+        return self.classifier.training(train_data, train_label)
 
     def predict(self, model, test_data, test_label) -> float:
         """
-        Execute prediction
+        Make predictions with a given model to test data set
         :param  model: trained model
         :param  test_data: training data
         :param  test_label: test data

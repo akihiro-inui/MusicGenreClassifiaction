@@ -7,10 +7,10 @@ Created on Fri Mar 23 02:01:21 2018
 """
 import os
 import pandas as pd
+import datetime
 
 
 class FileUtil:
-
 
     @staticmethod
     def is_valid_file(input_filename: str) -> bool:
@@ -64,7 +64,7 @@ class FileUtil:
         return i + 1
 
     @staticmethod
-    def get_folder_names(directory_path:str) -> list:
+    def get_folder_names(directory_path: str) -> list:
         """
         Return list of directories under the given path
         :param directory_path: path to the directory
@@ -100,3 +100,11 @@ class FileUtil:
         :return : output data frame
         """
         return pd.read_csv(input_filename)
+
+    @staticmethod
+    def get_time():
+        """
+        # Get current time and return as string
+        :return : current time in string
+        """
+        return str(datetime.datetime.now()).replace(" ", "_")
