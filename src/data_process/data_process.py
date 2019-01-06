@@ -10,6 +10,7 @@ import os
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
+from sklearn import preprocessing
 from utils.file_utils import FileUtil
 
 
@@ -97,6 +98,36 @@ class DataProcess:
         return input_dataframe[column_name].unique()
 
     @staticmethod
+    def folder2label(input_data_directory):
+        """
+        # Get unique values in one column
+        :param  input_data_directory: input data directory where data folder with the label name exist
+        :param  column_name: column name
+        :return list of folder names
+        """
+        return os.listdir(input_data_directory)
+
+    @staticmethod
+    def encode_label(input_label_names_list: list):
+        """
+        # Get unique values in one column labels in str
+        :param  input_label_names_list: list of str label names
+        :return
+        """
+        encoder = preprocessing.LabelEncoder()
+        encoder.fit(input_label_names_list)
+        return encoder.classes_
+
+    @staticmethod
+    def decode_label(input_label_numbers_list: list, encoder):
+        """
+        # Get unique values in one column labels in str
+        :param  input_label_numbers_list: list of num label names
+        :return list of str label names
+        """
+        return encoder.inverse_transform(input_label_numbers_list)
+
+    @staticmethod
     def factorize_lebel(input_dataframe, column_name: str):
         """
         # Factorize str label to num label
@@ -129,9 +160,31 @@ class DataProcess:
             normalized_dataframe[feature_name] = (data[feature_name] - min_value) / (max_value - min_value)
 
         # Put back label column
-        normalized_dataframe["category"] = input_dataframe["category"]
+        normalized_dataframe[label_name] = input_dataframe[label_name]
 
         return normalized_dataframe
+
+    @staticmethod
+    def standardize_dataframe(input_dataframe, label_name: str or list):
+        """
+        # Apply standardization
+        :param  input_dataframe: input pandas data frame
+        :param  label_name: exception column
+        :return standardized_dataframe: standardized data frame
+        """
+        # Make a copy of the data frame
+        standardized_dataframe = input_dataframe.copy()
+        # Extract only data part
+        data = standardized_dataframe[standardized_dataframe.columns[standardized_dataframe.columns != label_name]]
+
+        # Apply standardization to all columns
+        for feature_name in data.columns:
+            standardized_dataframe[feature_name] = (data[feature_name] - np.mean(data[feature_name])) / np.std(data[feature_name])
+
+        # Put back label column
+        standardized_dataframe[label_name] = input_dataframe[label_name]
+
+        return standardized_dataframe
 
     @staticmethod
     def data_label_split(input_dataframe, label_name: str):

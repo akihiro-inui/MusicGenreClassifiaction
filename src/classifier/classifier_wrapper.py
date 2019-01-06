@@ -10,9 +10,9 @@ Created on Sat Mar 17 23:14:28 2018
 from classifier.kNN import kNN
 from classifier.mlp import MLP
 from common.config_reader import ConfigReader
+from keras.models import load_model
 import matplotlib.pyplot as plt
 import os
-
 
 class Classifier:
 
@@ -25,6 +25,7 @@ class Classifier:
         # Load parameters from config file
         self.cfg = ConfigReader(setting_file)
         self.k = self.cfg.k
+        self.num_classes = self.cfg.num_classes
         self.validation_rate = self.cfg.validation_rate
 
         # Initialize classifier selection
@@ -53,7 +54,7 @@ class Classifier:
         if self.selected_classifier == "knn":
             classifier = kNN(self.k)
         elif self.selected_classifier == "mlp":
-            classifier = MLP(self.validation_rate)
+            classifier = MLP(self.validation_rate, self.num_classes)
         assert classifier is not None, "No classifier selected"
         return classifier
 
@@ -64,44 +65,53 @@ class Classifier:
         :return trained model
         """
         assert os.path.exists(input_model_file_name), "Selected model does not exist"
-        return self.classifier.load_model(input_model_file_name)
+        # Load/Unpickle model
+        if input_model_file_name.endswith(".pickle"):
+            with open(input_model_file_name, mode='rb') as fp:
+                loaded_model = pickle.load(fp)
+        else:
+            loaded_model = load_model(input_model_file_name)
+        return loaded_model
 
     def save_model(self, model, output_directory: str):
         """
-        Save trained model
+        Pickle trained model
         :param  model: trained model
-        :param  output_directory: model file name
-        :return trained model
+        :param  output_directory: pickled model file name
         """
         # Make output directory if it does not exist
         if os.path.exists(output_directory) is False:
             os.mkdir(output_directory)
-
-        # Make model file name
-        model_filename = "{}.h5".format(self.selected_classifier)
-
-        # Save model
-        self.classifier.save_model(model, os.path.join(output_directory, model_filename))
+        self.classifier.save_model(model, output_directory)
 
     def training(self, train_data, train_label):
         """
         Training with train data set
         :param   train_data:  training data
-        :param   train_label: test data
+        :param   train_label: training data
         :return  model: trained   model
         """
         # Train model
         return self.classifier.training(train_data, train_label)
 
-    def predict(self, model, test_data, test_label) -> float:
+    def test(self, model, test_data, test_label) -> float:
         """
-        Make predictions with a given model to test data set
+        Make predictions and output the result from a given model to test data set
         :param  model: trained model
-        :param  test_data: training data
+        :param  test_data: test data
         :param  test_label: test data
-        :return prediction score
+        :return Over all test score (accuracy)
         """
-        return self.classifier.predict(model, test_data, test_label)
+        return self.classifier.test(model, test_data, test_label)
+
+    def predict(self, model, target_data) -> float:
+        """
+        Make prediction to a given target data and return the prediction result with accuracy for each sample
+        :param  model: trained model
+        :param  target_data: target data
+        :return prediction result with accuracy
+        """
+        return self.classifier.predict(model, target_data)
 
     def show_history(self, model_training):
 

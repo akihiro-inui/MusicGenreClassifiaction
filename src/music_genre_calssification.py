@@ -6,12 +6,12 @@ Created on Christmas 2018
 @author: Akihiro Inui
 """
 
-import os
 import time
-import numpy as np
 import pandas as pd
+import numpy as np
+import os
 from utils.file_utils import FileUtil
-from classifier.classifier import Classifier
+from classifier.classifier_wrapper import Classifier
 from common.config_reader import ConfigReader
 from data_process.data_process import DataProcess
 from feature_extraction.audio_feature_extraction import AudioFeatureExtraction
@@ -52,7 +52,7 @@ class MusicGenreClassification:
         # Get file names and store them into a dictionary
         directory_files_dict = {}
         for directory in directory_names:
-            directory_files_dict[directory] = os.listdir(os.path.join(self.dataset_path, directory))
+            directory_files_dict[directory] = FileUtil.get_file_names(os.path.join(self.dataset_path, directory))
 
         # Extract all features and store them into list
         final_dataframe = pd.DataFrame()
@@ -153,7 +153,16 @@ class MusicGenreClassification:
         :return prediction accuracy
         """
         # Make prediction
-        return self.CLF.predict(model, test_data, test_label)
+        return self.CLF.test(model, test_data, test_label)
+
+    def predict(self, model, target_data):
+        """
+        Make prediction to a given target data and return the prediction result with accuracy for each sample
+        :param  model: trained model
+        :param  target_data: target data
+        :return prediction array with probability
+        """
+        return self.CLF.predict(model, target_data)
 
 
 def main():
@@ -164,8 +173,9 @@ def main():
     output_data_directory = "../feature"
     feature_extraction = True
     training = True
-    # input_data_directory = "../feature/2018-12-26_02:06:01.254270"
-    # model_file = "model/2018-12-26_15:39:28.242417/mlp.h5"
+    input_data_directory = "../feature/2019-01-03_23:13:27.829628"
+    model_file = "../model/2019-01-03_23:21:07.913861/mlp.h5"
+    dummy_sample = "../dummy_sample.csv"
 
     # Instantiate mgc class
     MGC = MusicGenreClassification(AudioFeatureExtraction, Classifier, music_dataset_path, setting_file)
@@ -182,12 +192,23 @@ def main():
         # Read data from directory
         train_data, test_data, train_label, test_label = MGC.read_dataset(input_data_directory)
 
-    # Training model
-    model = MGC.training(train_data, train_label, model_directory_path)
+    if training is True:
+        # Training model
+        model = MGC.training(train_data, train_label, model_directory_path)
+    else:
+        # Load model
+        model = MGC.CLF.load_model(model_file)
 
-    # Make predictions
+    # Test system
     accuracy = MGC.test(model, test_data, test_label)
 
+    # Make prediction
+    dummy_dataframe = FileUtil.csv2dataframe(dummy_sample)
+    prediction_array = MGC.predict(model, dummy_dataframe)
+    max_class = np.argmax(prediction_array)
+
+    print(prediction_array)
+    print(max_class)
     print("Start prediction")
     print("Final accuracy is {0}".format(accuracy))
 
