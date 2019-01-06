@@ -7,6 +7,7 @@ Created on Sat Mar 17 23:14:28 2018
 """
 
 import os
+import pickle
 import pandas as pd
 from keras.optimizers import SGD
 from keras.layers import Dense
@@ -17,31 +18,15 @@ from keras.models import load_model
 
 class MLP:
 
-    def __init__(self, validation_rate):
+    def __init__(self, validation_rate, num_classes):
         """
         Init
         :param  validation_rate: validation rate
+        :param  num_classes: number of classes
         :return model: trained model
         """
         self.validation_rate = validation_rate
-
-    def load_model(self, model_file_name: str):
-        """
-        Load trained model
-        :param  model_file_name: name of model file to load
-        :return model: trained model
-        """
-        # Load model if it exists
-        assert os.path.exists(model_file_name), "Given model file does not exist"
-        return load_model(model_file_name)
-
-    def save_model(self, model, model_file_name: str):
-        """
-        Save model
-        :param  model: trained model
-        :param  model_file_name: name of model file to load
-        """
-        model.save(model_file_name)
+        self.num_classes = num_classes
 
     def training(self, train_data, train_label):
         """
@@ -72,7 +57,7 @@ class MLP:
         model.add(Dense(150, activation='relu'))
 
         # Add the output layer
-        model.add(Dense(10))
+        model.add(Dense(self.num_classes))
 
         # Create optimizer
         my_optimizer = SGD(lr=LearningRate)
@@ -85,21 +70,51 @@ class MLP:
 
         # Fit the model
         model.fit(train_data, onehot_train_label, callbacks=[early_stopping_monitor],
-                  nb_epoch=50, shuffle=False, validation_split=self.validation_rate)
+                  epochs=50, shuffle=False, validation_split=self.validation_rate)
 
         return model
 
-    def predict(self, model, test_data, test_label):
+    def load_model(self, model_file_name: str):
         """
-        Predict with model
+        Load trained model
+        :param  model_file_name: name of model file to load
+        :return model: trained model
+        """
+        # Load model if it exists
+        assert os.path.exists(model_file_name), "Given model file does not exist"
+        return load_model(model_file_name)
+
+    def save_model(self, model, output_directory: str):
+        """
+        Save model
+        :param  model: trained model
+        :param  model_file_name: name of model file to load
+        """
+        model.save(os.path.join(output_directory, "mlp.h5"))
+
+    def test(self, model, test_data, test_label):
+        """
+        Make a test for the given dataset
         :param  model: trained model
         :param  test_data: test data
         :param  test_label: test label
+        :return result of test
         """
         # One hot encode
         onehot_test_label = pd.get_dummies(test_label)
-        # Make predictions
+        # Make predictions and output result
         return model.evaluate(test_data, onehot_test_label)[1]
+
+    def predict(self, model, target_data):
+        """
+        Make prediction to a given target data and return the prediction result with accuracy for each sample
+        :param  model: trained model
+        :param  target_data: target data without label
+        :return prediction array with probability
+        """
+        # Make prediction to the target data
+        return model.predict_proba(target_data)
+
 
     def show_history(self, model):
         # Load model

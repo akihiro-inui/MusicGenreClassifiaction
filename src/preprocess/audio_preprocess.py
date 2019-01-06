@@ -12,6 +12,11 @@ from utils.audio_util import AudioUtil
 
 
 class AudioPreProcess:
+    """
+    Pre processing to audio file
+    1. Framing
+    2. Windowing (Options: Hamm window)
+    """
     def __init__(self, frame_time: float, overlap_rate: float, window_type: str):
         """
         :param frame_time: time for framing in ms (e.g. 46.44)
@@ -21,7 +26,6 @@ class AudioPreProcess:
         self.frame_time = frame_time
         self.overlap_rate = overlap_rate
         self.window_type = window_type
-
 
     def read_audio_file(self, filename: str) -> dict:
         """
@@ -35,7 +39,7 @@ class AudioPreProcess:
     @staticmethod
     def add_eps(audio_data: list) -> list:
         """
-        Read audio file
+        Add eps to audio data
         :param audio_data: list of audio data
         :return list of audio data with eps
         """

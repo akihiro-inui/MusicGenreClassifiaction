@@ -23,6 +23,7 @@ class MFCC:
         self.mfcc_coeff = mfcc_coeff
         self.fft_size = fft_size
         self.sampling_rate = sampling_rate
+        self.total_filters = total_filters
         self.__init_melfilter()
         self.__init_dct_matrix()
 
@@ -36,12 +37,12 @@ class MFCC:
         """
         Init Mel filter
         """
-        self.mel_filter = self.melfilter(self.sampling_rate, self.total_filters)
+        self.mel_filter = self.melfilter(self.sampling_rate, self.fft_size, self.total_filters)
 
-    def melfilter(self, sampling_rate, total_filters) -> list:
+    @staticmethod
+    def melfilter(sampling_rate:int, fft_size:int, total_filters:int):
         """
         Mel filter
-        :param  sampling_rate: int
         :param  total_filters: number of mel filters
         :return  Mel filter in list
         """
@@ -58,13 +59,13 @@ class MFCC:
         points = 700 * (10 ** (melpoints / 2595) - 1)
 
         # DTF bins within half fftSize
-        DFTbins = np.round(points / maxF * (self.fft_size / 2))
+        DFTbins = np.ceil(points / maxF * (fft_size / 2))
 
-        # Set the first value to 1
-        DFTbins[0] = 1
+        # Set the first value to 0
+        DFTbins[0] = 0
 
         # Create an empty matrix to store filter
-        MelFilter = np.zeros((total_filters, self.fft_size))
+        MelFilter = np.zeros((total_filters, fft_size))
 
         # Create Triangle filters by each row
         for n in range(0, total_filters):
@@ -83,7 +84,8 @@ class MFCC:
 
         return MelFilter
 
-    def dctmatrix(self, total_filters: int, mfcc_coeff: int) -> bytearray:
+    @staticmethod
+    def dctmatrix(total_filters: int, mfcc_coeff: int) -> bytearray:
         """
         DCT matrix
         :param  total_filters: number of mel filters

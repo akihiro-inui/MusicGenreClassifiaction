@@ -67,6 +67,7 @@ class ConfigReader:
 
     def __init_classification(self, cfg):
         # Parameters for classification
+        self.num_classes = int(cfg.get('classification', 'num_classes'))
         self.validation_rate = float(cfg.get('classification', 'validation_rate'))
         self.iteration = int(cfg.get('classification', 'iteration'))
         self.k = int(cfg.get('classification', 'k'))

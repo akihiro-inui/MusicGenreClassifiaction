@@ -28,7 +28,7 @@ class AudioFeatureExtraction:
         """
         # Load parameters from config file
         self.cfg = ConfigReader(setting_file)
-        self.sampling_rate = self.cfg.frame_time
+        self.sampling_rate = self.cfg.sampling_rate
         self.frame_time = self.cfg.frame_time
         self.overlap_rate = self.cfg.overlap_rate
         self.window_type = self.cfg.window_type
