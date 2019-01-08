@@ -90,71 +90,15 @@ MLP: 83.6%
 <img src="assets/MLP loss.png?raw=true" alt="MLP loss" width="400",align="right">
 </p>
 
-CNN: 46.3% (Need to find more suitable parameters, seems overfitting)
-<p>
-<img src="assets/CNN accuracy.png?raw=true" alt="CNN accuracy" width="400", align="left">
-<img src="assets/CNN loss.png?raw=true" alt="CNN loss" width="400",align="right">
-</p>
-
 
 ## Code
-"mgc.py"
-Entire process including feature extraction and all the classification above.
-
-"ExtractAll.py"
-Feature extraction to all files in GTZAN
-
-"FeatureExtraction.py"
-Feature extraction to an audio file
-
-"datacleaner.py"
-Exclude invalid data including NaN or Inf
-
-"traintest.py"
-Devide image or matrix data into train/test dataset with the provide train rate.
-
-"dctmatrix.py, melfilter.py"
-for mfcc
-
-"centoid.py, rolloff.py, osc.py, zerocrossing.py"
-Compute each feature extraction
-
-"normalise.py, standardise.py"
-Compute normalisation, standardisation
 
 ### Dependency
-Python 3.6.5
-
-numpy  version 1.14.2
-
-pandas version 0.22.0
-
-scipy  version 1.0.1
-
-keras  version 2.1.3
-
-PIL    version 5.0.0
 
 
 ## Complete Installation
 
 1. Download Data from the link below
-
-   GTZAN Dataset
-   https://drive.google.com/open?id=16YkvirrRcdhqxix_0DBBjZeri4bjcfff
-
-   FeatureMap
-   https://drive.google.com/open?id=1yBGJUJL2UO9uatPtEDtRuAACqRTbdeiY
-
-2. Locate the data in your working directory and change the path in codes
-
-3. Download and install libraries (See Dependancy)
-
-4. run "mgc.py" (Comment out unnecessary classifiers)
-
-5. If you use CNN, run "traintest.py" before you run "mgc.py"
-
-6. Give me any advice
 
 
 ## References
