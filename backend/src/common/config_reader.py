@@ -44,15 +44,19 @@ class ConfigReader:
 
     def __init_feature_selection(self, cfg):
         # Parameters for feature selection
+        self.zcr = bool(cfg.get('feature_selection', 'zcr'))
         self.mfcc = bool(cfg.get('feature_selection', 'mfcc'))
         self.rms = bool(cfg.get('feature_selection', 'rms'))
         self.centroid = bool(cfg.get('feature_selection', 'centroid'))
+        self.rolloff = bool(cfg.get('feature_selection', 'rolloff'))
+        self.flux = bool(cfg.get('feature_selection', 'flux'))
 
     def __init_feature_extraction(self, cfg):
         # Parameters for feature extraction
         self.fft_size = int(cfg.get('feature_extraction', 'fft_size'))
         self.mfcc_coeff = int(cfg.get('feature_extraction', 'mfcc_coeff'))
         self.mfcc_total_filters = int(cfg.get('feature_extraction', 'mfcc_total_filters'))
+        self.rolloff_param = float(cfg.get('feature_extraction', 'rolloff_param'))
 
     def __init_dataset(self, cfg):
         # Parameters for data set creation

@@ -9,8 +9,12 @@ Created on Fri Mar 23 02:01:21 2018
 from src.common.config_reader import ConfigReader
 from src.preprocess.audio_preprocess import AudioPreProcess
 from src.feature_extraction.fft import FFT
+from src.feature_extraction.zerocrossing import zerocrossing
 from src.feature_extraction.mfcc import MFCC
 from src.feature_extraction.centroid import centroid
+from src.feature_extraction.rolloff import rolloff
+from src.feature_extraction.rms import rms
+from src.feature_extraction.flux import Flux
 from src.utils.stats_tool import get_mean, get_std
 
 
@@ -41,8 +45,9 @@ class AudioFeatureExtraction:
         self.feature_selection_dict = self.cfg.section_reader("feature_selection")
         self.feature_list = self.__init_feature_select()
 
-        # Initialize mfcc
+        # Initialize feature extraction classes
         self.mfcc = MFCC(self.cfg.mfcc_coeff, self.sampling_rate, self.fft_size, self.cfg.mfcc_total_filters)
+        self.flux = Flux(self.sampling_rate)
 
     def __init_feature_select(self) -> list:
         """
@@ -80,10 +85,18 @@ class AudioFeatureExtraction:
             # Apply feature extraction only the feature type is set as True
             spectrum = FFT.fft(framed_audio, self.fft_size)
             power_spectrum = FFT.power_fft(framed_audio, self.fft_size)
+            if feature == "zcr":
+                feature_dict[feature] = zerocrossing(framed_audio)
             if feature == "mfcc":
                 feature_dict[feature] = self.mfcc.main(FFT.fft(framed_audio, self.fft_size))
+            if feature == "rms":
+                feature_dict[feature] = rms(framed_audio)
             if feature == "centroid":
                 feature_dict[feature] = centroid(power_spectrum, self.fft_size, self.sampling_rate)
+            if feature == "rolloff":
+                feature_dict[feature] = rolloff(power_spectrum, self.cfg.rolloff_param)
+            if feature == "flux":
+                feature_dict[feature] = self.flux.main(power_spectrum)
         return feature_dict
 
     # Feature extraction to one audio file
