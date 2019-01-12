@@ -172,10 +172,10 @@ def main():
     music_dataset_path = "../../data"
     model_directory_path = "../../model"
     output_data_directory = "../../feature"
-    feature_extraction = True
+    feature_extraction = False
     training = True
-    input_data_directory = "../../feature/2019-01-03_23:13:27.829628"
-    model_file = "../../model/2019-01-03_23:21:07.913861/mlp.h5"
+    input_data_directory = "../../feature/2019-01-12_00:48:33.525812"
+    model_file = "../../model/2019-01-11_21:17:03.318011/mlp.h5"
     dummy_sample = "../../dummy_data.csv"
 
     # Instantiate mgc class

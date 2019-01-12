@@ -3,33 +3,23 @@
 """
 Created on Sat Mar 17 23:14:28 2018
 
-@author: akihiro inui
+@author: Akihiro Inui
 """
-
-#==============================================================================
-# zerocrossing.py
-# Program author: Akihiro Inui
-# Compute Zero-crossing Rate
-#==============================================================================
-
-#==============================================================================
-# 0. Import libraries
-#==============================================================================
 import numpy as np
-#==============================================================================
-# 1. Define Zero-Crossing Rate
-#==============================================================================
 
-def zerocrossing (xw):
-    
+
+def zerocrossing(input_windowed_signal:tuple or list) -> float:
+    """
+    Zero Crossing Rate
+    :param  input_windowed_signal: input audio signal after windowing
+    :return zero crossing rate
+    """
     # Size of windowed signal
-    wsize = len(xw)
+    window_size = len(input_windowed_signal)
     
     # Slided signal
-    xw2 = np.zeros(wsize)
-    xw2[1:] = xw[0:-1]
+    xw2 = np.zeros(window_size)
+    xw2[1:] = input_windowed_signal[0:-1]
     
     # Compute Zero-crossing Rate
-    z = (1/(2*wsize)) * sum(abs(np.sign(xw)-np.sign(xw2)))
-    
-    return z
+    return (1/(2*window_size)) * sum(abs(np.sign(input_windowed_signal)-np.sign(xw2)))
