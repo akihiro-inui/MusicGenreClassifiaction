@@ -50,6 +50,7 @@ class ConfigReader:
         self.centroid = bool(cfg.get('feature_selection', 'centroid'))
         self.rolloff = bool(cfg.get('feature_selection', 'rolloff'))
         self.flux = bool(cfg.get('feature_selection', 'flux'))
+        self.osc = bool(cfg.get('feature_selection', 'osc'))
 
     def __init_feature_extraction(self, cfg):
         # Parameters for feature extraction
@@ -57,6 +58,7 @@ class ConfigReader:
         self.mfcc_coeff = int(cfg.get('feature_extraction', 'mfcc_coeff'))
         self.mfcc_total_filters = int(cfg.get('feature_extraction', 'mfcc_total_filters'))
         self.rolloff_param = float(cfg.get('feature_extraction', 'rolloff_param'))
+        self.osc_param = float(cfg.get('feature_extraction', 'osc_param'))
 
     def __init_dataset(self, cfg):
         # Parameters for data set creation

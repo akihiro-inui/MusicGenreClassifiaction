@@ -15,6 +15,7 @@ from src.feature_extraction.centroid import centroid
 from src.feature_extraction.rolloff import rolloff
 from src.feature_extraction.rms import rms
 from src.feature_extraction.flux import Flux
+from src.feature_extraction.osc import OSC
 from src.utils.stats_tool import get_mean, get_std
 
 
@@ -48,6 +49,7 @@ class AudioFeatureExtraction:
         # Initialize feature extraction classes
         self.mfcc = MFCC(self.cfg.mfcc_coeff, self.sampling_rate, self.fft_size, self.cfg.mfcc_total_filters)
         self.flux = Flux(self.sampling_rate)
+        self.osc = OSC(self.cfg.osc_param, self.sampling_rate, self.fft_size)
 
     def __init_feature_select(self) -> list:
         """
@@ -97,6 +99,9 @@ class AudioFeatureExtraction:
                 feature_dict[feature] = rolloff(power_spectrum, self.cfg.rolloff_param)
             if feature == "flux":
                 feature_dict[feature] = self.flux.main(power_spectrum)
+            if feature == "osc":
+                osc, fft_bin_sum = self.osc.main(power_spectrum)
+                feature_dict[feature] = osc
         return feature_dict
 
     # Feature extraction to one audio file
