@@ -172,9 +172,9 @@ def main():
     music_dataset_path = "../../data"
     model_directory_path = "../../model"
     output_data_directory = "../../feature"
-    feature_extraction = False
+    feature_extraction = True
     training = True
-    input_data_directory = "../../feature/2019-01-12_00:48:33.525812"
+    input_data_directory = "../../feature/2019-01-13_03:50:40.651834"
     model_file = "../../model/2019-01-11_21:17:03.318011/mlp.h5"
     dummy_sample = "../../dummy_data.csv"
 

@@ -6,53 +6,71 @@ Created on Sat Mar 17 23:14:28 2018
 @author: akihiro inui
 """
 
-#==============================================================================
-# rolloff.py
-# Program author: Akihiro Inui
-# Compute Spectral Rolloff
-#==============================================================================
-
-
-#==============================================================================
-# 0. Import libraries
-#==============================================================================
-import math
 import numpy as np
-#==============================================================================
-# 1. Define Spectral Rolloff
-#==============================================================================
+import math
 
-def osc (Fs,X1,fftSize,alpha):
-    
-    # Indicate frequency points to create bins
-    Subband_points = [0,100,200,400,800,1600,3200,6400,12800,Fs/2]
-    
-    # FFT bins within half fftSize
-    SubFFTbins = np.round(np.divide(Subband_points,Fs/2)*fftSize/2) 
 
-    # Set the first value to 1
-    SubFFTbins[0] = 1
+class OSC:
 
-    # Create empty matrices for peak, valley and sum for each band
-    peak = np.zeros(len(Subband_points)-1)
-    valley = np.zeros(len(Subband_points)-1)
-    Xsum = np.zeros(len(Subband_points)-1)
+    def __init__(self, osc_param: int, sampling_rate: int, fft_size: int):
+        """
+        Octave-based spectral contrast
+        :param  osc_param: parameter for OSC
+        :param  sampling_rate: int
+        :param  fft_size: size of fft
+        """
+        self.osc_param = osc_param
+        self.sampling_rate = sampling_rate
+        self.fft_size = fft_size
+        self.sub_fft_bins = self.__init_sub_band()
 
-    # Take peaks and valleys from all FFT frames
-    for b in range (0,len(Subband_points)-1):   
-        Xframe = X1[int(SubFFTbins[b]):int(SubFFTbins[b+1])]     # Take out FFT frame
-        Xsmall2big = np.sort(Xframe)                             # Sort values from small to big
-        Xbig2small = np.flipud(Xsmall2big)                       # Sort values from big to small
-        N = int(np.round(alpha*len(Xframe)))                     # Take values up to N in each frame
-        peak[b] = math.log10((1/N)*sum(Xbig2small[0:N]))         # Calculate peak from each frame
-        valley[b] = math.log10((1/N)*sum(Xsmall2big[0:N]))       # Calculate valley from each frame
-        Xsum[b] = sum(Xframe)                                    # Sum of power spectrum from each sub-band
-        Xsum.transpose
+    def __init_sub_band(self) -> list:
+        """
+        Init to create sub-band
+        :return subbands: fft sub-bands up to half of sampling rate
+        """
+        # Indicate frequency points to create bins
+        subband_points = [0, 100, 200, 400, 800, 1600, 3200, 6400, 12800, self.sampling_rate/2]
 
-    # Take difference (ignore the first value)
-    sc = peak[:] - valley[:]
+        # FFT bins within half fft size
+        subbands = np.ceil(np.divide(subband_points, self.sampling_rate/2)*self.fft_size/2)
+        # Set the second element as 1 to make each bins to have at least 2 elements
+        subbands[1] = 1
+        return subbands
 
-    # Cobmine features
-    o = np.hstack((valley[:],sc))
-    
-    return o,Xsum
+    def main(self, input_power_spectrum: list):
+        """
+        Main function for Octave-based spectral contrast
+        :param  input_power_spectrum: spectrum in list
+        :return osc: octave-based spectral contrast
+        :return fft_bin_sum: sum of spectrum in octave-base bands
+        """
+        # Create empty matrices for peak, valley and sum for each band
+        peak_array = []
+        valley_array = []
+        fft_bin_sum = []
+
+        # Take peaks and valleys from all FFT frames
+        for bin_num in range(1, len(self.sub_fft_bins)):
+            # Take out FFT bin
+            fft_bin = input_power_spectrum[int(self.sub_fft_bins[bin_num-1]):int(self.sub_fft_bins[bin_num])]
+            # Sort values from small to big
+            small2big = np.sort(fft_bin)
+            # Sort values from big to small
+            big2small = np.flip(small2big)
+            # Take values up to N in each frame
+            threshold = int(np.ceil(self.osc_param*len(fft_bin)))
+            # Calculate peak from each frame
+            peak_array.append(math.log10((1/threshold)*sum(big2small[:threshold])))
+            # Calculate valley from each frame
+            valley_array.append(math.log10((1/threshold)*sum(small2big[:threshold])))
+            # Sum of power spectrum from each sub-band
+            fft_bin_sum.append(sum(fft_bin))
+
+        # Take difference except the first element which is the same value
+        sc = np.subtract(peak_array[1:], valley_array[1:])
+
+        # Combine features
+        osc = np.concatenate([valley_array, sc])
+
+        return osc, fft_bin_sum
