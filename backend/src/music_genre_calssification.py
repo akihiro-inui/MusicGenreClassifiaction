@@ -6,10 +6,8 @@ Created on Christmas 2018
 @author: Akihiro Inui
 """
 
-import time
-import pandas as pd
-import numpy as np
 import os
+import numpy as np
 from src.utils.file_utils import FileUtil
 from src.classifier.classifier_wrapper import Classifier
 from src.common.config_reader import ConfigReader
@@ -45,40 +43,10 @@ class MusicGenreClassification:
     def feature_extraction(self):
         """
         Feature extraction to data set
-        :return final_dataframe:  extracted feature in pandas data frame
+        :return feature_dataframe:  extracted feature in pandas data frame
         """
-        # Get folder names under data set path
-        directory_names = FileUtil.get_folder_names(self.dataset_path)
-
-        # Get file names and store them into a dictionary
-        directory_files_dict = {}
-        for directory in directory_names:
-            directory_files_dict[directory] = FileUtil.get_file_names(os.path.join(self.dataset_path, directory))
-
-        # Extract all features and store them into list
-        final_dataframe = pd.DataFrame()
-        for directory, audio_files in directory_files_dict.items():
-            start = time.time()
-            file_feature_stat_dict = {}
-            # Extract all audio files in one directory
-            for audio_file in audio_files:
-                # Extract features from one audio file
-                file_feature_stat_dict[audio_file] = self.AFE.get_feature_stats(
-                    self.AFE.extract_file(os.path.join(self.dataset_path, directory, audio_file)), "mean")
-            end = time.time()
-
-            # Convert dictionary to data frame
-            class_dataframe = DataProcess.dict2dataframe(file_feature_stat_dict, segment_feature=True)
-
-            # Add label to data frame
-            class_dataframe_with_label = DataProcess.add_label(class_dataframe, directory)
-
-            # Combine data frames
-            final_dataframe = final_dataframe.append(class_dataframe_with_label)
-
-            print("Extracted {0} with {1} \n".format(directory, end - start))
-
-        return final_dataframe
+        # Extract all features from dataset and store them into dataframe
+        return self.AFE.extract_dataset(self.dataset_path, "mean")
 
     def make_dataset(self, dataframe, output_directory: str):
         """
@@ -133,16 +101,14 @@ class MusicGenreClassification:
         Train model and save it under output_directory
         :param  train_data:  train data
         :param  train_label: train label
+        :param  output_directory: output directory for model
         :return trained model
         """
         # Train classifier
         model = self.CLF.training(train_data, train_label)
 
-        # Name the model with current time
-        output_directory_with_time = os.path.join(output_directory, FileUtil.get_time())
-
-        # Save mode
-        self.CLF.save_model(model, output_directory_with_time)
+        # Save mode with current time
+        self.CLF.save_model(model, os.path.join(output_directory, FileUtil.get_time()))
         return model
 
     def test(self, model, test_data, test_label) -> float:

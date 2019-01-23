@@ -99,11 +99,12 @@ class MFCC:
         dct_matrix[0, :] = dct_matrix[0, :] / np.sqrt(2)
         return dct_matrix
 
-    def main(self, input_spectrum: list) -> list:
+    def main(self, input_spectrum: list):
         """
         Main function for Mel Frequency Cepstral Coefficient
         :param  input_spectrum: spectrum in list
         :return mfcc: mfccs in list
+        :return mel_fft: mel-scaled fft
         """
         # Apply Mel scale filter
         mel_fft = np.matmul(self.mel_filter, input_spectrum)
@@ -113,3 +114,13 @@ class MFCC:
 
         # Apply DCT to cepstrum
         return self.dct_matrix.dot(ear_mag)
+
+    def mel_spectrum(self, input_spectrum: list):
+        """
+        Make Mel-spectrum from mel-scaled spectrum
+        :param  input_spectrum: spectrum in list
+        :return : mel-scaled spectrum
+        """
+        # Apply inverse FFT to mel-scaled spectrum and truncate half
+        return abs(np.fft.ifft((np.matmul(self.mel_filter, input_spectrum)), self.fft_size))[:self.fft_size]
+

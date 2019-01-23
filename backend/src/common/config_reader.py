@@ -51,6 +51,7 @@ class ConfigReader:
         self.rolloff = bool(cfg.get('feature_selection', 'rolloff'))
         self.flux = bool(cfg.get('feature_selection', 'flux'))
         self.osc = bool(cfg.get('feature_selection', 'osc'))
+        self.mel_spectrogram = bool(cfg.get('feature_selection', 'mel_spectrogram'))
 
     def __init_feature_extraction(self, cfg):
         # Parameters for feature extraction
