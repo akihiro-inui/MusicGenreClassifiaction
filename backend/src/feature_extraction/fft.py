@@ -36,3 +36,5 @@ class FFT:
         spectrum = abs(np.fft.fft(audio_signal, n=fft_size)) / math.sqrt(fft_size * len(audio_signal))
         # Truncate second half of fft
         return spectrum[0:int(fft_size/2)]
+
+
