@@ -1,0 +1,34 @@
+<application>
+  <component name="NodeJsLocalInterpreters">
+    <local-interpreter path="/usr/local/bin/node">
+      <version-cache last-modified="1528702626000" />
+    </local-interpreter>
+    <local-interpreter path="/usr/local/Cellar/node/10.4.0/bin/node" />
+  </component>
+  <component name="PyTestFrameworkService">
+    <option name="SDK_TO_PYTEST">
+      <map>
+        <entry key="$USER_HOME$/Desktop/projects/genre_classification/MusicGenreClassifiaction/venv/bin/python" value="false" />
+        <entry key="$USER_HOME$/anaconda3/envs/py3/bin/python" value="false" />
+        <entry key="$USER_HOME$/anaconda3/envs/tools/bin/python" value="false" />
+        <entry key="$USER_HOME$/anaconda3/envs/tools/innovatech/bin/python" value="false" />
+      </map>
+    </option>
+    <option name="SDK_TO_NOSETEST">
+      <map>
+        <entry key="$USER_HOME$/Desktop/projects/genre_classification/MusicGenreClassifiaction/venv/bin/python" value="false" />
+        <entry key="$USER_HOME$/anaconda3/envs/py3/bin/python" value="false" />
+        <entry key="$USER_HOME$/anaconda3/envs/tools/bin/python" value="false" />
+        <entry key="$USER_HOME$/anaconda3/envs/tools/innovatech/bin/python" value="false" />
+      </map>
+    </option>
+    <option name="SDK_TO_TRIALTEST">
+      <map>
+        <entry key="$USER_HOME$/Desktop/projects/genre_classification/MusicGenreClassifiaction/venv/bin/python" value="false" />
+        <entry key="$USER_HOME$/anaconda3/envs/py3/bin/python" value="true" />
+        <entry key="$USER_HOME$/anaconda3/envs/tools/bin/python" value="false" />
+        <entry key="$USER_HOME$/anaconda3/envs/tools/innovatech/bin/python" value="true" />
+      </map>
+    </option>
+  </component>
+</application>
