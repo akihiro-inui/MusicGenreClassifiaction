@@ -11,7 +11,7 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn import preprocessing
-from src.utils.file_utils import FileUtil
+from backend.src.utils.file_utils import FileUtil
 
 
 class DataProcess:
@@ -57,6 +57,8 @@ class DataProcess:
         Convert dictionary to data frame
         :param: input_dict: {key: file name, value: dictionary{key: feature name, value: single value}}
         :param: segment_feature: If True, segment all feature vector elements (Case of numerical feature)
+        :return: pandas dataframe with feature name as header
+        :rtype:  pandas dataframe
         """
         if segment_feature is True:
             new_feature_dict = DataProcess.clean_feature_dict(input_dict)
@@ -64,6 +66,23 @@ class DataProcess:
         else:
             feature_dataframe = pd.DataFrame.from_dict(input_dict, orient='index')
         return feature_dataframe
+
+    @staticmethod
+    def dict2list(input_dict: dict):
+        """
+        Convert dictionary to list
+        :param:  input_dict: {key: file name, value: dictionary{key: feature name, value: single value}}
+        :rtype:  list
+        :return: final_list: list which stores values in input dictionary
+        """
+        final_list = []
+        for key, value in input_dict.items():
+            if type(value) is dict:
+                for key_in_dict, value_in_dict in value.items():
+                    final_list.append(value_in_dict)
+            else:
+                final_list.append(value)
+        return final_list
 
     @staticmethod
     def add_label(input_dataframe, label_name: str):

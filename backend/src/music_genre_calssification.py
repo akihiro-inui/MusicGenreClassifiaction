@@ -7,11 +7,11 @@ Created on Christmas 2018
 """
 
 import os
-from src.utils.file_utils import FileUtil
-from src.classifier.classifier_wrapper import Classifier
-from src.common.config_reader import ConfigReader
-from src.data_process.data_process import DataProcess
-from src.feature_extraction.audio_feature_extraction import AudioFeatureExtraction
+from backend.src.utils.file_utils import FileUtil
+from backend.src.classifier.classifier_wrapper import Classifier
+from backend.src.common.config_reader import ConfigReader
+from backend.src.data_process.data_process import DataProcess
+from backend.src.feature_extraction.audio_feature_extraction import AudioFeatureExtraction
 
 
 class MusicGenreClassification:
@@ -137,7 +137,7 @@ def main():
     music_dataset_path = "../../data"
     model_directory_path = "../../model"
     output_data_directory = "../../feature"
-    feature_extraction = False
+    feature_extraction = True
     training = True
     input_data_directory = "../../feature/2019-01-23_23:19:56.871484"
     model_file = "../../model/2019-01-23_23:19:59.720996/mlp.h5"

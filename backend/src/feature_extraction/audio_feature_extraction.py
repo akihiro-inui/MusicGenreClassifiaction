@@ -9,24 +9,24 @@ Created on Fri Mar 23 02:01:21 2018
 import os
 import pandas as pd
 import time
-from src.common.config_reader import ConfigReader
-from src.preprocess.audio_preprocess import AudioPreProcess
-from src.feature_extraction.fft import FFT
-from src.feature_extraction.zerocrossing import zerocrossing
-from src.feature_extraction.mfcc import MFCC
-from src.feature_extraction.centroid import centroid
-from src.feature_extraction.rolloff import rolloff
-from src.feature_extraction.rms import rms
-from src.feature_extraction.flux import Flux
-from src.feature_extraction.osc import OSC
-from src.utils.stats_tool import get_mean, get_std
-from src.utils.file_utils import FileUtil
-from src.data_process.data_process import DataProcess
+from backend.src.common.config_reader import ConfigReader
+from backend.src.preprocess.audio_preprocess import AudioPreProcess
+from backend.src.feature_extraction.fft import FFT
+from backend.src.feature_extraction.zerocrossing import zerocrossing
+from backend.src.feature_extraction.mfcc import MFCC
+from backend.src.feature_extraction.centroid import centroid
+from backend.src.feature_extraction.rolloff import rolloff
+from backend.src.feature_extraction.rms import rms
+from backend.src.feature_extraction.flux import Flux
+from backend.src.feature_extraction.osc import OSC
+from backend.src.utils.stats_tool import get_mean, get_std
+from backend.src.utils.file_utils import FileUtil
+from backend.src.data_process.data_process import DataProcess
 
 
 class AudioFeatureExtraction:
     """
-    Audio feature extraction to one audio file
+    Audio feature extraction to audio files
     Supported features: mfcc, spectral centroid,
     """
 
@@ -146,15 +146,6 @@ class AudioFeatureExtraction:
         for audio_file in file_names:
             # Extract features from one audio file
             frame_extracted_feature = self.extract_file(os.path.join(input_directory, audio_file))
-            # Append mel-spectrum
-            # mel_spectrogram = frame_extracted_feature["mel_spectrogram"]
-            # Save mel-spectrogram image
-            # plt.imshow(np.array(mel_spectrogram).T[:], aspect='auto')
-            # plt.gca().invert_yaxis()
-            # image_filename = "{}.png".format(audio_file.split(".wav")[0])
-            # plt.savefig()
-            # Remove mel_spectrogram from feature dictionary and calculate statistics over all the frames
-            # del frame_extracted_feature["mel_spectrogram"]
             file_feature_stat_dict[audio_file] = self.get_feature_stats(frame_extracted_feature, stats_type)
         end = time.time()
 
@@ -164,24 +155,19 @@ class AudioFeatureExtraction:
 
     def extract_dataset(self, dataset_path: str, stats_type: str):
         # Get folder names under data set path
-        directory_names = FileUtil.get_folder_names(dataset_path)
-
-        # Get file names and store them into a dictionary
-        directory_files_dict = {}
-        for directory in directory_names:
-            directory_files_dict[directory] = FileUtil.get_file_names(os.path.join(dataset_path, directory))
+        category_names = FileUtil.get_folder_names(dataset_path)
 
         # Extract all features and store them into list
         final_dataframe = pd.DataFrame()
-        for directory, audio_files in directory_files_dict.items():
+        for category in category_names:
             # Apply feature extraction to a directory
-            file_feature_stat_dict = self.extract_directory(os.path.join(dataset_path, directory), stats_type)
+            file_feature_stat_dict = self.extract_directory(os.path.join(dataset_path, category), stats_type)
 
             # Convert dictionary to data frame
             class_dataframe = DataProcess.dict2dataframe(file_feature_stat_dict, segment_feature=True)
 
             # Add label to data frame
-            class_dataframe_with_label = DataProcess.add_label(class_dataframe, directory)
+            class_dataframe_with_label = DataProcess.add_label(class_dataframe, category)
 
             # Combine data frames
             final_dataframe = final_dataframe.append(class_dataframe_with_label)

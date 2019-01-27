@@ -7,9 +7,9 @@ Created on Sat Mar 17 23:14:28 2018
 """
 
 # Import libraries/modules
-from src.classifier.kNN import kNN
-from src.classifier.mlp import MLP
-from src.common.config_reader import ConfigReader
+from backend.src.classifier.kNN import kNN
+from backend.src.classifier.mlp import MLP
+from backend.src.common.config_reader import ConfigReader
 from keras.models import load_model
 import pickle
 import matplotlib.pyplot as plt

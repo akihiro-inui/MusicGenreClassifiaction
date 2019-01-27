@@ -6,7 +6,7 @@ Created on Fri Mar 23 02:01:21 2018
 """
 
 import configparser
-from src.utils.file_utils import FileUtil
+from backend.src.utils.file_utils import FileUtil
 
 
 class ConfigReader:

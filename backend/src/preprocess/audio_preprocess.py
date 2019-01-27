@@ -8,7 +8,7 @@ Created on Tue Nov 6 2018
 
 import math
 import numpy as np
-from src.utils.audio_util import AudioUtil
+from backend.src.utils.audio_util import AudioUtil
 
 
 class AudioPreProcess:
