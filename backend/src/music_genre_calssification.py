@@ -118,7 +118,7 @@ class MusicGenreClassification:
         :param  test_label:  test label
         :return prediction accuracy
         """
-        # Make prediction
+        # Test model
         return self.CLF.test(model, test_data, test_label)
 
     def predict(self, model, target_data):
