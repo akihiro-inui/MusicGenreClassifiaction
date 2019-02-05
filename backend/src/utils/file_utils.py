@@ -128,3 +128,32 @@ class FileUtil:
         :return : current time in string
         """
         return str(datetime.datetime.now()).replace(" ", "_")
+
+    @staticmethod
+    def list2text(input_list: list, output_text_file_path: str, headers=None):
+        """
+        # Write out list to text file
+        :param : input_list
+        :param : output_text_file_path: text file path to write out the input list
+        :param : headers: header to be written in text file
+        """
+        # Make N number of comma as string
+        if not headers:
+            comma_str = ','
+        else:
+            comma_str = (len(headers)-1) * ','
+
+        # Write out as text file
+        with open(output_text_file_path, 'w') as f:
+            # Write header on top
+            if headers:
+                for header in headers:
+                    f.write("{}".format(header))
+                    if header is not headers[-1]:
+                        f.write(",".format(header))
+
+                f.write("\n")
+            # Write items in rows
+            for item in input_list:
+                f.write("{0}{1}\n".format(item, comma_str))
+
