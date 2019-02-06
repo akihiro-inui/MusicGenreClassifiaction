@@ -87,6 +87,7 @@ class AudioFeatureExtraction:
         # Store extracted features into a dictionary (key:name of feature, value: list of extracted features in frames)
         feature_dict = {}
         # Apply feature extraction to a framed audio and store into a dictionary
+        # TODO: Use While True iterate over selected feature and use apply for each feature extraction method
         for feature in self.feature_list:
             # Apply feature extraction
             spectrum = FFT.fft(framed_audio, self.fft_size)
