@@ -15,6 +15,7 @@ import pickle
 import matplotlib.pyplot as plt
 import os
 
+
 class Classifier:
 
     # Initialization

@@ -47,6 +47,15 @@ class MusicGenreClassification:
         # Extract all features from dataset and store them into dataframe
         return self.AFE.extract_dataset(self.dataset_path, "mean")
 
+    def make_label(self, label_csv_file_path: str):
+        """
+        Make csv file where the classes label is written
+        **** Make sure sort is True ****
+        """
+        # Get folder names
+        label_list = FileUtil.get_folder_names(self.dataset_path, sort=True)
+        FileUtil.list2csv(label_list, label_csv_file_path)
+
     def make_dataset(self, dataframe, output_directory: str):
         """
         Make data set
@@ -92,12 +101,12 @@ class MusicGenreClassification:
         # Apply normalization to data frame
         processed_dataframe = DataProcess.normalize_dataframe(processed_dataframe, self.cfg.label_name)
         # Factorize label
-        processed_dataframe = DataProcess.factorize_lebel(processed_dataframe, self.cfg.label_name)
+        processed_dataframe = DataProcess.factorize_label(processed_dataframe, self.cfg.label_name)
         return processed_dataframe
 
     def training(self, train_data, train_label, output_directory):
         """
-        Train model and save it under output_directory
+        Train model and save it in the output_directory
         :param  train_data:  train data
         :param  train_label: train label
         :param  output_directory: output directory for model
@@ -118,7 +127,7 @@ class MusicGenreClassification:
         :param  test_label:  test label
         :return prediction accuracy
         """
-        # Test model
+        # Make prediction
         return self.CLF.test(model, test_data, test_label)
 
     def predict(self, model, target_data):
@@ -135,13 +144,14 @@ def main():
     # File location
     setting_file = "../../config/master_config.ini"
     music_dataset_path = "../../data"
-    model_directory_path = "../../model"
-    output_data_directory = "../../feature"
+    model_directory_path = "../model"
+    output_data_directory = "../feature"
     feature_extraction = True
     training = True
-    input_data_directory = "../../feature/2019-01-23_23:19:56.871484"
-    model_file = "../../model/2019-01-23_23:19:59.720996/mlp.h5"
-    dummy_sample = "../../dummy_data.csv"
+    input_data_directory = "../feature/2019-02-14_00:46:10.916975"
+    model_file = "../model/2019-02-14_00:20:17.281506/mlp.h5"
+    dummy_sample = "../dummy_data.csv"
+    label_txt_filename = "label.csv"
 
     # Instantiate mgc class
     MGC = MusicGenreClassification(AudioFeatureExtraction, Classifier, music_dataset_path, setting_file)
@@ -167,6 +177,9 @@ def main():
 
     # Test classifier
     accuracy = MGC.test(model, test_data, test_label)
+
+    # Make label text file
+    MGC.make_label(label_txt_filename)
 
     # Make prediction
     #dummy_dataframe = FileUtil.csv2dataframe(dummy_sample)

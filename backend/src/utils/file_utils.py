@@ -6,6 +6,7 @@ Created on Fri Mar 23 02:01:21 2018
 @author: Akihiro Inui
 """
 import os
+import csv
 import pandas as pd
 import datetime
 
@@ -64,10 +65,11 @@ class FileUtil:
         return i + 1
 
     @staticmethod
-    def get_folder_names(directory_path: str) -> list:
+    def get_folder_names(directory_path: str, sort=True) -> list:
         """
         Return list of directories under the given path
         :param   directory_path: path to the directory
+        :param   sort : True for alphabetical sort
         :return: list of folder names under the given path
         """
         assert FileUtil.is_invalid_directory(directory_path) is False, "Invalid directory path"
@@ -76,21 +78,30 @@ class FileUtil:
         for folder_name in os.listdir(directory_path):
             if not folder_name.startswith('.'):
                 folder_names_list.append(folder_name)
+        # Sort by alphabet
+        if sort is True:
+            folder_names_list = sorted(folder_names_list)
         return folder_names_list
 
     @staticmethod
-    def get_file_names(directory_path: str) -> list:
+    def get_file_names(directory_path: str, sort=True) -> list:
         """
         Return list of directories under the given path
         :param   directory_path: path to the directory
+        :param   sort : True for alphabetical sort
         :return: list of file names under the given path
         """
         assert FileUtil.is_invalid_directory(directory_path) is False, "Invalid directory path"
 
+        # Extract file/folder names under the input directory
         file_names_list = []
         for file_name in os.listdir(directory_path):
             if not file_name.startswith('.'):
                 file_names_list.append(file_name)
+
+        # Sort by alphabet
+        if sort is True:
+            file_names_list = sorted(file_names_list)
         return file_names_list
 
     @staticmethod
@@ -110,24 +121,20 @@ class FileUtil:
         :param  input_dataframe: input pandas data frame
         :param  output_filename: output csv file name
         """
+        # Write dataframe as csv file
         input_dataframe.to_csv(output_filename, index=False)
 
     @staticmethod
-    def csv2dataframe(input_filename: str):
+    def list2csv(input_list: list, output_csv_file_path: str):
         """
-        # Read csv file to data frame
-        :param  input_dataframe: input csv file
-        :return : output data frame
+        # Write list to csv file
+        :param : input_list
+        :param : output_text_file_path: csv file path to write out the input list
         """
-        return pd.read_csv(input_filename)
-
-    @staticmethod
-    def get_time():
-        """
-        # Get current time and return as string
-        :return : current time in string
-        """
-        return str(datetime.datetime.now()).replace(" ", "_")
+        # Write list as csv file
+        with open(output_csv_file_path, 'w') as f:
+            for value in input_list:
+                f.write(str(value) + ',')
 
     @staticmethod
     def list2text(input_list: list, output_text_file_path: str, headers=None):
@@ -157,3 +164,19 @@ class FileUtil:
             for item in input_list:
                 f.write("{0}{1}\n".format(item, comma_str))
 
+    @staticmethod
+    def csv2dataframe(input_filename: str):
+        """
+        # Read csv file to data frame
+        :param  input_dataframe: input csv file
+        :return : output data frame
+        """
+        return pd.read_csv(input_filename)
+
+    @staticmethod
+    def get_time():
+        """
+        # Get current time and return as string
+        :return : current time in string
+        """
+        return str(datetime.datetime.now()).replace(" ", "_")
