@@ -156,19 +156,24 @@ class AudioFeatureExtraction:
 
     def extract_dataset(self, dataset_path: str, stats_type: str):
         # Get folder names under data set path
-        category_names = FileUtil.get_folder_names(dataset_path)
+        directory_names = FileUtil.get_folder_names(dataset_path, sort=True)
+
+        # Get file names and store them into a dictionary
+        directory_files_dict = {}
+        for directory in directory_names:
+            directory_files_dict[directory] = FileUtil.get_file_names(os.path.join(dataset_path, directory))
 
         # Extract all features and store them into list
         final_dataframe = pd.DataFrame()
-        for category in category_names:
+        for directory, audio_files in directory_files_dict.items():
             # Apply feature extraction to a directory
-            file_feature_stat_dict = self.extract_directory(os.path.join(dataset_path, category), stats_type)
+            file_feature_stat_dict = self.extract_directory(os.path.join(dataset_path, directory), stats_type)
 
             # Convert dictionary to data frame
             class_dataframe = DataProcess.dict2dataframe(file_feature_stat_dict, segment_feature=True)
 
             # Add label to data frame
-            class_dataframe_with_label = DataProcess.add_label(class_dataframe, category)
+            class_dataframe_with_label = DataProcess.add_label(class_dataframe, directory)
 
             # Combine data frames
             final_dataframe = final_dataframe.append(class_dataframe_with_label)

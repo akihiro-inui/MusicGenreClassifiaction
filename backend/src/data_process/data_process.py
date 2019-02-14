@@ -10,7 +10,6 @@ import os
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn import preprocessing
 from backend.src.utils.file_utils import FileUtil
 
 
@@ -57,8 +56,6 @@ class DataProcess:
         Convert dictionary to data frame
         :param: input_dict: {key: file name, value: dictionary{key: feature name, value: single value}}
         :param: segment_feature: If True, segment all feature vector elements (Case of numerical feature)
-        :return: pandas dataframe with feature name as header
-        :rtype:  pandas dataframe
         """
         if segment_feature is True:
             new_feature_dict = DataProcess.clean_feature_dict(input_dict)
@@ -66,23 +63,6 @@ class DataProcess:
         else:
             feature_dataframe = pd.DataFrame.from_dict(input_dict, orient='index')
         return feature_dataframe
-
-    @staticmethod
-    def dict2list(input_dict: dict):
-        """
-        Convert dictionary to list
-        :param:  input_dict: {key: file name, value: dictionary{key: feature name, value: single value}}
-        :rtype:  list
-        :return: final_list: list which stores values in input dictionary
-        """
-        final_list = []
-        for key, value in input_dict.items():
-            if type(value) is dict:
-                for key_in_dict, value_in_dict in value.items():
-                    final_list.append(value_in_dict)
-            else:
-                final_list.append(value)
-        return final_list
 
     @staticmethod
     def add_label(input_dataframe, label_name: str):
@@ -117,46 +97,30 @@ class DataProcess:
         return input_dataframe[column_name].unique()
 
     @staticmethod
-    def folder2label(input_data_directory):
+    def folder2label(input_data_directory: str) -> list:
         """
         # Get unique values in one column
         :param  input_data_directory: input data directory where data folder with the label name exist
-        :param  column_name: column name
         :return list of folder names
         """
-        return os.listdir(input_data_directory)
+        return FileUtil.get_file_names(input_data_directory)
 
     @staticmethod
-    def encode_label(input_label_names_list: list):
-        """
-        # Get unique values in one column labels in str
-        :param  input_label_names_list: list of str label names
-        :return
-        """
-        encoder = preprocessing.LabelEncoder()
-        encoder.fit(input_label_names_list)
-        return encoder.classes_
-
-    @staticmethod
-    def decode_label(input_label_numbers_list: list, encoder):
-        """
-        # Get unique values in one column labels in str
-        :param  input_label_numbers_list: list of num label names
-        :return list of str label names
-        """
-        return encoder.inverse_transform(input_label_numbers_list)
-
-    @staticmethod
-    def factorize_lebel(input_dataframe, column_name: str):
+    def factorize_label(input_dataframe, column_name: str):
         """
         # Factorize str label to num label
-        :param  input_dataframe: input pandas data frame
-        :param  column_name: column name to factorize
-        :return data frame with factorized label
+        :param  input_dataframe : input pandas data frame
+        :param  column_name : column name to factorize
+        :return factorized_dataframe : data frame with factorized label
+        :return label_list : list which stores label names
         """
         # Make a copy of the data frame
         factorized_dataframe = input_dataframe.copy()
-        factorized_dataframe[column_name] = pd.factorize(factorized_dataframe[column_name])[0] + 1
+
+        # Factorize string label
+        factorized_column, unique_names = pd.factorize(factorized_dataframe[column_name])
+        factorized_dataframe[column_name] = factorized_column
+
         return factorized_dataframe
 
     @staticmethod
