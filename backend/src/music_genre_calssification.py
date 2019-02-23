@@ -54,6 +54,7 @@ class MusicGenreClassification:
         """
         # Get folder names
         label_list = FileUtil.get_folder_names(self.dataset_path, sort=True)
+        assert len(label_list == self.cfg.num_classes), "Number of the class mismatch"
         FileUtil.list2csv(label_list, label_csv_file_path)
 
     def make_dataset(self, dataframe, output_directory: str):
@@ -86,7 +87,6 @@ class MusicGenreClassification:
         # Read data set
         train_data, test_data, train_label, test_label = DataProcess.read_dataset(input_data_directory_with_date,
                                                                                   self.cfg.label_name)
-
         return train_data, test_data, train_label, test_label
 
     def data_process(self, dataframe):

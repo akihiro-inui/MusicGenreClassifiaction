@@ -19,6 +19,7 @@ from backend.src.feature_extraction.rolloff import rolloff
 from backend.src.feature_extraction.rms import rms
 from backend.src.feature_extraction.flux import Flux
 from backend.src.feature_extraction.osc import OSC
+from backend.src.feature_extraction.low_energy import low_energy
 from backend.src.utils.stats_tool import get_mean, get_std
 from backend.src.utils.file_utils import FileUtil
 from backend.src.data_process.data_process import DataProcess
@@ -48,24 +49,37 @@ class AudioFeatureExtraction:
         self.APP = AudioPreProcess(self.frame_time, self.overlap_rate, self.window_type)
 
         # Feature selection
-        self.feature_selection_dict = self.cfg.section_reader("feature_selection")
-        self.feature_list = self.__init_feature_select()
+        self.short_feature_selection_dict = self.cfg.section_reader("short_feature_selection")
+        self.long_feature_selection_dict = self.cfg.section_reader("long_feature_selection")
+        self.short_feature_list = self.__init_short_feature_select()
+        self.long_feature_list = self.__init_long_feature_select()
 
         # Initialize feature extraction classes
         self.mfcc = MFCC(self.cfg.mfcc_coeff, self.sampling_rate, self.fft_size, self.cfg.mfcc_total_filters)
         self.flux = Flux(self.sampling_rate)
         self.osc = OSC(self.cfg.osc_param, self.sampling_rate, self.fft_size)
 
-    def __init_feature_select(self) -> list:
+    def __init_short_feature_select(self) -> list:
         """
-        Extract setting for feature extraction from config file
+        Extract setting for short-term feature extraction from config file
         :return list of features to extract
         """
-        feature_list = []
-        for feature, switch in self.feature_selection_dict.items():
+        short_feature_list = []
+        for short_feature, switch in self.short_feature_selection_dict.items():
             if switch == "True":
-                feature_list.append(feature)
-        return feature_list
+                short_feature_list.append(short_feature)
+        return short_feature_list
+
+    def __init_long_feature_select(self) -> list:
+        """
+        Extract setting for long-term feature extraction from config file
+        :return list of features to extract
+        """
+        long_feature_list = []
+        for short_feature, switch in self.long_feature_selection_dict.items():
+            if switch == "True":
+                long_feature_list.append(short_feature)
+        return long_feature_list
 
     # Pre-processing
     def pre_processing(self, audio_file: str) -> tuple:
@@ -77,9 +91,9 @@ class AudioFeatureExtraction:
         return self.APP.apply(audio_file)
 
     # Feature extraction to one frame
-    def extract_frame(self, framed_audio: tuple) -> dict:
+    def extract_short_frame(self, framed_audio: tuple) -> dict:
         """
-        Feature extraction to one frame
+        Short-term feature extraction to one frame
         :param  framed_audio: tuple of framed audio data from audio file
         :return dictionary of extracted features from framed audio data
                 {key: name of feature, value: tuple of features from all frames}
@@ -88,28 +102,44 @@ class AudioFeatureExtraction:
         feature_dict = {}
         # Apply feature extraction to a framed audio and store into a dictionary
         # TODO: Use While True iterate over selected feature and use apply for each feature extraction method
-        for feature in self.feature_list:
+        for short_feature in self.short_feature_list:
             # Apply feature extraction
             spectrum = FFT.fft(framed_audio, self.fft_size)
             power_spectrum = FFT.power_fft(framed_audio, self.fft_size)
-            if feature == "zcr":
-                feature_dict[feature] = zerocrossing(framed_audio)
-            if feature == "mfcc":
-                feature_dict[feature] = self.mfcc.main(spectrum)
-            if feature == "rms":
-                feature_dict[feature] = rms(framed_audio)
-            if feature == "centroid":
-                feature_dict[feature] = centroid(power_spectrum, self.fft_size, self.sampling_rate)
-            if feature == "rolloff":
-                feature_dict[feature] = rolloff(power_spectrum, self.cfg.rolloff_param)
-            if feature == "flux":
-                feature_dict[feature] = self.flux.main(power_spectrum)
-            if feature == "osc":
+            if short_feature == "zcr":
+                feature_dict[short_feature] = zerocrossing(framed_audio)
+            if short_feature == "mfcc":
+                feature_dict[short_feature] = self.mfcc.main(spectrum)
+            if short_feature == "rms":
+                feature_dict[short_feature] = rms(framed_audio)
+            if short_feature == "centroid":
+                feature_dict[short_feature] = centroid(power_spectrum, self.fft_size, self.sampling_rate)
+            if short_feature == "rolloff":
+                feature_dict[short_feature] = rolloff(power_spectrum, self.cfg.rolloff_param)
+            if short_feature == "flux":
+                feature_dict[short_feature] = self.flux.main(power_spectrum)
+            if short_feature == "osc":
                 osc, fft_bin_sum = self.osc.main(power_spectrum)
-                feature_dict[feature] = osc
-            if feature == "mel_spectrogram":
+                feature_dict[short_feature] = osc
+            if short_feature == "mel_spectrogram":
                 # Mel-spectrum needs to be stored to be converted later
-                feature_dict[feature] = (self.mfcc.mel_spectrum(spectrum))
+                feature_dict[short_feature] = (self.mfcc.mel_spectrum(spectrum))
+        return feature_dict
+
+        # Feature extraction to one frame
+    def extract_long_frame(self, framed_audio_list: list) -> dict:
+        """
+        Long-term feature extraction to one frame
+        :param  framed_audio_list: list of framed audio data (tuple) from audio file
+        :return dictionary of extracted features from framed audio data
+                {key: name of feature, value: tuple of features from all frames}
+        """
+        # Store extracted features into a dictionary (key:name of feature, value: list of extracted features in frames)
+        feature_dict = {}
+        # Apply feature extraction to a framed audio and store into a dictionary
+        for long_feature in self.long_feature_list:
+            if long_feature == "low_energy":
+                feature_dict[long_feature] = low_energy(framed_audio_list)
         return feature_dict
 
     def extract_file(self, input_audio_file: str) -> dict:
@@ -123,12 +153,26 @@ class AudioFeatureExtraction:
         processed_audio = self.pre_processing(input_audio_file)
 
         # Apply feature extraction to all frames and store into dictionary
-        feature_frame_dict = {}
+        feature_dict = {}
+        short_frame_blocks = []
+        frame_number = 0
         for frame in range(0, len(processed_audio[0]) - 1):
-            frame_feature_dict = self.extract_frame(processed_audio[frame])
-            for feature in self.feature_list:
-                feature_frame_dict.setdefault(feature, []).append(frame_feature_dict[feature])
-        return feature_frame_dict
+            # Extract short-term features
+            short_feature_dict = self.extract_short_frame(processed_audio[frame])
+            for short_feature_type in self.short_feature_list:
+                feature_dict.setdefault(short_feature_type, []).append(short_feature_dict[short_feature_type])
+            # Extract long-term features
+            if frame_number == self.cfg.frame_num:
+                long_feature_dict = self.extract_long_frame(short_frame_blocks)
+                for long_feature in self.long_feature_list:
+                    feature_dict.setdefault(long_feature, []).append(long_feature_dict[long_feature])
+                # Reset
+                frame_number = 0
+                short_frame_blocks = []
+            # Update short frame blocks
+            frame_number += 1
+            short_frame_blocks.append(processed_audio[frame])
+        return feature_dict
 
     def extract_directory(self, input_directory: str, stats_type: str):
         """
@@ -199,5 +243,3 @@ class AudioFeatureExtraction:
                 feature_stat_dict[feature] = get_std(feature_frame_dict[feature], "r")
         return feature_stat_dict
 
-#    def short_term_feature_extraction(self, framed_audio):
-        # :TODO Add 6 low-level feature extraction

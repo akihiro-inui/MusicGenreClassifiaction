@@ -29,7 +29,8 @@ class ConfigReader:
 
         # Read module specific config reader
         self.__init_audio_preprocess(cfg)
-        self.__init_feature_selection(cfg)
+        self.__init_short_feature_selection(cfg)
+        self.__init_long_feature_selection(cfg)
         self.__init_feature_extraction(cfg)
         self.__init_dataset(cfg)
         self.__init_classifier_selection(cfg)
@@ -42,19 +43,27 @@ class ConfigReader:
         self.overlap_rate = float(cfg.get('preprocess', 'overlap_rate'))
         self.window_type = str(cfg.get('preprocess', 'window_type'))
 
-    def __init_feature_selection(self, cfg):
-        # Parameters for feature selection
-        self.zcr = bool(cfg.get('feature_selection', 'zcr'))
-        self.mfcc = bool(cfg.get('feature_selection', 'mfcc'))
-        self.rms = bool(cfg.get('feature_selection', 'rms'))
-        self.centroid = bool(cfg.get('feature_selection', 'centroid'))
-        self.rolloff = bool(cfg.get('feature_selection', 'rolloff'))
-        self.flux = bool(cfg.get('feature_selection', 'flux'))
-        self.osc = bool(cfg.get('feature_selection', 'osc'))
-        self.mel_spectrogram = bool(cfg.get('feature_selection', 'mel_spectrogram'))
+    def __init_short_feature_selection(self, cfg):
+        # Switch for short-term feature selection
+        self.zcr = bool(cfg.get('short_feature_selection', 'zcr'))
+        self.mfcc = bool(cfg.get('short_feature_selection', 'mfcc'))
+        self.rms = bool(cfg.get('short_feature_selection', 'rms'))
+        self.centroid = bool(cfg.get('short_feature_selection', 'centroid'))
+        self.rolloff = bool(cfg.get('short_feature_selection', 'rolloff'))
+        self.flux = bool(cfg.get('short_feature_selection', 'flux'))
+        self.osc = bool(cfg.get('short_feature_selection', 'osc'))
+        self.mel_spectrogram = bool(cfg.get('short_feature_selection', 'mel_spectrogram'))
+
+    def __init_long_feature_selection(self, cfg):
+        # Switch for long-term feature selection
+        self.low_energy = bool(cfg.get('long_feature_selection', 'low_energy'))
+        self.omsc = bool(cfg.get('long_feature_selection', 'omsc'))
+        self.msmc = bool(cfg.get('long_feature_selection', 'msmc'))
+        self.msfm = bool(cfg.get('long_feature_selection', 'msfm'))
 
     def __init_feature_extraction(self, cfg):
         # Parameters for feature extraction
+        self.frame_num = int(cfg.get('feature_extraction', 'frame_num'))
         self.fft_size = int(cfg.get('feature_extraction', 'fft_size'))
         self.mfcc_coeff = int(cfg.get('feature_extraction', 'mfcc_coeff'))
         self.mfcc_total_filters = int(cfg.get('feature_extraction', 'mfcc_total_filters'))
