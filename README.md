@@ -90,37 +90,9 @@ MLP: 83.6%
 <img src="assets/MLP loss.png?raw=true" alt="MLP loss" width="400",align="right">
 </p>
 
-CNN: 46.3% (Need to find more suitable parameters, seems overfitting)
-<p>
-<img src="assets/CNN accuracy.png?raw=true" alt="CNN accuracy" width="400", align="left">
-<img src="assets/CNN loss.png?raw=true" alt="CNN loss" width="400",align="right">
-</p>
-
 
 ## Code
-"mgc.py"
-Entire process including feature extraction and all the classification above.
 
-"ExtractAll.py"
-Feature extraction to all files in GTZAN
-
-"FeatureExtraction.py"
-Feature extraction to an audio file
-
-"datacleaner.py"
-Exclude invalid data including NaN or Inf
-
-"traintest.py"
-Devide image or matrix data into train/test dataset with the provide train rate.
-
-"dctmatrix.py, melfilter.py"
-for mfcc
-
-"centoid.py, rolloff.py, osc.py, zerocrossing.py"
-Compute each feature extraction
-
-"normalise.py, standardise.py"
-Compute normalisation, standardisation
 
 ### Dependency
 Python 3.6.5
