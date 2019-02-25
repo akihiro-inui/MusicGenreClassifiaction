@@ -146,9 +146,9 @@ def main():
     music_dataset_path = "../../data"
     model_directory_path = "../model"
     output_data_directory = "../feature"
-    feature_extraction = True
+    feature_extraction = False
     training = True
-    input_data_directory = "../feature/2019-02-14_00:46:10.916975"
+    input_data_directory = "../feature/2019-02-25_21:39:09.728650"
     model_file = "../model/2019-02-14_00:20:17.281506/mlp.h5"
     dummy_sample = "../dummy_data.csv"
     label_txt_filename = "label.csv"

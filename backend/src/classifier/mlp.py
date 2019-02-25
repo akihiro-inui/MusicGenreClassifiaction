@@ -17,7 +17,9 @@ from keras.models import load_model
 
 
 class MLP:
-
+    """
+    Multi Layer Perceptron
+    """
     def __init__(self, validation_rate, num_classes):
         """
         Init

@@ -13,9 +13,7 @@ import os
 class kNN:
     """
     K Nearest Neighbors
-    :param  k: number of k
     """
-
     def __init__(self, k: int):
         """
         Init

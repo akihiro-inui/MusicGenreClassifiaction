@@ -86,7 +86,7 @@ class MSF:
             contrast_array.append(peak - minimum)
 
         # Combine features
-        return np.concatenate([valley_array, contrast_array])
+        return list(np.concatenate([valley_array, contrast_array]))
 
     def msfm(self, long_frame_power_spectrum: list, mod_fft_size: int):
         """
@@ -131,7 +131,7 @@ class MSF:
 
             # Modulation spectrum
             mod_spectrum = FFT.power_fft(zero_padded_bin_sum, mod_fft_size)
-            
+
             # Compute mscm
             mscm_array.append(max(mod_spectrum) / np.mean(mod_spectrum))
         return mscm_array
