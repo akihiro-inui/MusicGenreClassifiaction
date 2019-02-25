@@ -179,7 +179,7 @@ def main():
     accuracy = MGC.test(model, test_data, test_label)
 
     # Make label text file
-    MGC.make_label(label_txt_filename)
+    #MGC.make_label(label_txt_filename)
 
     # Make prediction
     #dummy_dataframe = FileUtil.csv2dataframe(dummy_sample)

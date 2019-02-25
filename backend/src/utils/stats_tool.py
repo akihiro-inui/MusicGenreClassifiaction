@@ -25,7 +25,8 @@ def get_mean(input_data, axis: str = "r"):
         elif axis == "c":
             return np.mean(input_data, axis=1)
 
-def get_std(input_data, axis:str = "r"):
+
+def get_std(input_data, axis: str = "r"):
     """
     Standard fft with normalization
     :param  input_data: tuple/list of framed audio data from audio file
@@ -41,3 +42,7 @@ def get_std(input_data, axis:str = "r"):
             return np.std(input_data, axis=0)
         elif axis == "c":
             return np.std(input_data, axis=1)
+
+
+def geo_mean(num_list):
+    return np.exp(np.log(num_list).sum() / len(np.log(num_list)))

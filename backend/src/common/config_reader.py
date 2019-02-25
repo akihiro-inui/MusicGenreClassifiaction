@@ -58,17 +58,19 @@ class ConfigReader:
         # Switch for long-term feature selection
         self.low_energy = bool(cfg.get('long_feature_selection', 'low_energy'))
         self.omsc = bool(cfg.get('long_feature_selection', 'omsc'))
-        self.msmc = bool(cfg.get('long_feature_selection', 'msmc'))
+        self.mscm = bool(cfg.get('long_feature_selection', 'mscm'))
         self.msfm = bool(cfg.get('long_feature_selection', 'msfm'))
 
     def __init_feature_extraction(self, cfg):
         # Parameters for feature extraction
-        self.frame_num = int(cfg.get('feature_extraction', 'frame_num'))
+        self.long_frame_length = int(cfg.get('feature_extraction', 'long_frame_length'))
         self.fft_size = int(cfg.get('feature_extraction', 'fft_size'))
+        self.mod_fft_size = int(cfg.get('feature_extraction', 'mod_fft_size'))
         self.mfcc_coeff = int(cfg.get('feature_extraction', 'mfcc_coeff'))
         self.mfcc_total_filters = int(cfg.get('feature_extraction', 'mfcc_total_filters'))
         self.rolloff_param = float(cfg.get('feature_extraction', 'rolloff_param'))
         self.osc_param = float(cfg.get('feature_extraction', 'osc_param'))
+        self.omsc_param = int(cfg.get('feature_extraction', 'omsc_param'))
 
     def __init_dataset(self, cfg):
         # Parameters for data set creation
