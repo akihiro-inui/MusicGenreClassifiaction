@@ -11,6 +11,7 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from backend.src.utils.file_utils import FileUtil
+from backend.src.data_process.datacleaner import DataCleaner
 
 
 class DataProcess:
@@ -136,11 +137,14 @@ class DataProcess:
         # Extract only data part
         data = normalized_dataframe[normalized_dataframe.columns[normalized_dataframe.columns != label_name]]
 
-        # Apply normalizarion to all columns
+        # Replace NaN/Inf as 0
+        clean_data = DataCleaner.clean_data(data)
+
+        # Apply normalizaion to all columns
         for feature_name in data.columns:
-            max_value = data[feature_name].max()
-            min_value = data[feature_name].min()
-            normalized_dataframe[feature_name] = (data[feature_name] - min_value) / (max_value - min_value)
+            max_value = clean_data[feature_name].max()
+            min_value = clean_data[feature_name].min()
+            normalized_dataframe[feature_name] = (clean_data[feature_name] - min_value) / (max_value - min_value)
 
         # Put back label column
         normalized_dataframe[label_name] = input_dataframe[label_name]
@@ -160,9 +164,11 @@ class DataProcess:
         # Extract only data part
         data = standardized_dataframe[standardized_dataframe.columns[standardized_dataframe.columns != label_name]]
 
+        # Clean data
+        clean_data = DataCleaner.clean_data(data)
         # Apply standardization to all columns
-        for feature_name in data.columns:
-            standardized_dataframe[feature_name] = (data[feature_name] - np.mean(data[feature_name])) / np.std(data[feature_name])
+        for feature_name in clean_data.columns:
+            standardized_dataframe[feature_name] = (clean_data[feature_name] - np.mean(clean_data[feature_name])) / np.std(clean_data[feature_name])
 
         # Put back label column
         standardized_dataframe[label_name] = input_dataframe[label_name]
@@ -280,3 +286,21 @@ class DataProcess:
         test_label, test_data = DataProcess.data_label_split(test_dataframe, label_name)
 
         return train_data, test_data, train_label, test_label
+
+    @staticmethod
+    def clean_data(input_dataframe):
+        """
+        Replace Inf to NaN, then replace NaN to 0
+        :param  input_dataframe: input pandas dataframe
+        :return clean dataframe
+        """
+        # Copy input dataframe
+        clean_dataframe = input_dataframe.copy()
+
+        # Replace Inf to NaN
+        clean_dataframe.replace([np.inf, -np.inf], np.nan)
+
+        # Replace NaN to 0
+        clean_dataframe.replace([np.inf, -np.inf], np.nan).dropna(subset=["col1", "col2"], how="all")
+        clean_dataframe.fillna(0)
+        return clean_dataframe

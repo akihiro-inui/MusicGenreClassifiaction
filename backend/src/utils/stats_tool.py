@@ -21,9 +21,9 @@ def get_mean(input_data, axis: str = "r"):
     # Case of matrix input
     else:
         if axis == "r":
-            return np.mean(input_data, axis=0)
+            return np.nanmean(input_data, axis=0)
         elif axis == "c":
-            return np.mean(input_data, axis=1)
+            return np.nanmean(input_data, axis=1)
 
 
 def get_std(input_data, axis: str = "r"):
@@ -39,9 +39,9 @@ def get_std(input_data, axis: str = "r"):
     # Case of matrix input
     else:
         if axis == "r":
-            return np.std(input_data, axis=0)
+            return np.nanstd(input_data, axis=0)
         elif axis == "c":
-            return np.std(input_data, axis=1)
+            return np.nanstd(input_data, axis=1)
 
 
 def geo_mean(num_list):
