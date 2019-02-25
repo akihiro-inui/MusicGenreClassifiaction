@@ -41,14 +41,12 @@ class OSC:
     def main(self, input_power_spectrum: list):
         """
         Main function for Octave-based spectral contrast
-        :param  input_power_spectrum: spectrum in list
-        :return osc: octave-based spectral contrast
-        :return fft_bin_sum: sum of spectrum in octave-base bands
+        :param  input_power_spectrum: power spectrum from one short-term frame
+        :return low energy
         """
         # Create empty matrices for peak, valley and sum for each band
         peak_array = []
         valley_array = []
-        fft_bin_sum = []
 
         # Take peaks and valleys from all FFT frames
         for bin_num in range(1, len(self.sub_fft_bins)):
@@ -64,8 +62,6 @@ class OSC:
             peak_array.append(math.log10((1/threshold)*sum(big2small[:threshold])))
             # Calculate valley from each frame
             valley_array.append(math.log10((1/threshold)*sum(small2big[:threshold])))
-            # Sum of power spectrum from each sub-band
-            fft_bin_sum.append(sum(fft_bin))
 
         # Take difference except the first element which is the same value
         sc = np.subtract(peak_array[1:], valley_array[1:])
@@ -73,4 +69,4 @@ class OSC:
         # Combine features
         osc = np.concatenate([valley_array, sc])
 
-        return osc, fft_bin_sum
+        return osc

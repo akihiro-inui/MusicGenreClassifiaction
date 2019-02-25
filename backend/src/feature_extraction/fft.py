@@ -37,4 +37,11 @@ class FFT:
         # Truncate second half of fft
         return spectrum[0:int(fft_size/2)]
 
-
+    @staticmethod
+    def fft2long(framed_audio_list: list, fft_size: int):
+        """
+        Apply fft to stack of audio frames
+        :param  framed_audio_list: list of framed audio data (tuple) from audio file
+        """
+        # Apply fft to each row to get modulation spectrum
+        return abs(np.fft.fft(Epadded, n=fft_size, axis=1))

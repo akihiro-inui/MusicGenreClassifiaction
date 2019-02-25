@@ -20,6 +20,7 @@ from backend.src.feature_extraction.rms import rms
 from backend.src.feature_extraction.flux import Flux
 from backend.src.feature_extraction.osc import OSC
 from backend.src.feature_extraction.low_energy import low_energy
+from backend.src.feature_extraction.modulation_spectrum_feature import MSF
 from backend.src.utils.stats_tool import get_mean, get_std
 from backend.src.utils.file_utils import FileUtil
 from backend.src.data_process.data_process import DataProcess
@@ -44,6 +45,7 @@ class AudioFeatureExtraction:
         self.overlap_rate = self.cfg.overlap_rate
         self.window_type = self.cfg.window_type
         self.fft_size = self.cfg.fft_size
+        self.mod_fft_size = self.cfg.mod_fft_size
 
         # Initialize pre-processing
         self.APP = AudioPreProcess(self.frame_time, self.overlap_rate, self.window_type)
@@ -58,6 +60,7 @@ class AudioFeatureExtraction:
         self.mfcc = MFCC(self.cfg.mfcc_coeff, self.sampling_rate, self.fft_size, self.cfg.mfcc_total_filters)
         self.flux = Flux(self.sampling_rate)
         self.osc = OSC(self.cfg.osc_param, self.sampling_rate, self.fft_size)
+        self.msf = MSF(self.cfg.omsc_param, self.sampling_rate, self.fft_size, self.mod_fft_size)
 
     def __init_short_feature_select(self) -> list:
         """
@@ -91,10 +94,11 @@ class AudioFeatureExtraction:
         return self.APP.apply(audio_file)
 
     # Feature extraction to one frame
-    def extract_short_frame(self, framed_audio: tuple) -> dict:
+    def extract_short_frame(self, framed_audio: tuple):
         """
         Short-term feature extraction to one frame
         :param  framed_audio: tuple of framed audio data from audio file
+        :return power_spectrum: power_spectrum from short-term frame
         :return dictionary of extracted features from framed audio data
                 {key: name of feature, value: tuple of features from all frames}
         """
@@ -119,18 +123,18 @@ class AudioFeatureExtraction:
             if short_feature == "flux":
                 feature_dict[short_feature] = self.flux.main(power_spectrum)
             if short_feature == "osc":
-                osc, fft_bin_sum = self.osc.main(power_spectrum)
-                feature_dict[short_feature] = osc
+                feature_dict[short_feature] = self.osc.main(power_spectrum)
             if short_feature == "mel_spectrogram":
                 # Mel-spectrum needs to be stored to be converted later
                 feature_dict[short_feature] = (self.mfcc.mel_spectrum(spectrum))
-        return feature_dict
+        return power_spectrum, feature_dict
 
         # Feature extraction to one frame
-    def extract_long_frame(self, framed_audio_list: list) -> dict:
+    def extract_long_frame(self, long_frame_audio: list, long_frame_spectrum: list) -> dict:
         """
         Long-term feature extraction to one frame
-        :param  framed_audio_list: list of framed audio data (tuple) from audio file
+        :param  long_frame_audio: list of audio data from short-term frame
+        :param  long_frame_spectrum: list of spectrum from short-term frame
         :return dictionary of extracted features from framed audio data
                 {key: name of feature, value: tuple of features from all frames}
         """
@@ -139,7 +143,13 @@ class AudioFeatureExtraction:
         # Apply feature extraction to a framed audio and store into a dictionary
         for long_feature in self.long_feature_list:
             if long_feature == "low_energy":
-                feature_dict[long_feature] = low_energy(framed_audio_list)
+                feature_dict[long_feature] = low_energy(long_frame_audio)
+            if long_feature == "omsc":
+                feature_dict[long_feature] = self.msf.omsc(long_frame_spectrum, self.mod_fft_size)
+            if long_feature == "msfm":
+                feature_dict[long_feature] = self.msf.msfm(long_frame_spectrum, self.mod_fft_size)
+            if long_feature == "mscm":
+                feature_dict[long_feature] = self.msf.mscm(long_frame_spectrum, self.mod_fft_size)
         return feature_dict
 
     def extract_file(self, input_audio_file: str) -> dict:
@@ -154,24 +164,30 @@ class AudioFeatureExtraction:
 
         # Apply feature extraction to all frames and store into dictionary
         feature_dict = {}
-        short_frame_blocks = []
         frame_number = 0
+        long_frame_audio = []
+        long_frame_power_spectrum = []
         for frame in range(0, len(processed_audio[0]) - 1):
+            # One frame
+            short_frame_audio = processed_audio[frame]
             # Extract short-term features
-            short_feature_dict = self.extract_short_frame(processed_audio[frame])
+            short_frame_power_spectrum, short_feature_dict = self.extract_short_frame(short_frame_audio)
             for short_feature_type in self.short_feature_list:
                 feature_dict.setdefault(short_feature_type, []).append(short_feature_dict[short_feature_type])
             # Extract long-term features
-            if frame_number == self.cfg.frame_num:
-                long_feature_dict = self.extract_long_frame(short_frame_blocks)
+            if frame_number == self.cfg.long_frame_length:
+                long_feature_dict = self.extract_long_frame(long_frame_audio, long_frame_power_spectrum)
                 for long_feature in self.long_feature_list:
                     feature_dict.setdefault(long_feature, []).append(long_feature_dict[long_feature])
                 # Reset
                 frame_number = 0
-                short_frame_blocks = []
-            # Update short frame blocks
+                long_frame_audio = []
+                long_frame_power_spectrum = []
+
+            # Update short frame stack
             frame_number += 1
-            short_frame_blocks.append(processed_audio[frame])
+            long_frame_audio.append(short_frame_audio)
+            long_frame_power_spectrum.append(short_frame_power_spectrum)
         return feature_dict
 
     def extract_directory(self, input_directory: str, stats_type: str):
