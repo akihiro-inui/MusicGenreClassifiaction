@@ -44,8 +44,9 @@ class MusicGenreClassification:
         Feature extraction to data set
         :return feature_dataframe:  extracted feature in pandas data frame
         """
-        # Extract all features from dataset and store them into dataframe
-        return self.AFE.extract_dataset(self.dataset_path, "mean")
+        # Extract all features from dataset and store them into dataframe, 3D array
+        feature_2d_dataframe, feature_3d_array = self.AFE.extract_dataset(self.dataset_path, "mean")
+        return feature_2d_dataframe, feature_3d_array
 
     def make_label(self, label_csv_file_path: str):
         """
@@ -146,7 +147,7 @@ def main():
     music_dataset_path = "../../data"
     model_directory_path = "../model"
     output_data_directory = "../feature"
-    feature_extraction = False
+    feature_extraction = True
     training = True
     input_data_directory = "../feature/2019-02-25_21:39:09.728650"
     model_file = "../model/2019-02-14_00:20:17.281506/mlp.h5"
@@ -160,9 +161,9 @@ def main():
     if feature_extraction is True:
         # Apply feature extraction to all audio files
         print("Start feature extraction")
-        extracted_feature_dataframe = MGC.feature_extraction()
+        feature_2d_dataframe, feature_3d_array = MGC.feature_extraction()
         # Apply data process
-        clean_dataframe = MGC.data_process(extracted_feature_dataframe)
+        clean_dataframe = MGC.data_process(feature_2d_dataframe)
         train_data, test_data, train_label, test_label = MGC.make_dataset(clean_dataframe, output_data_directory)
     else:
         # Read data from directory

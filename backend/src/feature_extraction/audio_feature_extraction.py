@@ -8,6 +8,7 @@ Created on Fri Mar 23 02:01:21 2018
 # Import libraries/modules
 import os
 import pandas as pd
+import numpy as np
 import time
 from backend.src.common.config_reader import ConfigReader
 from backend.src.preprocess.audio_preprocess import AudioPreProcess
@@ -110,6 +111,7 @@ class AudioFeatureExtraction:
             # Apply feature extraction
             spectrum = FFT.fft(framed_audio, self.fft_size)
             power_spectrum = FFT.power_fft(framed_audio, self.fft_size)
+
             if short_feature == "zcr":
                 feature_dict[short_feature] = zerocrossing(framed_audio)
             if short_feature == "mfcc":
@@ -140,6 +142,7 @@ class AudioFeatureExtraction:
         """
         # Store extracted features into a dictionary (key:name of feature, value: list of extracted features in frames)
         feature_dict = {}
+
         # Apply feature extraction to a framed audio and store into a dictionary
         for long_feature in self.long_feature_list:
             if long_feature == "low_energy":
@@ -152,12 +155,13 @@ class AudioFeatureExtraction:
                 feature_dict[long_feature] = self.msf.mscm(long_frame_spectrum, self.mod_fft_size)
         return feature_dict
 
-    def extract_file(self, input_audio_file: str) -> dict:
+    def extract_file(self, input_audio_file: str):
         """
         Feature extraction to one audio file
         :param  input_audio_file: name of the audio file
         :return dictionary of extracted features from audio file
                 {key: name of feature, value: list of array(number of frames)}
+        :return file_short_feature_list: short-term features across whole audio file stored into list
         """
         # Pre-processing to audio file
         processed_audio = self.pre_processing(input_audio_file)
@@ -167,19 +171,27 @@ class AudioFeatureExtraction:
         frame_number = 0
         long_frame_audio = []
         long_frame_power_spectrum = []
-        for frame in range(0, len(processed_audio[0]) - 1):
-            # One frame
-            short_frame_audio = processed_audio[frame]
+
+        # Store whole short-term features in list
+        file_short_feature_list = []
+        for short_frame_audio in processed_audio:
             # Extract short-term features
             short_frame_power_spectrum, short_feature_dict = self.extract_short_frame(short_frame_audio)
+            # Create a feature vector and append
+            file_short_feature_list.append(DataProcess.flatten_list(list(short_feature_dict.values())))
+
+            # Store short-term features in dictionary
             for short_feature_type in self.short_feature_list:
                 feature_dict.setdefault(short_feature_type, []).append(short_feature_dict[short_feature_type])
+
             # Extract long-term features
             if frame_number == self.cfg.long_frame_length:
                 long_feature_dict = self.extract_long_frame(long_frame_audio, long_frame_power_spectrum)
+            # Store long-term features in dictionary
                 for long_feature in self.long_feature_list:
                     feature_dict.setdefault(long_feature, []).append(long_feature_dict[long_feature])
-                # Reset
+
+            # Reset for long-term feature
                 frame_number = 0
                 long_frame_audio = []
                 long_frame_power_spectrum = []
@@ -188,7 +200,8 @@ class AudioFeatureExtraction:
             frame_number += 1
             long_frame_audio.append(short_frame_audio)
             long_frame_power_spectrum.append(short_frame_power_spectrum)
-        return feature_dict
+
+        return feature_dict, file_short_feature_list
 
     def extract_directory(self, input_directory: str, stats_type: str):
         """
@@ -197,6 +210,7 @@ class AudioFeatureExtraction:
         :param  stats_type: type of statistics
         :return dictionary of extracted features from audio file
                 {key: name of feature, value: list of array(number of frames)}
+        :return directory_short_feature_list: short-term features extracted from all audio files from one directory
         """
         # Extract file names in the input directory
         file_names = FileUtil.get_file_names(input_directory)
@@ -204,15 +218,25 @@ class AudioFeatureExtraction:
         # Extract features from audio files in a directory
         file_feature_stat_dict = {}
         start = time.time()
-        for audio_file in file_names:
-            # Extract features from one audio file
-            frame_extracted_feature = self.extract_file(os.path.join(input_directory, audio_file))
-            file_feature_stat_dict[audio_file] = self.get_feature_stats(frame_extracted_feature, stats_type)
-        end = time.time()
 
+        # Extract each audio file
+        for count, audio_file in enumerate(file_names):
+            # Extract features from one audio file
+            frame_extracted_feature, file_short_feature_list = self.extract_file(os.path.join(input_directory, audio_file))
+
+            # Append short-term feature to 3D array
+            if count == 0:
+                directory_3d_feature = np.array(file_short_feature_list)
+            else:
+                directory_3d_feature = np.dstack((directory_3d_feature, np.array(file_short_feature_list)))
+
+            # Take stats across frames
+            file_feature_stat_dict[audio_file] = self.get_feature_stats(frame_extracted_feature, stats_type)
+
+        end = time.time()
         print("Extracted {0} with {1} \n".format(input_directory, end - start))
 
-        return file_feature_stat_dict
+        return file_feature_stat_dict, directory_3d_feature
 
     def extract_dataset(self, dataset_path: str, stats_type: str):
         # Get folder names under data set path
@@ -224,21 +248,32 @@ class AudioFeatureExtraction:
             directory_files_dict[directory] = FileUtil.get_file_names(os.path.join(dataset_path, directory))
 
         # Extract all features and store them into list
-        final_dataframe = pd.DataFrame()
+        all_2d_dataframe = pd.DataFrame()
+        dir_num = 0
         for directory, audio_files in directory_files_dict.items():
             # Apply feature extraction to a directory
-            file_feature_stat_dict = self.extract_directory(os.path.join(dataset_path, directory), stats_type)
+            file_feature_stat_dict, directory_3d_feature = self.extract_directory(os.path.join(dataset_path, directory), stats_type)
 
             # Convert dictionary to data frame
-            class_dataframe = DataProcess.dict2dataframe(file_feature_stat_dict, segment_feature=True)
+            class_2d_dataframe = DataProcess.dict2dataframe(file_feature_stat_dict, segment_feature=True)
 
             # Add label to data frame
-            class_dataframe_with_label = DataProcess.add_label(class_dataframe, directory)
+            class_2d_dataframe_with_label = DataProcess.add_label(class_2d_dataframe, directory)
 
-            # Combine data frames
-            final_dataframe = final_dataframe.append(class_dataframe_with_label)
+            # Combine 2d data frames
+            all_2d_dataframe = all_2d_dataframe.append(class_2d_dataframe_with_label)
 
-        return final_dataframe
+            # Append 3d arrays
+            if dir_num == 0:
+                all_3d_array = directory_3d_feature
+            else:
+                all_3d_array = np.dstack((all_3d_array, directory_3d_feature))
+            dir_num += 1
+
+        # Transpose 3D array
+        all_3d_array =all_3d_array.T
+
+        return all_2d_dataframe, all_3d_array
 
     @staticmethod
     def get_feature_stats(feature_frame_dict: dict, stat_type: str) -> dict:
@@ -252,6 +287,7 @@ class AudioFeatureExtraction:
         """
         # For each feature, compute statistical operation
         feature_stat_dict = {}
+
         for feature, frame in feature_frame_dict.items():
             if stat_type == "mean":
                 feature_stat_dict[feature] = get_mean(feature_frame_dict[feature], "r")
@@ -259,3 +295,17 @@ class AudioFeatureExtraction:
                 feature_stat_dict[feature] = get_std(feature_frame_dict[feature], "r")
         return feature_stat_dict
 
+    def make_3d_array(self, feature_frame_dict: dict):
+        """
+        # Store statistics from features into dictionary
+        :param  feature_frame_dict:dictionary of extracted features from audio file
+                {key: name of feature, value: list of array(number of frames)}
+        """
+        # Prepare empty 3D array to store time series features
+#        data = np.zeros((6, 511, 56), dtype=np.float64)
+
+        # For each feature, store them into 3D array
+#        feature_num = 0
+#        for frame_feature in feature_frame_dict.values():
+#            data() = frame_feature # List 1x511
+#            feature_num += 1

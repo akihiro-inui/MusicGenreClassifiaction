@@ -67,6 +67,5 @@ class OSC:
         sc = np.subtract(peak_array[1:], valley_array[1:])
 
         # Combine features
-        osc = np.concatenate([valley_array, sc])
+        return list(np.concatenate([valley_array, sc]))
 
-        return osc

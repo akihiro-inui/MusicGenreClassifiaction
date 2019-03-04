@@ -154,3 +154,42 @@ class FileUtil:
             with open(file_name, 'wb') as file:
                 for chunk in res.iter_content(chunk_size=1024):
                     file.write(chunk)
+
+    @staticmethod
+    def dict2threeDarray(feature_frame_dict: dict):
+        """
+        # Store statistics from features into dictionary
+        :param  feature_frame_dict:dictionary of extracted features from audio file
+                {key: name of feature, value: list of array(number of frames)}
+        :param  stat_type: type of statistics
+        :return feature_stat_dict: features from one audio file with statistics
+                {key: name of feature, value: array or single value}
+        """
+        # For each feature, compute statistical operation
+        feature_stat_dict = {}
+        for feature, frame in feature_frame_dict.items():
+            if stat_type == "mean":
+                feature_stat_dict[feature] = get_mean(feature_frame_dict[feature], "r")
+            elif stat_type == "std":
+                feature_stat_dict[feature] = get_std(feature_frame_dict[feature], "r")
+        return feature_stat_dict
+
+    @staticmethod
+    def flatten_list(input_list: list) -> list:
+        """
+        # Flatten list elements in the input list
+        :param  input_list: Input list to be flattened
+        :return flat_list: Flattened list
+        """
+        # Prepare empty list to store elements
+        flat_list = []
+
+        # Add element one by one
+        for feature in input_list:
+            if type(feature) is list or tuple:
+                for element in feature:
+                    flat_list.append(element)
+            else:
+                flat_list.append(feature)
+        return flat_list
+
