@@ -113,7 +113,7 @@ class MFCC:
         ear_mag = np.log10(mel_fft ** 2)
 
         # Apply DCT to cepstrum
-        return self.dct_matrix.dot(ear_mag)
+        return list(self.dct_matrix.dot(ear_mag))
 
     def mel_spectrum(self, input_spectrum: list):
         """

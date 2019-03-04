@@ -9,6 +9,7 @@ Created on Sat Mar 17 23:14:28 2018
 # Import libraries/modules
 from backend.src.classifier.kNN import kNN
 from backend.src.classifier.mlp import MLP
+from backend.src.classifier.gru import GRU
 from backend.src.common.config_reader import ConfigReader
 from keras.models import load_model
 import pickle
@@ -57,6 +58,8 @@ class Classifier:
             classifier = kNN(self.k)
         elif self.selected_classifier == "mlp":
             classifier = MLP(self.validation_rate, self.num_classes)
+        elif self.selected_classifier == "gru":
+            classifier = GRU(self.validation_rate, self.num_classes)
         assert classifier is not None, "No classifier selected"
         return classifier
 

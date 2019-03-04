@@ -7,7 +7,6 @@ Created on Tue Nov 6 2018
 """
 
 import numpy as np
-import pandas as pd
 
 
 class DataCleaner:
