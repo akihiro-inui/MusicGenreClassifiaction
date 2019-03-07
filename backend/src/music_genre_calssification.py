@@ -42,11 +42,12 @@ class MusicGenreClassification:
     def feature_extraction(self):
         """
         Feature extraction to data set
-        :return feature_dataframe:  extracted feature in pandas data frame
+        :return feature_2D_dataframe: extracted 2D feature in pandas data frame
+        :retrun feature_3D_array:     extracted 3D feature in numpy array
         """
         # Extract all features from dataset and store them into dataframe, 3D array
-        feature_2d_dataframe, feature_3d_array = self.AFE.extract_dataset(self.dataset_path, "mean")
-        return feature_2d_dataframe, feature_3d_array
+        feature_2D_dataframe, feature_3D_array, label_list = self.AFE.extract_dataset(self.dataset_path, "mean")
+        return feature_2D_dataframe, feature_3D_array, label_list
 
     def make_label(self, label_csv_file_path: str):
         """
@@ -58,10 +59,10 @@ class MusicGenreClassification:
         assert len(label_list == self.cfg.num_classes), "Number of the class mismatch"
         FileUtil.list2csv(label_list, label_csv_file_path)
 
-    def make_dataset(self, dataframe, output_directory: str):
+    def make_2D_dataset(self, feature_2D_dataframe, output_directory: str):
         """
         Make data set
-        :param  dataframe:   extracted feature in data frame
+        :param  feature_2D_dataframe:   extracted feature in data frame
         :param  output_directory: output directory to write out the train and test data
         :return train_data:  train data
         :return train_label: train label
@@ -71,7 +72,25 @@ class MusicGenreClassification:
         # Get time and make a new directory name
         directory_name_with_time = os.path.join(output_directory, FileUtil.get_time())
 
-        train_data, test_data, train_label, test_label = DataProcess.make_dataset(dataframe, self.cfg.label_name,
+        train_data, test_data, train_label, test_label = DataProcess.make_2D_dataset(feature_2D_dataframe, self.cfg.label_name,
+                                                                                  self.cfg.test_rate, self.cfg.shuffle,
+                                                                                  directory_name_with_time)
+        return train_data, test_data, train_label, test_label
+
+    def make_3D_dataset(self, feature_3D_array, label_list: list, output_directory: str):
+        """
+        Make data set
+        :param  feature_3D_array:   extracted feature in data frame
+        :param  output_directory: output directory to write out the train and test data
+        :return train_data:  train data
+        :return train_label: train label
+        :return test_data:   test data
+        :return test_label:  test label
+        """
+        # Get time and make a new directory name
+        directory_name_with_time = os.path.join(output_directory, FileUtil.get_time())
+
+        train_data, test_data, train_label, test_label = DataProcess.make_3D_dataset(feature_3D_array, label_list,
                                                                                   self.cfg.test_rate, self.cfg.shuffle,
                                                                                   directory_name_with_time)
         return train_data, test_data, train_label, test_label
@@ -149,6 +168,7 @@ def main():
     output_data_directory = "../feature"
     feature_extraction = True
     training = True
+    is2d = False
     input_data_directory = "../feature/2019-02-25_21:39:09.728650"
     model_file = "../model/2019-02-14_00:20:17.281506/mlp.h5"
     dummy_sample = "../dummy_data.csv"
@@ -161,10 +181,16 @@ def main():
     if feature_extraction is True:
         # Apply feature extraction to all audio files
         print("Start feature extraction")
-        feature_2d_dataframe, feature_3d_array = MGC.feature_extraction()
-        # Apply data process
-        clean_dataframe = MGC.data_process(feature_2d_dataframe)
-        train_data, test_data, train_label, test_label = MGC.make_dataset(clean_dataframe, output_data_directory)
+        feature_2D_dataframe, feature_3d_array, label_list = MGC.feature_extraction()
+
+        if is2d:
+            # Apply data process to 2D array
+            clean_dataframe = MGC.data_process(feature_2D_dataframe)
+            train_data, test_data, train_label, test_label = MGC.make_2D_dataset(clean_dataframe, output_data_directory)
+        else:
+            # Apply data process to 3D array
+            train_data, test_data, train_label, test_label = MGC.make_3D_dataset(feature_3d_array, label_list, output_data_directory)
+
     else:
         # Read data from directory
         train_data, test_data, train_label, test_label = MGC.read_dataset(input_data_directory)

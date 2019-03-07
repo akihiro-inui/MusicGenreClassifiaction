@@ -156,25 +156,6 @@ class FileUtil:
                     file.write(chunk)
 
     @staticmethod
-    def dict2threeDarray(feature_frame_dict: dict):
-        """
-        # Store statistics from features into dictionary
-        :param  feature_frame_dict:dictionary of extracted features from audio file
-                {key: name of feature, value: list of array(number of frames)}
-        :param  stat_type: type of statistics
-        :return feature_stat_dict: features from one audio file with statistics
-                {key: name of feature, value: array or single value}
-        """
-        # For each feature, compute statistical operation
-        feature_stat_dict = {}
-        for feature, frame in feature_frame_dict.items():
-            if stat_type == "mean":
-                feature_stat_dict[feature] = get_mean(feature_frame_dict[feature], "r")
-            elif stat_type == "std":
-                feature_stat_dict[feature] = get_std(feature_frame_dict[feature], "r")
-        return feature_stat_dict
-
-    @staticmethod
     def flatten_list(input_list: list) -> list:
         """
         # Flatten list elements in the input list

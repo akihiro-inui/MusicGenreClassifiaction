@@ -239,6 +239,15 @@ class AudioFeatureExtraction:
         return file_feature_stat_dict, directory_3d_feature
 
     def extract_dataset(self, dataset_path: str, stats_type: str):
+        """
+        Feature extraction to dataset
+        Extract time series feature as 2D pandas dataframe and 3D numpy array, as well as label vector as list
+        :param  dataset_path: path to dataset
+        :param  stats_type: type of statistics for 2D feature
+        :return all_2d_dataframe: 2D feature pandas dataframe across all frames
+        :return all_3d_array: 3D feature numpy array across all frames
+        :return label_list: list of numerical label vector
+        """
         # Get folder names under data set path
         directory_names = FileUtil.get_folder_names(dataset_path, sort=True)
 
@@ -250,30 +259,35 @@ class AudioFeatureExtraction:
         # Extract all features and store them into list
         all_2d_dataframe = pd.DataFrame()
         dir_num = 0
+        label_list = []
         for directory, audio_files in directory_files_dict.items():
             # Apply feature extraction to a directory
-            file_feature_stat_dict, directory_3d_feature = self.extract_directory(os.path.join(dataset_path, directory), stats_type)
+            file_feature_stat_dict, class_3d_feature = self.extract_directory(os.path.join(dataset_path, directory), stats_type)
 
             # Convert dictionary to data frame
             class_2d_dataframe = DataProcess.dict2dataframe(file_feature_stat_dict, segment_feature=True)
 
-            # Add label to data frame
+            # Add label to 2D feature data frame
             class_2d_dataframe_with_label = DataProcess.add_label(class_2d_dataframe, directory)
 
-            # Combine 2d data frames
+            # Combine 2D feature data frame
             all_2d_dataframe = all_2d_dataframe.append(class_2d_dataframe_with_label)
 
-            # Append 3d arrays
+            # Append 3D arrays
             if dir_num == 0:
-                all_3d_array = directory_3d_feature
+                all_3d_array = class_3d_feature
             else:
-                all_3d_array = np.dstack((all_3d_array, directory_3d_feature))
+                all_3d_array = np.dstack((all_3d_array, class_3d_feature))
+
+            # Make label as list
+            a = [dir_num] * len(audio_files)
+            label_list.extend(a)
             dir_num += 1
 
         # Transpose 3D array
-        all_3d_array =all_3d_array.T
+        all_3d_array = all_3d_array.T
 
-        return all_2d_dataframe, all_3d_array
+        return all_2d_dataframe, all_3d_array, label_list
 
     @staticmethod
     def get_feature_stats(feature_frame_dict: dict, stat_type: str) -> dict:
@@ -294,18 +308,3 @@ class AudioFeatureExtraction:
             elif stat_type == "std":
                 feature_stat_dict[feature] = get_std(feature_frame_dict[feature], "r")
         return feature_stat_dict
-
-    def make_3d_array(self, feature_frame_dict: dict):
-        """
-        # Store statistics from features into dictionary
-        :param  feature_frame_dict:dictionary of extracted features from audio file
-                {key: name of feature, value: list of array(number of frames)}
-        """
-        # Prepare empty 3D array to store time series features
-#        data = np.zeros((6, 511, 56), dtype=np.float64)
-
-        # For each feature, store them into 3D array
-#        feature_num = 0
-#        for frame_feature in feature_frame_dict.values():
-#            data() = frame_feature # List 1x511
-#            feature_num += 1
