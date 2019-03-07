@@ -220,7 +220,7 @@ class DataProcess:
         return train_data, test_data, train_label, test_label
 
     @staticmethod
-    def make_dataset(dataframe, label_name: str, test_size: float, shuffle: bool = False, output_directory: str = None):
+    def make_2D_dataset(feature_2D_dataframe, label_name: str, test_size: float, shuffle: bool = False, output_directory: str = None):
         """
         Make data set and save the train/test data under output_directory
         1. Split label and data from the input dataframe
@@ -228,7 +228,7 @@ class DataProcess:
         3. If output_directory is given, writes out them in csv format to the directory with current time
         4. Data and label are respectively saved as "train.csv" and "test.csv"
 
-        :param  dataframe:   extracted feature in data frame
+        :param  feature_2D_dataframe:   extracted feature in data frame
         :param  label_name:  name of label column in data frame
         :param  test_size:   size of test data set
         :param  shuffle:     set True for randomisation
@@ -239,7 +239,7 @@ class DataProcess:
         :return test_label:  test label
         """
         # Split data and label
-        label, data = DataProcess.data_label_split(dataframe, label_name)
+        label, data = DataProcess.data_label_split(feature_2D_dataframe, label_name)
         # Train/Test separation
         train_data, test_data, train_label, test_label = train_test_split(data,
                                                                           label,
@@ -258,6 +258,48 @@ class DataProcess:
         else:
             print("Data set is created but not saved")
 
+        return train_data, test_data, train_label, test_label
+
+    @staticmethod
+    def make_3D_dataset(feature_3D_array, label_list: list, test_size: float, shuffle: bool = False, output_directory: str = None):
+        """
+        Make data set and save the train/test data under output_directory
+        1. Split label and data from the input dataframe
+        2. Split them into train/test data and train/test label
+        3. If output_directory is given, writes out them in csv format to the directory with current time
+        4. Data and label are respectively saved as "train.csv" and "test.csv"
+
+        :param  feature_3D_array:   extracted feature in data frame
+        :param  label_name:  name of label column in data frame
+        :param  test_size:   size of test data set
+        :param  shuffle:     set True for randomisation
+        :param  output_directory: output directory to save train and test data
+        :return train_data:  train data
+        :return train_label: train label
+        :return test_data:   test data
+        :return test_label:  test label
+        """
+
+        # Train/Test separation
+        train_data, test_data, train_label, test_label = train_test_split(feature_3D_array,
+                                                                          label_list,
+                                                                           test_size=test_size,
+                                                                           shuffle=shuffle)
+
+        # Write out test and train data as csv files if output directory name is given
+        if output_directory:
+            # Return error of the target directory already exist
+            assert os.path.exists(output_directory) is False, "Target output data folder already exist"
+            os.mkdir(output_directory)
+            # TODO: save feature as np
+            #with open(train_data, 'wb') as f:
+            #    np.save(f, train_data)
+            #FileUtil.dataframe2csv(pd.concat([train_data, train_label], axis=1),
+            #                       os.path.join(output_directory, "train.csv"))
+            #FileUtil.dataframe2csv(pd.concat([test_data, test_label], axis=1),
+            #                       os.path.join(output_directory, "test.csv"))
+        else:
+            print("Data set is created but not saved")
         return train_data, test_data, train_label, test_label
 
     @staticmethod
