@@ -291,19 +291,16 @@ class DataProcess:
             # Return error of the target directory already exist
             assert os.path.exists(output_directory) is False, "Target output data folder already exist"
             os.mkdir(output_directory)
-            # TODO: save feature as np
-            #with open(train_data, 'wb') as f:
-            #    np.save(f, train_data)
-            #FileUtil.dataframe2csv(pd.concat([train_data, train_label], axis=1),
-            #                       os.path.join(output_directory, "train.csv"))
-            #FileUtil.dataframe2csv(pd.concat([test_data, test_label], axis=1),
-            #                       os.path.join(output_directory, "test.csv"))
+            np.save(os.path.join(output_directory, "train_data.npy"), train_data)
+            np.save(os.path.join(output_directory, "train_label.npy"), train_label)
+            np.save(os.path.join(output_directory, "test_data.npy"), test_data)
+            np.save(os.path.join(output_directory, "test_label.npy"), test_label)
         else:
             print("Data set is created but not saved")
         return train_data, test_data, train_label, test_label
 
     @staticmethod
-    def read_dataset(input_data_directory_with_date: str, label_name: str):
+    def read_2D_dataset(input_data_directory_with_date: str, label_name: str):
         """
         Read data set under the given directory, return data and label
         :param  input_data_directory_with_date: input data directory with time where train.csv and test.csv exist
@@ -326,6 +323,35 @@ class DataProcess:
         # Split data and label
         train_label, train_data = DataProcess.data_label_split(train_dataframe, label_name)
         test_label, test_data = DataProcess.data_label_split(test_dataframe, label_name)
+
+        return train_data, test_data, train_label, test_label
+
+    @staticmethod
+    def read_3D_dataset(input_data_directory_with_date: str, label_name: str):
+        """
+        Read data set under the given directory, return data and label
+        :param  input_data_directory_with_date: input data directory with time where train.csv and test.csv exist
+        :param  label_name: name of label column in numpy array
+        :return data: data in numpy array
+        :return label: label in series
+        """
+        # Get file names
+        train_data_file_path = os.path.join(input_data_directory_with_date, "train_data.npy")
+        train_label_file_path = os.path.join(input_data_directory_with_date, "train_label.npy")
+        test_data_file_path = os.path.join(input_data_directory_with_date, "test_data.npy")
+        test_label_file_path = os.path.join(input_data_directory_with_date, "test_label.npy")
+
+        # Check if the given data set exist
+        FileUtil.is_valid_file(train_data_file_path)
+        FileUtil.is_valid_file(train_label_file_path)
+        FileUtil.is_valid_file(test_data_file_path)
+        FileUtil.is_valid_file(test_label_file_path)
+
+        # Read csv file
+        train_data = FileUtil.load_3D_array(train_data_file_path)
+        train_label = FileUtil.load_3D_array(train_label_file_path)
+        test_data = FileUtil.load_3D_array(test_data_file_path)
+        test_label = FileUtil.load_3D_array(test_label_file_path)
 
         return train_data, test_data, train_label, test_label
 

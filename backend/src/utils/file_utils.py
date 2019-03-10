@@ -8,6 +8,7 @@ Created on Fri Mar 23 02:01:21 2018
 import os
 import csv
 import pandas as pd
+import numpy as np
 import datetime
 
 
@@ -180,3 +181,22 @@ class FileUtil:
         :return : current time in string
         """
         return str(datetime.datetime.now()).replace(" ", "_")
+
+    @staticmethod
+    def save_3D_array(input_numpy_array, output_file_path: str):
+        """
+        # Save 3D numpy array
+        :param  input_numpy_array: Input numpy array
+        :param  output_file_path: Output file path
+        """
+        np.save(output_file_path, input_numpy_array)
+
+    @staticmethod
+    def load_3D_array(input_file_path):
+        """
+        # Load 3D numpy array
+        :param  input_file_path: Input file path
+        :return numpy array
+        """
+        return np.load(input_file_path)
+

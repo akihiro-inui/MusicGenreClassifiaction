@@ -8,10 +8,11 @@ Created on Sat Mar 17 23:14:28 2018
 
 import os
 import pandas as pd
-from keras.models import Sequential
+from matplotlib import pyplot as plt
 from keras.callbacks import EarlyStopping
-from keras.models import load_model
-from keras.layers import GRU, Dense, Activation, Dropout
+from keras.models import Model, load_model, Sequential
+from keras.layers import Dense, Activation, Dropout, Input, Masking, TimeDistributed, LSTM, Conv1D
+from keras.layers import GRU, Bidirectional, BatchNormalization, Reshape
 from keras.optimizers import Adam
 
 
@@ -46,21 +47,17 @@ class GatedRecurrentUnit:
         early_stopping_monitor = EarlyStopping(patience=2)
 
         # Set up the model: model
-        model = Sequential()
-
-        n_hidden = 16
+        # n_hidden = 16
         epochs = 10
-        batch_size = 10
-
+        batch_size = 100
         model = Sequential()
-        model.add(GRU(n_hidden, input_shape=input_shape))
-        model.add(Dense(self.num_classes))
-        model.add(Activation('softmax'))
-        optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999)
-        model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
 
-        model.fit(train_data, onehot_train_label, batch_size=batch_size, epochs=epochs, validation_split=self.validation_rate)
-
+        model.add(GRU(50, input_shape=input_shape, return_sequences=True))
+        model.add(GRU(self.num_classes, return_sequences=False))
+        model.add(Activation('sigmoid'))
+        model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+        history = model.fit(train_data, onehot_train_label,
+                  batch_size=batch_size, epochs=epochs, validation_split=self.validation_rate)
         return model
 
     def load_model(self, model_file_name: str):
@@ -102,4 +99,4 @@ class GatedRecurrentUnit:
         :return prediction array with probability
         """
         # Make prediction to the target data
-        return model.predict_proba(target_data)
+        return model.predict(target_data)

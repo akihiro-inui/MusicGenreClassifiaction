@@ -122,5 +122,5 @@ class MFCC:
         :return : mel-scaled spectrum
         """
         # Apply inverse FFT to mel-scaled spectrum and truncate half
-        return abs(np.fft.ifft((np.matmul(self.mel_filter, input_spectrum)), self.fft_size))[:self.fft_size]
+        return list(abs(np.fft.ifft((np.matmul(self.mel_filter, input_spectrum)), self.fft_size))[:self.fft_size])
 
