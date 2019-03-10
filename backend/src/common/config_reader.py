@@ -38,7 +38,7 @@ class ConfigReader:
 
     def __init_audio_preprocess(self, cfg):
         # Parameters for pre-process
-        self.sampling_rate = float(cfg.get('preprocess', 'sampling_rate'))
+        self.sampling_rate = int(cfg.get('preprocess', 'sampling_rate'))
         self.frame_time = float(cfg.get('preprocess', 'frame_time'))
         self.overlap_rate = float(cfg.get('preprocess', 'overlap_rate'))
         self.window_type = str(cfg.get('preprocess', 'window_type'))
@@ -74,6 +74,8 @@ class ConfigReader:
 
     def __init_dataset(self, cfg):
         # Parameters for data set creation
+        self.normalize = bool(cfg.get('dataset', 'normalize'))
+        self.audio_length = int(cfg.get('dataset', 'audio_length'))
         self.test_rate = float(cfg.get('dataset', 'test_rate'))
         self.label_name = str(cfg.get('dataset', 'label_name'))
         self.shuffle = bool(cfg.get('dataset', 'shuffle'))

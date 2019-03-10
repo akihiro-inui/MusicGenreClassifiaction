@@ -128,7 +128,7 @@ class AudioFeatureExtraction:
                 feature_dict[short_feature] = self.osc.main(power_spectrum)
             if short_feature == "mel_spectrogram":
                 # Mel-spectrum needs to be stored to be converted later
-                feature_dict[short_feature] = (self.mfcc.mel_spectrum(spectrum))
+                feature_dict[short_feature] = self.mfcc.mel_spectrum(spectrum)
         return power_spectrum, feature_dict
 
         # Feature extraction to one frame
@@ -227,7 +227,9 @@ class AudioFeatureExtraction:
             # Append short-term feature to 3D array
             if count == 0:
                 directory_3d_feature = np.array(file_short_feature_list)
+                print(directory_3d_feature.shape)
             else:
+                print(directory_3d_feature.shape)
                 directory_3d_feature = np.dstack((directory_3d_feature, np.array(file_short_feature_list)))
 
             # Take stats across frames
