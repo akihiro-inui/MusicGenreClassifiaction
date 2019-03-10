@@ -6,7 +6,7 @@
 
 # Content-based Music Genre Classification
 
-Academic research in the field of Music Information Retrieval, The University of Edinburgh
+Academic research in the field of Music Information Retrieval, The University of Edinburgh (Updated time to time)
 
 ## Abstract
 
@@ -111,15 +111,12 @@ PIL    version 5.0.0
    GTZAN Dataset
    https://drive.google.com/open?id=16YkvirrRcdhqxix_0DBBjZeri4bjcfff
 
-   FeatureMap
-   https://drive.google.com/open?id=1yBGJUJL2UO9uatPtEDtRuAACqRTbdeiY
-
-2. Locate the data in your working directory and change the path in codes
+2. Locate the data in your working directory and change the path in master_config.ini
 
 3. Download and install libraries (See Dependancy)
 pip install -r requirements.txt
 
-4. run "music_genre_classification.py"
+4. run "audio_dataset_maker.py" then "music_genre_classification.py"
 
 
 ## References
