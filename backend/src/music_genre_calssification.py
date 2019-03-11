@@ -157,16 +157,17 @@ class MusicGenreClassification:
         processed_dataframe = DataProcess.factorize_label(processed_dataframe, self.cfg.label_name)
         return processed_dataframe
 
-    def training(self, train_data, train_label, output_directory):
+    def training(self, train_data, train_label, output_directory, visualize=None):
         """
         Train model and save it in the output_directory
         :param  train_data:  train data
         :param  train_label: train label
         :param  output_directory: output directory for model
+        :param  visualize: True/False to visualize training history
         :return trained model
         """
         # Train classifier
-        model = self.CLF.training(train_data, train_label)
+        model = self.CLF.training(train_data, train_label, visualize)
 
         # Save mode with current time
         self.CLF.save_model(model, os.path.join(output_directory, FileUtil.get_time()))
@@ -248,7 +249,7 @@ def main():
 
     # Training model
     if training is True:
-        model = MGC.training(train_data, train_label, model_directory_path)
+        model = MGC.training(train_data, train_label, model_directory_path, visualize=True)
     # Load model
     else:
         model = MGC.CLF.load_model(model_file)

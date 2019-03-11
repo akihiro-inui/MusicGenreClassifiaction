@@ -9,7 +9,9 @@ Created on Sat Mar 17 23:14:28 2018
 # Import libraries/modules
 from backend.src.classifier.kNN import kNN
 from backend.src.classifier.mlp import MLP
+from backend.src.classifier.cnn import CNN
 from backend.src.classifier.gru import GatedRecurrentUnit
+from backend.src.classifier.lstm import LongShortTermMemory
 from backend.src.common.config_reader import ConfigReader
 from keras.models import load_model
 import pickle
@@ -58,6 +60,10 @@ class Classifier:
             classifier = kNN(self.k)
         elif self.selected_classifier == "mlp":
             classifier = MLP(self.validation_rate, self.num_classes)
+        elif self.selected_classifier == "cnn":
+            classifier = CNN(self.validation_rate, self.num_classes)
+        elif self.selected_classifier == "lstm":
+            classifier = GatedRecurrentUnit(self.validation_rate, self.num_classes)
         elif self.selected_classifier == "gru":
             classifier = GatedRecurrentUnit(self.validation_rate, self.num_classes)
         assert classifier is not None, "No classifier selected"
@@ -89,15 +95,16 @@ class Classifier:
             os.mkdir(output_directory)
         self.classifier.save_model(model, output_directory)
 
-    def training(self, train_data, train_label):
+    def training(self, train_data, train_label, visualize=None):
         """
         Training with train data set
         :param   train_data:  training data
         :param   train_label: training data
+        :param   visualize: True/False to visualize training history
         :return  model: trained   model
         """
         # Train model
-        return self.classifier.training(train_data, train_label)
+        return self.classifier.training(train_data, train_label, visualize)
 
     def test(self, model, test_data, test_label) -> float:
         """

@@ -226,11 +226,11 @@ class AudioFeatureExtraction:
 
             # Append short-term feature to 3D array
             if count == 0:
-                directory_3d_feature = np.array(file_short_feature_list)
-                print(directory_3d_feature.shape)
+                directory_3d_feature = np.array(file_short_feature_list).T
+                print("Data structure is {}".format(directory_3d_feature.shape))
             else:
-                print(directory_3d_feature.shape)
-                directory_3d_feature = np.dstack((directory_3d_feature, np.array(file_short_feature_list)))
+                directory_3d_feature = np.dstack((directory_3d_feature, np.array(file_short_feature_list).T))
+                print("Data structure is {}".format(directory_3d_feature.shape))
 
             # Take stats across frames
             file_feature_stat_dict[audio_file] = self.get_feature_stats(frame_extracted_feature, stats_type)
