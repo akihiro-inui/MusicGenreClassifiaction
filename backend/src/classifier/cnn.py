@@ -18,19 +18,15 @@ import matplotlib.pyplot as plt
 
 
 class CNN:
-    def __init__(self, validation_rate: float,  num_classes: int, image_size: int, num_colors: int):
+    def __init__(self, validation_rate: float,  num_classes: int):
         """
         Init
         :param  validation_rate: validation rate
         :param  num_classes: number of classes
-        :param  image_size:  square shape image size
-        :param  num_colors: number of colors
         :return model: trained model
         """
         self.validation_rate = validation_rate
         self.num_classes = num_classes
-        self.image_size = image_size
-        self.num_colors = num_colors
 
     def training(self, train_data, train_label, visualize=False):
         """
@@ -47,12 +43,12 @@ class CNN:
         # Define early_stopping_monitor
         early_stopping_monitor = EarlyStopping(patience=2)
 
-        # input pixel
-        input_shape = (self.image_size, self.image_size, self.num_colors)
+        # Time series length, Feature length
+        input_shape = (train_data.shape[1], train_data.shape[2])
 
         # Set up the model: model
         model = Sequential()
-        model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=input_shape))
+        model.add(Conv2D(32, kernel_size=(2, 2), activation='relu', input_shape=input_shape))
         model.add(MaxPooling2D(pool_size=(2, 2)))
         model.add(Dropout(0.25))
         model.add(Flatten())

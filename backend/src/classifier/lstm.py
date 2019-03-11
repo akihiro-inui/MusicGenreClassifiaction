@@ -13,12 +13,11 @@ from keras.callbacks import EarlyStopping
 from keras.models import Model, load_model, Sequential
 from keras.layers import Dense, Activation, Dropout, Input, Masking, TimeDistributed, LSTM, Conv1D
 from keras.layers import GRU, Bidirectional, BatchNormalization, Reshape
-from keras.optimizers import Adam
 
 
-class GatedRecurrentUnit:
+class LongShortTermMemory:
     """
-    Gated Recurrent Unit
+    Long Short Term Memory
     """
     def __init__(self, validation_rate, num_classes):
         """
@@ -51,14 +50,13 @@ class GatedRecurrentUnit:
         # n_hidden = 16
         epochs = 10
         batch_size = 10
-        model = Sequential()
 
-        model.add(GRU(50, input_shape=input_shape, dropout=0.05, recurrent_dropout=0.35, return_sequences=True))
-        model.add(GRU(self.num_classes, return_sequences=False))
-        model.add(Activation('sigmoid'))
-        model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-        model_graph = model.fit(train_data, onehot_train_label,
-                  batch_size=batch_size, epochs=epochs, validation_split=self.validation_rate)
+        model = Sequential()
+        model.add(LSTM(units=128, dropout=0.05, recurrent_dropout=0.35, return_sequences=True, input_shape=input_shape))
+        model.add(LSTM(units=32, dropout=0.05, recurrent_dropout=0.35, return_sequences=False))
+        model.add(Dense(units=self.num_classes, activation='softmax'))
+        model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+        model_graph = model.fit(train_data, onehot_train_label, batch_size=batch_size, epochs=epochs)
 
         # Visualize training history
         if visualize is True:

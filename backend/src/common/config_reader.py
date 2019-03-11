@@ -84,6 +84,8 @@ class ConfigReader:
         # Parameters for classifier selection
         self.kNN = bool(cfg.get('classifier_selection', 'knn'))
         self.MLP = bool(cfg.get('classifier_selection', 'mlp'))
+        self.GRU = bool(cfg.get('classifier_selection', 'gru'))
+        self.LSTM = bool(cfg.get('classifier_selection', 'lstm'))
 
     def __init_classification(self, cfg):
         # Parameters for classification
