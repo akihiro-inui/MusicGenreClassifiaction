@@ -4,9 +4,9 @@
 </p>
 
 
-# Content-based Music Genre Classification
+# Content-based Music Genre Classification *(Under construction to be updated soon)
 
-Academic research in the field of Music Information Retrieval, The University of Edinburgh (Updated time to time)
+Academic research in the field of Music Information Retrieval, The University of Edinburgh
 
 ## Abstract
 
@@ -81,13 +81,6 @@ k-NN: 62.0%
 
 
 MLP: 83.6%
-<p>
-<img src="assets/MLP accuracy.png?raw=true" alt="MLP accuracy" width="400", align="left">
-<img src="assets/MLP loss.png?raw=true" alt="MLP loss" width="400",align="right">
-</p>
-
-
-## Code
 
 
 ### Dependency
