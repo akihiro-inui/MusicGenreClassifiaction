@@ -48,15 +48,15 @@ class LongShortTermMemory:
 
         # Set up the model: model
         # n_hidden = 16
-        epochs = 10
-        batch_size = 10
+        epochs = 2
+        batch_size = 30
 
         model = Sequential()
         model.add(LSTM(units=128, dropout=0.05, recurrent_dropout=0.35, return_sequences=True, input_shape=input_shape))
         model.add(LSTM(units=32, dropout=0.05, recurrent_dropout=0.35, return_sequences=False))
         model.add(Dense(units=self.num_classes, activation='softmax'))
         model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-        model_graph = model.fit(train_data, onehot_train_label, batch_size=batch_size, epochs=epochs)
+        model_graph = model.fit(train_data, onehot_train_label, batch_size=batch_size, epochs=epochs, shuffle=False, validation_split=self.validation_rate)
 
         # Visualize training history
         if visualize is True:
