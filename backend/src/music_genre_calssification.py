@@ -207,7 +207,7 @@ def main():
 
     # Case of loading features
     input_2D_feature_directory = "../feature/feature_2D/xxxxx"
-    input_3D_feature_directory = "../feature/feature_3D/2019-03-09_22:16:33.796319"
+    input_3D_feature_directory = "../feature/feature_3D/2019-03-12_00:40:19.325268"
 
     # Case of loading pre-trained model
     model_file = "../model/2019-02-14_00:20:17.281506/mlp.h5"
@@ -216,7 +216,7 @@ def main():
     dummy_sample = "../dummy_data.csv"
 
     # Conditions
-    feature_extraction = True
+    feature_extraction = False
     training = True
     extract_2d_feature = False  # If False, it extracts 3D feature
 
@@ -261,7 +261,12 @@ def main():
     #dummy_dataframe = FileUtil.csv2dataframe(dummy_sample)
     prediction_array = MGC.predict(model, test_data)
     #max_class = np.argmax(prediction_array)
-    print(prediction_array)
+    predict_list = []
+    for sample in list(prediction_array):
+        predict_list.append(list(sample).index(max(list(sample))))
+
+
+
     #print(max_class)
 
     print("Start prediction")
