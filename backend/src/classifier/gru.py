@@ -49,7 +49,7 @@ class GatedRecurrentUnit:
 
         # Set up the model: model
         # n_hidden = 16
-        epochs = 10
+        epochs = 2
         batch_size = 10
         model = Sequential()
 

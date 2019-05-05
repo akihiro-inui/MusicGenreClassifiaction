@@ -3,21 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <title>Music Genre Classification</title>
-</head>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js'></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <!--<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>-->
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js"></script>
+    <script src='../node_modules/chart.js/dist/Chart.js'></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="../static/style.css">
 <body>
-    <!--<script language="javascript">-->
-        <!--function RefreshImage(){-->
-            <!--document.pic0.src="../assets/03.png?a=" + String(Math.random()*99999999);-->
-            <!--setTimeout('RefreshImage()',50);-->
-        <!--}-->
-    <!--</script>-->
-    <!--<body onload="RefreshImage()">-->
-    <!--<img name="pic0" src="03.png">-->
-    <!--</body>-->
 
-    <form method="post" action="/record">
-    <input type="submit" name="Start Recording" value="Start Recording"/>
-    </form>
+    <div class="main_screen">
+
+        <div class="cover" style="text-align: center; font-size: 12px; color: #005cbf; margin-top: 5vh;">
+            <h1>Music Genre Classification Demo</h1>
+        </div>
+
+        <div id="canvas-holder" style="width:100%">
+            <canvas id="chart" style="width: 100vw; height: 40vh; margin-top: 10vh;"></canvas>
+        </div>
+
+        <script>
+            var pieData = [
+                {% for item, label, colors in set %}
+            {
+                value: {{item}},
+                label: "{{label}}",
+                    color : "{{colors}}"
+            },
+            {% endfor %}
+            ];
+
+            // get pie chart canvas
+            var mychart = document.getElementById("chart").getContext("2d");
+            steps = 10
+            max = {{ max }}
+            // draw pie chart
+            new Chart(document.getElementById("chart").getContext("2d")).Pie(pieData);
+        </script>
+
+        <form method="post" action="/record" style="text-align: center; margin: 4vh 0" >
+            <input type="submit" class="btn btn-success" onclick="this.value='Recording...'"  value="Start Recording" id="record">
+        </form>
+
+        <form method="post" action="/predict" style="text-align: center; margin: 4vh 0" >
+            <!--<button type="submit" class="btn btn-outline-primary" onclick="ProcessPrediction()" id="predict" data-loading-text="loading stuff...">Predict</button>-->
+            <input type="submit" class="btn btn-outline-primary" onclick="this.value='Processing...'" value="Predict" id="predict">
+        </form>
+
+    </div>
 
 </body>
 </html>

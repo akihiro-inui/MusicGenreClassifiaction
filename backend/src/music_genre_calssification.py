@@ -206,7 +206,7 @@ def main():
     output_3D_feature_directory = "../feature/feature_3D"
 
     # Case of loading features
-    input_2D_feature_directory = "../feature/feature_2D/xxxxx"
+    input_2D_feature_directory = "../feature/feature_2D/2019-05-04_19:59:32.384607"
     input_3D_feature_directory = "../feature/feature_3D/2019-03-12_00:40:19.325268"
 
     # Case of loading pre-trained model
@@ -216,9 +216,9 @@ def main():
     dummy_sample = "../dummy_data.csv"
 
     # Conditions
-    feature_extraction = False
+    feature_extraction = True
     training = True
-    extract_2d_feature = False  # If False, it extracts 3D feature
+    extract_2d_feature = False # If False, it extracts 3D feature
 
     # Instantiate mgc class
     MGC = MusicGenreClassification(AudioDatasetMaker, AudioFeatureExtraction, Classifier, music_dataset_path, setting_file)
@@ -239,7 +239,6 @@ def main():
         else:
             # Apply data process to 3D array
             train_data, test_data, train_label, test_label = MGC.make_3D_dataset(feature_3d_array, label_list, output_3D_feature_directory)
-
     # Read data from directory
     else:
         if extract_2d_feature is True:
