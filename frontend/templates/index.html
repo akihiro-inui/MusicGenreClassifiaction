@@ -38,9 +38,11 @@
             // var mychart = document.getElementById("chart").getContext("2d");
             // steps = 10
             // max = {{ max }}
-
+            var pieOptions = {
+                animation : false,  // Edit: correction typo: from 'animated' to 'animation'
+            }
             // draw pie chart
-            new Chart(document.getElementById("chart").getContext("2d")).Pie(pieData);
+            new Chart(document.getElementById("chart").getContext("2d")).Pie(pieData, pieOptions);
         </script>
 
         <script>
@@ -64,11 +66,10 @@
                  document.getElementById("record").style.borderColor = "red";
 
                  //setTimeout(function(){ document.getElementById("record").value = "Recording Finished" }, 5000);
-
                  // Custom function for prediction button
                  // setTimeout(function(){ document.getElementById("predict").hidden=false; }, 5000);
+                 //document.getElementById("record").disabled=true;
                  ProcessRecordPython();
-                 document.getElementById("record").disabled=true;
              }
 
              // function ProcessPredict() {
@@ -79,7 +80,7 @@
         </script>
 
         <form method="post" action="/record" style="text-align: center; margin: 4vh 0" >
-            <input type="submit" class="btn btn-outline-info" value="Start Recording" onclick="ProcessRecordJS()" id="record">
+            <input type="submit" class="btn btn-outline-info" value="Start Recording" onclick="ProcessRecordJS();" id="record">
             <!--<input type="submit" class="btn btn-outline-info" value="Start Recording" onclick="(function(){ProcessRecordJS();ProcessRecordPython();})()" id="record">-->
 
             <!--<input type="submit" class="btn btn-outline-info" value="Start Recording" id="record">-->
