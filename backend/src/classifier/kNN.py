@@ -21,7 +21,7 @@ class kNN:
         """
         self.k = k
 
-    def training(self, train_data, train_label):
+    def training(self, train_data, train_label, visualize=None):
         """
         Train model
         :param  train_data: training data

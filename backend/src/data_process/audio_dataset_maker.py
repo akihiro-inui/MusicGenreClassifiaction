@@ -109,8 +109,12 @@ class AudioDatasetMaker:
 
         # Apply process to audio files in the input directory
         for folder in folder_names:
+            # Status
+            print("Processing {}".format(folder))
             # Process one audio file
             self.process_directory(os.path.join(input_dataset, folder), os.path.join(output_dataset, folder))
+            # Status
+            print("Processed {}".format(folder))
 
 
 if __name__ == "__main__":
