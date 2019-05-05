@@ -35,11 +35,14 @@
         ];
 
         // get pie chart canvas
-        var mychart = document.getElementById("chart").getContext("2d");
-        steps = 10
-        max = {{ max }}
+        // var mychart = document.getElementById("chart").getContext("2d");
+        // steps = 10
+        // max = {{ max }}
+        var pieOptions = {
+            animation : false,  // Edit: correction typo: from 'animated' to 'animation'
+        }
         // draw pie chart
-        new Chart(document.getElementById("chart").getContext("2d")).Pie(pieData);
+        new Chart(document.getElementById("chart").getContext("2d")).Pie(pieData, pieOptions);
     </script>
 
     <script>
@@ -48,10 +51,8 @@
             document.getElementById("predict").value = "Predicting";
         }
     </script>
-
     <form method="post" action="/record" style="text-align: center; margin: 4vh 0" >
-        <input type="submit" class="btn btn-outline-info" value="Recording Finished" disabled="disabled" id="record">
-
+        <input type="submit" class="btn btn-outline-info" value="Recording Finished" disabled="disabled" id="record" style="color:white; background-color: red; border-color: red;">
     </form>
 
     <form method="post" action="/predict" style="text-align: center; margin: 4vh 0" >
