@@ -35,21 +35,59 @@
             ];
 
             // get pie chart canvas
-            var mychart = document.getElementById("chart").getContext("2d");
-            steps = 10
-            max = {{ max }}
+            // var mychart = document.getElementById("chart").getContext("2d");
+            // steps = 10
+            // max = {{ max }}
+
             // draw pie chart
             new Chart(document.getElementById("chart").getContext("2d")).Pie(pieData);
         </script>
 
+        <script>
+             function ProcessRecordPython() {
+                 $.ajax({
+                     type:'POST',
+                     url: "{{ url_for('record')}}",
+                     dataType:"text",
+                     success: function(response){
+                         console.log(response);
+                         alert(response);
+                     }
+                 });
+             }
+
+             function ProcessRecordJS() {
+                 // Custom function for recording button
+                 document.getElementById("record").value = "Recording";
+                 document.getElementById("record").style.color = "white";
+                 document.getElementById("record").style.backgroundColor = "red";
+                 document.getElementById("record").style.borderColor = "red";
+
+                 //setTimeout(function(){ document.getElementById("record").value = "Recording Finished" }, 5000);
+
+                 // Custom function for prediction button
+                 // setTimeout(function(){ document.getElementById("predict").hidden=false; }, 5000);
+                 ProcessRecordPython();
+                 document.getElementById("record").disabled=true;
+             }
+
+             // function ProcessPredict() {
+             //     // Custom function for prediction button
+             //     document.getElementById("predict").value = "Predicting";
+             // }
+
+        </script>
+
         <form method="post" action="/record" style="text-align: center; margin: 4vh 0" >
-            <input type="submit" class="btn btn-success" onclick="this.value='Recording...'"  value="Start Recording" id="record">
+            <input type="submit" class="btn btn-outline-info" value="Start Recording" onclick="ProcessRecordJS()" id="record">
+            <!--<input type="submit" class="btn btn-outline-info" value="Start Recording" onclick="(function(){ProcessRecordJS();ProcessRecordPython();})()" id="record">-->
+
+            <!--<input type="submit" class="btn btn-outline-info" value="Start Recording" id="record">-->
         </form>
 
-        <form method="post" action="/predict" style="text-align: center; margin: 4vh 0" >
-            <!--<button type="submit" class="btn btn-outline-primary" onclick="ProcessPrediction()" id="predict" data-loading-text="loading stuff...">Predict</button>-->
-            <input type="submit" class="btn btn-outline-primary" onclick="this.value='Processing...'" value="Predict" id="predict">
-        </form>
+        <!--<form method="post" action="/predict" style="text-align: center; margin: 4vh 0" >-->
+            <!--<input type="submit" class="btn btn-outline-primary" value="Predict" onclick="ProcessPredict()" id="predict" hidden="hidden">-->
+        <!--</form>-->
 
     </div>
 
