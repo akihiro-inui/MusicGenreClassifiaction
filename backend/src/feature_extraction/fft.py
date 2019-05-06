@@ -42,6 +42,7 @@ class FFT:
         """
         Apply fft to stack of audio frames
         :param  framed_audio_list: list of framed audio data (tuple) from audio file
+        :param  fft_size: size of fft
         """
         # Apply fft to each row to get modulation spectrum
-        return abs(np.fft.fft(Epadded, n=fft_size, axis=1))
+        return abs(np.fft.fft(framed_audio_list, n=fft_size, axis=1))

@@ -10,6 +10,7 @@ from sklearn.metrics import accuracy_score
 import pickle
 import os
 
+
 class kNN:
     """
     K Nearest Neighbors

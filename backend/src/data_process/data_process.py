@@ -52,7 +52,7 @@ class DataProcess:
         return new_file_feature_dict
 
     @staticmethod
-    def dict2dataframe(input_dict: dict, segment_feature: False):
+    def dict2dataframe(input_dict: dict, segment_feature=False):
         """
         Convert dictionary to data frame
         :param: input_dict: {key: file name, value: dictionary{key: feature name, value: single value}}
@@ -256,7 +256,7 @@ class DataProcess:
             FileUtil.dataframe2csv(pd.concat([test_data, test_label], axis=1),
                                    os.path.join(output_directory, "test.csv"))
         else:
-            print("Data set is created but not saved")
+            print("Dataset is created but not saved")
 
         return train_data, test_data, train_label, test_label
 
