@@ -218,7 +218,7 @@ def main():
     # Conditions
     feature_extraction = True
     training = True
-    extract_2d_feature = False # If False, it extracts 3D feature
+    extract_2d_feature = True # If False, it extracts 3D feature
 
     # Instantiate mgc class
     MGC = MusicGenreClassification(AudioDatasetMaker, AudioFeatureExtraction, Classifier, music_dataset_path, setting_file)
