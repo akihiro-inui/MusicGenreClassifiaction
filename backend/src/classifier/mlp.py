@@ -30,7 +30,7 @@ class MLP:
         self.validation_rate = validation_rate
         self.num_classes = num_classes
 
-    def training(self, train_data, train_label):
+    def training(self, train_data, train_label, visualize=None):
         """
         Training for Multi layer perceptron
         :param  train_data: training data

@@ -15,9 +15,11 @@ from backend.src.classifier.classifier_wrapper import Classifier
 from backend.src.utils.file_utils import FileUtil
 import pandas as pd
 import numpy as np
-from numpy import genfromtxt
+from numpy import genfromtxt, newaxis
+import keras
 
 app = Flask(__name__)
+keras.backend.clear_session()
 
 # RATE / number of updates per second
 sampling_rate = 44100
@@ -28,7 +30,7 @@ record_sec = 10
 output_wav_file_name = "data/recording.wav"
 AFE = AudioFeatureExtraction("../config/master_config.ini")
 CLF = Classifier("../config/master_config.ini")
-model = CLF.load_model("../backend/model/2019-05-07_20_28_12.880994/kNN.pickle")
+model = CLF.load_model("../backend/model/2019-05-07_22_14_20.801103/gru.h5")
 mean_list = "../backend/mean_list.csv"
 std_list = "../backend/std_list.csv"
 
@@ -87,13 +89,17 @@ def prediction_process(input_audio_file_path: str):
 
     # Data shape formatting
     dataframe = pd.DataFrame.from_dict(segmented_dict, orient='index')
-    mean_data = genfromtxt(mean_list, delimiter=',')
-    std_data = genfromtxt(std_list, delimiter=',')
-    data_numpy = (np.array(dataframe[0]) - mean_data)
-    reshaped_data = data_numpy.reshape(1, -1)
+    #mean_data = genfromtxt(mean_list, delimiter=',')
+    #std_data = genfromtxt(std_list, delimiter=',')
+    #data_numpy = (np.array(dataframe[0]) - mean_data)
+    #reshaped_data = data_numpy.reshape(1, -1)
 
+    # 3D feature
+    feature_2d = np.array(file_short_feature_list)
+    feature_3d = feature_2d[newaxis, :, :]
+    print(feature_3d.shape)
     # Make prediction
-    result = CLF.predict(model, reshaped_data)
+    result = CLF.predict(model, feature_3d)
     return list(result[0])
 
 
