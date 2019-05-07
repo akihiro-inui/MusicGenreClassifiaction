@@ -99,17 +99,25 @@ PIL    version 5.0.0
 
 ## Complete Installation
 
-1. Download Data from the link below
+1. Clone this project
+2. Go to the folder(MusicGenreClassification)
+3. Install sox (see below)
+3. bash run_me_first.sh
+4. Run backend/src/data_process/audio_dataset_maker.py
+5. Run backend/src/music_genre_classification.py
 
-   GTZAN Dataset
-   https://drive.google.com/open?id=16YkvirrRcdhqxix_0DBBjZeri4bjcfff
+* You may need to install sox and/or ffmpeg if you do not have one. (Windows complains sometimes..) 
 
-2. Locate the data in your working directory and change the path in master_config.ini
+For installing sox (Windows)
+https://sourceforge.net/projects/sox/
 
-3. Download and install libraries (See Dependancy)
-pip install -r requirements.txt
+For installing sox (Mac)
+http://macappstore.org/sox/
 
-4. run "audio_dataset_maker.py" then "music_genre_classification.py"
+For installing ffmpeg
+https://www.ffmpeg.org/download.html
+
+* Make sure you are using Python3
 
 
 ## References

@@ -11,7 +11,6 @@ import pandas as pd
 import numpy as np
 import datetime
 
-
 class FileUtil:
 
     @staticmethod
@@ -64,6 +63,13 @@ class FileUtil:
             for i, l in enumerate(input_file):
                 pass
         return i + 1
+
+    @staticmethod
+    def replace_backslash(input_file_path: str):
+        """
+        Replace backslash in order to avoid Windows Mac convention mismatch
+        """
+        return input_file_path.replace('\\', '/')
 
     @staticmethod
     def get_folder_names(directory_path: str, sort=True) -> list:

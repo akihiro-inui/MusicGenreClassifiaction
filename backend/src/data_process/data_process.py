@@ -152,12 +152,42 @@ class DataProcess:
         return normalized_dataframe
 
     @staticmethod
+    def centerize_dataframe(input_dataframe, label_name: str or list):
+        """
+        # Apply centering to data frame
+        :param  input_dataframe: input pandas data frame
+        :param  label_name: exception column
+        :return centerized_dataframe: normalized data frame
+        :return: mean_list: list of mean
+        """
+        # Make a copy of the data frame
+        centerized_dataframe = input_dataframe.copy()
+        # Extract only data part
+        data = centerized_dataframe[centerized_dataframe.columns[centerized_dataframe.columns != label_name]]
+
+        # Replace NaN/Inf as 0
+        clean_data = DataCleaner.clean_data(data)
+
+        # Apply centering to all columns
+        mean_list = []
+        for feature_name in data.columns:
+            mean_value = clean_data[feature_name].mean()
+            centerized_dataframe[feature_name] = clean_data[feature_name] - mean_value
+            mean_list.append(mean_value)
+
+        # Put back label column
+        centerized_dataframe[label_name] = input_dataframe[label_name]
+
+        return centerized_dataframe, mean_list
+
+    @staticmethod
     def standardize_dataframe(input_dataframe, label_name: str or list):
         """
         # Apply standardization
         :param  input_dataframe: input pandas data frame
         :param  label_name: exception column
         :return standardized_dataframe: standardized data frame
+        :return std_list: list of standard deviation
         """
         # Make a copy of the data frame
         standardized_dataframe = input_dataframe.copy()
@@ -167,13 +197,15 @@ class DataProcess:
         # Clean data
         clean_data = DataCleaner.clean_data(data)
         # Apply standardization to all columns
+        std_list = []
         for feature_name in clean_data.columns:
-            standardized_dataframe[feature_name] = (clean_data[feature_name] - np.mean(clean_data[feature_name])) / np.std(clean_data[feature_name])
-
+            std_value = np.std(clean_data[feature_name])
+            standardized_dataframe[feature_name] = (clean_data[feature_name] - np.mean(clean_data[feature_name])) / std_value
+            std_list.append(std_value)
         # Put back label column
         standardized_dataframe[label_name] = input_dataframe[label_name]
 
-        return standardized_dataframe
+        return standardized_dataframe, std_list
 
     @staticmethod
     def data_label_split(input_dataframe, label_name: str):
@@ -250,7 +282,7 @@ class DataProcess:
         if output_directory:
             # Return error of the target directory already exist
             assert os.path.exists(output_directory) is False, "Target output data folder already exist"
-            os.mkdir(output_directory)
+            os.mkdir(FileUtil.replace_backslash(output_directory))
             FileUtil.dataframe2csv(pd.concat([train_data, train_label], axis=1),
                                    os.path.join(output_directory, "train.csv"))
             FileUtil.dataframe2csv(pd.concat([test_data, test_label], axis=1),
@@ -283,14 +315,14 @@ class DataProcess:
         # Train/Test separation
         train_data, test_data, train_label, test_label = train_test_split(feature_3D_array,
                                                                           label_list,
-                                                                           test_size=test_size,
-                                                                           shuffle=shuffle)
+                                                                          test_size=test_size,
+                                                                          shuffle=shuffle)
 
         # Write out test and train data as csv files if output directory name is given
         if output_directory:
             # Return error of the target directory already exist
             assert os.path.exists(output_directory) is False, "Target output data folder already exist"
-            os.mkdir(output_directory)
+            os.mkdir(FileUtil.replace_backslash(output_directory))
             np.save(os.path.join(output_directory, "train_data.npy"), train_data)
             np.save(os.path.join(output_directory, "train_label.npy"), train_label)
             np.save(os.path.join(output_directory, "test_data.npy"), test_data)

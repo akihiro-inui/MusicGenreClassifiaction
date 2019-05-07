@@ -14,6 +14,7 @@ from backend.src.data_process.data_process import DataProcess
 from backend.src.feature_extraction.audio_feature_extraction import AudioFeatureExtraction
 from backend.src.data_process.audio_dataset_maker import AudioDatasetMaker
 
+
 class MusicGenreClassification:
     """
     # Content-based music genre classification
@@ -60,7 +61,7 @@ class MusicGenreClassification:
         feature_2D_dataframe, feature_3D_array, label_list = self.AFE.extract_dataset(self.dataset_path, "mean")
         return feature_2D_dataframe, feature_3D_array, label_list
 
-    def make_label(self, label_csv_file_path: str):
+    def make_label(self):
         """
         Make csv file where the classes label is written
         **** Make sure sort is True ****
@@ -68,7 +69,7 @@ class MusicGenreClassification:
         # Get folder names
         label_list = FileUtil.get_folder_names(self.dataset_path, sort=True)
         assert len(label_list) == self.cfg.num_classes, "Number of the classes mismatch"
-        FileUtil.list2csv(label_list, label_csv_file_path)
+        FileUtil.list2csv(label_list, "../label.csv")
 
     def make_2D_dataset(self, feature_2D_dataframe, output_directory: str):
         """
@@ -85,7 +86,7 @@ class MusicGenreClassification:
             os.mkdir(output_directory)
 
         # Get time and make a new directory name
-        directory_name_with_time = os.path.join(output_directory, FileUtil.get_time())
+        directory_name_with_time = os.path.join(output_directory, FileUtil.get_time().replace(":", "_"))
 
         train_data, test_data, train_label, test_label = DataProcess.make_2D_dataset(feature_2D_dataframe, self.cfg.label_name,
                                                                                   self.cfg.test_rate, self.cfg.shuffle,
@@ -107,7 +108,7 @@ class MusicGenreClassification:
             os.mkdir(output_directory)
 
         # Get time and make a new directory name
-        directory_name_with_time = os.path.join(output_directory, FileUtil.get_time())
+        directory_name_with_time = os.path.join(output_directory, FileUtil.get_time().replace(":", "_"))
 
         train_data, test_data, train_label, test_label = DataProcess.make_3D_dataset(feature_3D_array, label_list,
                                                                                   self.cfg.test_rate, self.cfg.shuffle,
@@ -152,10 +153,15 @@ class MusicGenreClassification:
         # Make a copy of dataframe
         processed_dataframe = dataframe.copy()
         # Apply normalization to data frame
-        processed_dataframe = DataProcess.normalize_dataframe(processed_dataframe, self.cfg.label_name)
+        #processed_dataframe = DataProcess.normalize_dataframe(processed_dataframe, self.cfg.label_name)
+        centerized_dataframe, mean_list = DataProcess.centerize_dataframe(processed_dataframe, self.cfg.label_name)
+        cleaned_dataframe, std_list = DataProcess.standardize_dataframe(centerized_dataframe, self.cfg.label_name)
         # Factorize label
-        processed_dataframe = DataProcess.factorize_label(processed_dataframe, self.cfg.label_name)
-        return processed_dataframe
+        cleaned_dataframe = DataProcess.factorize_label(cleaned_dataframe, self.cfg.label_name)
+        # Write out mean values
+        FileUtil.list2csv(mean_list, "../mean_list.csv")
+        FileUtil.list2csv(std_list, "../std_list.csv")
+        return cleaned_dataframe
 
     def training(self, train_data, train_label, output_directory, visualize=None):
         """
@@ -170,7 +176,7 @@ class MusicGenreClassification:
         model = self.CLF.training(train_data, train_label, visualize)
 
         # Save mode with current time
-        self.CLF.save_model(model, os.path.join(output_directory, FileUtil.get_time()))
+        self.CLF.save_model(model, os.path.join(output_directory, FileUtil.get_time().replace(":", "_")))
         return model
 
     def test(self, model, test_data, test_label) -> float:
@@ -199,7 +205,6 @@ def main():
     setting_file = "../../config/master_config.ini"
     music_dataset_path = "../../processed_music_data"
     model_directory_path = "../model"
-    label_txt_filename = "label.csv"
 
     # To output extracted feature
     output_2D_feature_directory = "../feature/feature_2D"
@@ -224,7 +229,7 @@ def main():
     MGC = MusicGenreClassification(AudioDatasetMaker, AudioFeatureExtraction, Classifier, music_dataset_path, setting_file)
 
     # Make label text file
-    MGC.make_label(label_txt_filename)
+    MGC.make_label()
 
     # Apply feature extraction and write out csv file if it does not exist
     if feature_extraction is True:
