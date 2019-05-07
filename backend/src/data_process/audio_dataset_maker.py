@@ -9,7 +9,12 @@ Created on Mar 06
 import os
 import librosa
 from backend.src.utils.file_utils import FileUtil
+from backend.src.utils.audio_util import AudioUtil
 from backend.src.common.config_reader import ConfigReader
+
+
+class AudioReaderError(Exception):
+    pass
 
 
 class AudioDatasetMaker:
@@ -36,7 +41,12 @@ class AudioDatasetMaker:
         :param sampling_rate: sampling rate
         :return audio signal in tuple
         """
-        return librosa.core.load(input_audio_file_path, sampling_rate)
+
+        try:
+            audio_data = librosa.core.load(FileUtil.replace_backslash(input_audio_file_path), sampling_rate)
+        except:
+            raise AudioReaderError("Could not load audio file")
+        return audio_data
 
     def clip_audio_signal(self, input_audio_signal: tuple, audio_length_sample: int):
         """
@@ -59,11 +69,12 @@ class AudioDatasetMaker:
         # Read audio file
         audio_signal = self.read_audio_file(input_audio_file_path, sampling_rate)
         # Clip audio file
-        processed_audio = self.clip_audio_signal(audio_signal, audio_length_second*sampling_rate)
+        processed_audio = self.clip_audio_signal(audio_signal, audio_length_second * sampling_rate)
         # TODO: more process??
         return processed_audio
 
-    def save_audio_file(self, input_audio_signal, output_audio_file_path: str, sampling_rate: int, normalize: bool) -> None:
+    def save_audio_file(self, input_audio_signal, output_audio_file_path: str, sampling_rate: int,
+                        normalize: bool) -> None:
         """
         Save audio signal into wav file
         :param input_audio_signal: input audio signal in numpy array
@@ -90,9 +101,11 @@ class AudioDatasetMaker:
         # Apply process to audio files in the input directory
         for audio_file in file_names:
             # Process one audio file
-            processed_audio = self.process_audio_file(os.path.join(input_directory, audio_file), self.audio_length, self.sampling_rate)
+            processed_audio = self.process_audio_file(os.path.join(input_directory, audio_file), self.audio_length,
+                                                      self.sampling_rate)
             # Save it
-            self.save_audio_file(processed_audio, os.path.join(output_directory, audio_file), self.sampling_rate, self.normalize)
+            self.save_audio_file(processed_audio, os.path.join(output_directory, audio_file), self.sampling_rate,
+                                 self.normalize)
 
     def process_dataset(self, input_dataset: str, output_dataset: str):
         """
