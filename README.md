@@ -105,7 +105,8 @@ PIL    version 5.0.0
 4. bash run_me_first.sh
 5. Run backend/src/data_process/audio_dataset_maker.py
 6. Run backend/src/music_genre_classification.py
-
+7. Change model file path in frontend/src/app.py
+7. Run frontend/src/app.py
 * You may need to install sox and/or ffmpeg if you do not have one. (Windows complains sometimes..) 
 
 For installing sox (Windows)
