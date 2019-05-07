@@ -99,12 +99,12 @@ PIL    version 5.0.0
 
 ## Complete Installation
 
-1. Clone this project
-2. Go to the folder(MusicGenreClassification)
-3. Install sox (see below)
-3. bash run_me_first.sh
-4. Run backend/src/data_process/audio_dataset_maker.py
-5. Run backend/src/music_genre_classification.py
+1. Install sox (see below)
+2. Clone this project
+3. Go to the folder(MusicGenreClassification)
+4. bash run_me_first.sh
+5. Run backend/src/data_process/audio_dataset_maker.py
+6. Run backend/src/music_genre_classification.py
 
 * You may need to install sox and/or ffmpeg if you do not have one. (Windows complains sometimes..) 
 
