@@ -152,12 +152,15 @@ class MusicGenreClassification:
         """
         # Make a copy of dataframe
         processed_dataframe = dataframe.copy()
-        # Apply normalization to data frame
+
+        # Centerize data and apply standardization to data frame
         #processed_dataframe = DataProcess.normalize_dataframe(processed_dataframe, self.cfg.label_name)
         centerized_dataframe, mean_list = DataProcess.centerize_dataframe(processed_dataframe, self.cfg.label_name)
         cleaned_dataframe, std_list = DataProcess.standardize_dataframe(centerized_dataframe, self.cfg.label_name)
+
         # Factorize label
         cleaned_dataframe = DataProcess.factorize_label(cleaned_dataframe, self.cfg.label_name)
+
         # Write out mean values
         FileUtil.list2csv(mean_list, "../mean_list.csv")
         FileUtil.list2csv(std_list, "../std_list.csv")
@@ -199,66 +202,102 @@ class MusicGenreClassification:
         """
         return self.CLF.predict(model, target_data)
 
+    def feature_extraction_selector(self, run_feature_extraction: bool, use_2d_feature: bool,
+                                    pre_extracted_2d_feature_directory=None, pre_extracted_3d_feature_directory=None,
+                                    output_2d_feature_directory=None, output_3d_feature_directory=None):
+        """
+        Top level wrapper for feature extraction
+        :param run_feature_extraction: True to extract feature. If False, it loads pre-extracted feature from directory
+        :param use_2d_feature: If set to True, it extract 2D feature and to False, it extracts 3D feature
+        :param pre_extracted_2d_feature_directory: Path to directory where pre-extracted 2D feature exist
+        :param pre_extracted_3d_feature_directory: Path to directory where pre-extracted 3D feature exist
+        :param output_2d_feature_directory: Output directory for 2D feature extraction
+        :param output_3d_feature_directory: Output directory for 3D feature extraction
+        """
+        # Apply feature extraction
+        if run_feature_extraction is True:
+
+            # Apply feature extraction to all audio files
+            print("Start feature extraction")
+            feature_2d_dataframe, feature_3d_array, label_list = self.feature_extraction()
+
+            # Apply data process to extracted feature
+            if use_2d_feature is True:
+                # Apply data process to 2D array
+                clean_dataframe = self.data_process(feature_2d_dataframe)
+                train_data, test_data, train_label, test_label = self.make_2D_dataset(clean_dataframe, output_2d_feature_directory)
+            else:
+                # Apply data process to 3D array
+                train_data, test_data, train_label, test_label = self.make_3D_dataset(feature_3d_array, label_list, output_3d_feature_directory)
+
+        # Load pre-extracted feature from directory
+        else:
+            if use_2d_feature is True:
+                # Load 2D feature
+                train_data, test_data, train_label, test_label = self.read_2D_dataset(pre_extracted_2d_feature_directory)
+            else:
+                # Load 3D feature
+                train_data, test_data, train_label, test_label = self.read_3D_dataset(pre_extracted_3d_feature_directory)
+
+        return train_data, test_data, train_label, test_label
+
+    def training_selector(self, run_training: bool, train_data, train_label,
+                          model_file=None, output_model_directory_path=None):
+        """
+        Top level wrapper for training model
+        :param run_training: True to run training model. If False, it loads pre-trained model
+        :param train_data: Training data
+        :param train_label: Training label
+        :param model_file: Pre-trained model file path to load
+        :param output_model_directory_path: Output directory to save trained model
+        """
+        # Training model
+        if run_training is True:
+            model = self.training(train_data, train_label, output_model_directory_path, visualize=True)
+
+        # Load model
+        else:
+            model = self.CLF.load_model(model_file)
+        return model
+
 
 def main():
     # File/folder path
     setting_file = "../../config/master_config.ini"
     music_dataset_path = "../../processed_music_data"
-    model_directory_path = "../model"
-
-    # To output extracted feature
-    output_2D_feature_directory = "../feature/feature_2D"
-    output_3D_feature_directory = "../feature/feature_3D"
 
     # Case of loading features
-    input_2D_feature_directory = "../feature/feature_2D/2019-05-04_19:59:32.384607"
-    input_3D_feature_directory = "../feature/feature_3D/2019-05-07_22_06_38.549108"
+    pre_extracted_2d_feature_directory = "../feature/feature_2D/2019-05-07_21_47_01.263743"
+    pre_extracted_3d_feature_directory = "../feature/feature_3D/2019-05-07_22_06_38.549108"
 
     # Case of loading pre-trained model
-    model_file = "../model/2019-02-14_00:20:17.281506/mlp.h5"
+    pre_trained_model_file = "../model/2019-02-14_00:20:17.281506/mlp.h5"
 
     # Evaluate one file
     dummy_sample = "../dummy_data.csv"
 
     # Conditions
-    feature_extraction = False
-    training = True
-    extract_2d_feature = False # If False, it extracts 3D feature
+    run_feature_extraction = True
+    run_training = True
+    use_2d_feature = False
 
-    # Instantiate mgc class
+    # Instantiate mgc main class
     MGC = MusicGenreClassification(AudioDatasetMaker, AudioFeatureExtraction, Classifier, music_dataset_path, setting_file)
 
-    # Make label text file
+    # Make label from genre names in processed_music_data
     MGC.make_label()
 
-    # Apply feature extraction and write out csv file if it does not exist
-    if feature_extraction is True:
-        # Apply feature extraction to all audio files
-        print("Start feature extraction")
-        feature_2D_dataframe, feature_3d_array, label_list = MGC.feature_extraction()
+    # Run feature extraction or load pre-extracted feature
+    train_data, test_data, train_label, test_label = MGC.feature_extraction_selector(run_feature_extraction, use_2d_feature,
+                                                                                     pre_extracted_2d_feature_directory,
+                                                                                     pre_extracted_3d_feature_directory,
+                                                                                     output_2d_feature_directory="../feature/feature_2D",
+                                                                                     output_3d_feature_directory="../feature/feature_3D")
 
-        if extract_2d_feature is True:
-            # Apply data process to 2D array
-            clean_dataframe = MGC.data_process(feature_2D_dataframe)
-            train_data, test_data, train_label, test_label = MGC.make_2D_dataset(clean_dataframe, output_2D_feature_directory)
-        else:
-            # Apply data process to 3D array
-            train_data, test_data, train_label, test_label = MGC.make_3D_dataset(feature_3d_array, label_list, output_3D_feature_directory)
-    # Read data from directory
-    else:
-        if extract_2d_feature is True:
-            train_data, test_data, train_label, test_label = MGC.read_2D_dataset(input_2D_feature_directory)
-        else:
-            train_data, test_data, train_label, test_label = MGC.read_3D_dataset(input_3D_feature_directory)
+    # Run training or load pre-trained model
+    model = MGC.training_selector(run_training, train_data, train_label, pre_trained_model_file, output_model_directory_path="../model")
 
-    # Training model
-    if training is True:
-        model = MGC.training(train_data, train_label, model_directory_path, visualize=True)
-    # Load model
-    else:
-        model = MGC.CLF.load_model(model_file)
-
-    # Test classifier
+    # Test model performance
     accuracy = MGC.test(model, test_data, test_label)
 
     # Make prediction
@@ -268,10 +307,6 @@ def main():
     predict_list = []
     for sample in list(prediction_array):
         predict_list.append(list(sample).index(max(list(sample))))
-
-
-
-    #print(max_class)
 
     print("Start prediction")
     print("Final accuracy is {0}".format(accuracy))
