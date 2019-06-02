@@ -10,6 +10,8 @@ import csv
 import pandas as pd
 import numpy as np
 import datetime
+import ntpath
+
 
 class FileUtil:
 
@@ -70,6 +72,24 @@ class FileUtil:
         Replace backslash in order to avoid Windows Mac convention mismatch
         """
         return input_file_path.replace('\\', '/')
+
+    @staticmethod
+    def rename_file(input_file_path: str):
+        """
+        Rename invalid file name
+        """
+        # Separate file path and name
+        path, filename_base = ntpath.split(input_file_path)
+        # Separate file name and extension
+        filename, extension = os.path.splitext(filename_base)
+
+        # Replace invalid char
+        if filename.find("."):
+            filename = filename.replace(".", "_")
+        if filename.find(" "):
+            filename = filename.replace(" ", "_")
+
+        return os.path.join(path, filename+extension)
 
     @staticmethod
     def get_folder_names(directory_path: str, sort=True) -> list:

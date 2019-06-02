@@ -8,10 +8,12 @@ Created on Mar 06
 # Import libraries/modules
 import os
 import librosa
+import numpy as np
+from pydub import AudioSegment
 from backend.src.utils.file_utils import FileUtil
 from backend.src.utils.audio_util import AudioUtil
 from backend.src.common.config_reader import ConfigReader
-
+import matplotlib.pyplot as plt
 
 class AudioReaderError(Exception):
     pass
@@ -41,11 +43,21 @@ class AudioDatasetMaker:
         :param sampling_rate: sampling rate
         :return audio signal in tuple
         """
-
         try:
-            audio_data = librosa.core.load(FileUtil.replace_backslash(input_audio_file_path), sampling_rate)
+            # Case of mp3 data
+            if os.path.splitext(input_audio_file_path)[1].find("mp3") == 1:
+                int_audio_data_stereo = np.array(AudioSegment.from_mp3(input_audio_file_path).get_array_of_samples())
+                int_audio_data_mono = int_audio_data_stereo[::AudioSegment.from_mp3(input_audio_file_path).channels]
+                audio_data = [int_audio_data_mono.astype(np.float32, order='C') / 32768.0]
+            # Case of m4a data
+            elif os.path.splitext(input_audio_file_path)[1].find("m4a") == 1:
+                int_audio_data_stereo = np.array(AudioSegment.from_file(input_audio_file_path, "m4a").get_array_of_samples())
+                int_audio_data_mono = int_audio_data_stereo[::AudioSegment.from_file(input_audio_file_path).channels]
+                audio_data = [int_audio_data_mono.astype(np.float32, order='C') / 32768.0]
+            else:
+                audio_data = librosa.core.load(FileUtil.replace_backslash(input_audio_file_path), sampling_rate)
         except:
-            raise AudioReaderError("Could not load audio file")
+            raise AudioReaderError("Could not load audio file: {}".format(input_audio_file_path))
         return audio_data
 
     def clip_audio_signal(self, input_audio_signal: tuple, audio_length_sample: int):
@@ -57,6 +69,14 @@ class AudioDatasetMaker:
         """
         assert len(input_audio_signal[0]) > audio_length_sample, "Input audio file length is too short"
         return input_audio_signal[0][:audio_length_sample]
+
+    def convert2wav(self, input_audio_file_path: str):
+        """
+          Run process to one audio file
+          :param input_audio_file_path: Path to input audio file
+          """
+        audio_data = AudioSegment.from_mp3(input_audio_file_path)
+        audio_data.export(new_file_path, format="wav")
 
     def process_audio_file(self, input_audio_file_path: str, audio_length_second: int, sampling_rate: int):
         """
@@ -103,8 +123,11 @@ class AudioDatasetMaker:
             # Process one audio file
             processed_audio = self.process_audio_file(os.path.join(input_directory, audio_file), self.audio_length,
                                                       self.sampling_rate)
+            # Rename file
+            file_path, extension = os.path.splitext(audio_file)
+
             # Save it
-            self.save_audio_file(processed_audio, os.path.join(output_directory, audio_file), self.sampling_rate,
+            self.save_audio_file(processed_audio, os.path.join(output_directory, file_path+".wav"), self.sampling_rate,
                                  self.normalize)
 
     def process_dataset(self, input_dataset: str, output_dataset: str):

@@ -117,6 +117,8 @@ http://macappstore.org/sox/
 
 For installing ffmpeg
 https://www.ffmpeg.org/download.html
+or 
+brew install ffmpeg
 
 * Make sure you are using Python3
 

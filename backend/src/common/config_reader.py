@@ -86,6 +86,7 @@ class ConfigReader:
         self.MLP = bool(cfg.get('classifier_selection', 'mlp'))
         self.GRU = bool(cfg.get('classifier_selection', 'gru'))
         self.LSTM = bool(cfg.get('classifier_selection', 'lstm'))
+        self.Logistic_Regression = bool(cfg.get('classifier_selection', 'logistic_regression'))
 
     def __init_classification(self, cfg):
         # Parameters for classification
