@@ -27,19 +27,19 @@ class MusicGenreClassification:
     """
 
     def __init__(self, audio_dataset_maker: classmethod, audio_feature_extraction: classmethod, classifier: classmethod, \
-                 dataset_path: str, setting_file: str):
+                 music_dataset_path: str, setting_file: str):
         """
         Init
         :param  audio_dataset_maker:      audio dataset make class
         :param  audio_feature_extraction: audio feature extraction class
         :param  classifier:               classifier class
-        :param  dataset_path:             path to data set
+        :param  music_dataset_path:             path to data set
         :param  setting_file:             config file
         """
         self.ADM = audio_dataset_maker(setting_file)
         self.AFE = audio_feature_extraction(setting_file)
         self.CLF = classifier(setting_file)
-        self.dataset_path = dataset_path
+        self.dataset_path = music_dataset_path
         self.cfg = ConfigReader(setting_file)
         self.setting_file = setting_file
 
@@ -262,15 +262,10 @@ class MusicGenreClassification:
 
 
 def main():
-    # File/folder path
-    setting_file = "../../config/master_config.ini"
-    music_dataset_path = "../../processed_music_data"
 
-    # Case of loading features
-    pre_extracted_2d_feature_directory = "../feature/feature_2D/2019-05-07_21_47_01.263743"
+    # Case of loading pre-extracted features / pre-trained feature
+    pre_extracted_2d_feature_directory = '../feature/feature_2D/2019-05-17_18_36_31.283054'
     pre_extracted_3d_feature_directory = "../feature/feature_3D/2019-05-07_22_06_38.549108"
-
-    # Case of loading pre-trained model
     pre_trained_model_file = "../model/2019-02-14_00:20:17.281506/mlp.h5"
 
     # Evaluate one file
@@ -279,10 +274,12 @@ def main():
     # Conditions
     run_feature_extraction = True
     run_training = True
-    use_2d_feature = False
+    use_2d_feature = True
 
     # Instantiate mgc main class
-    MGC = MusicGenreClassification(AudioDatasetMaker, AudioFeatureExtraction, Classifier, music_dataset_path, setting_file)
+    MGC = MusicGenreClassification(AudioDatasetMaker, AudioFeatureExtraction, Classifier,
+                                   music_dataset_path="../../processed_music_data",
+                                   setting_file="../../config/master_config.ini")
 
     # Make label from genre names in processed_music_data
     MGC.make_label()
@@ -298,18 +295,19 @@ def main():
     model = MGC.training_selector(run_training, train_data, train_label, pre_trained_model_file, output_model_directory_path="../model")
 
     # Test model performance
+    print("Start Testing \n")
     accuracy = MGC.test(model, test_data, test_label)
+    print("Final accuracy is {0}% \n".format(accuracy*100))
 
     # Make prediction
+    print("Start prediction \n")
     #dummy_dataframe = FileUtil.csv2dataframe(dummy_sample)
     prediction_array = MGC.predict(model, test_data)
     #max_class = np.argmax(prediction_array)
     predict_list = []
     for sample in list(prediction_array):
         predict_list.append(list(sample).index(max(list(sample))))
-
-    print("Start prediction")
-    print("Final accuracy is {0}".format(accuracy))
+    print(predict_list)
 
 
 if __name__ == "__main__":

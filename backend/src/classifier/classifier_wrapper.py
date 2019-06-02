@@ -11,7 +11,7 @@ from backend.src.classifier.kNN import kNN
 from backend.src.classifier.mlp import MLP
 from backend.src.classifier.cnn import CNN
 from backend.src.classifier.gru import GatedRecurrentUnit
-from backend.src.classifier.lstm import LongShortTermMemory
+from backend.src.classifier.logistic_regression import LogisticRegression
 from backend.src.common.config_reader import ConfigReader
 from keras.models import load_model
 import pickle
@@ -66,6 +66,8 @@ class Classifier:
             classifier = GatedRecurrentUnit(self.validation_rate, self.num_classes)
         elif self.selected_classifier == "gru":
             classifier = GatedRecurrentUnit(self.validation_rate, self.num_classes)
+        elif self.selected_classifier == "logistic_regression":
+            classifier = LogisticRegression(self.validation_rate, self.num_classes)
         assert classifier is not None, "No classifier selected"
         return classifier
 

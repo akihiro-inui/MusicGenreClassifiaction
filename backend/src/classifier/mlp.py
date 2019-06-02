@@ -9,6 +9,7 @@ Created on Sat Mar 17 23:14:28 2018
 import os
 import pickle
 import pandas as pd
+from matplotlib import pyplot as plt
 from keras.optimizers import SGD
 from keras.layers import Dense
 from keras.models import Sequential
@@ -73,6 +74,10 @@ class MLP:
         # Fit the model
         model.fit(train_data, onehot_train_label, callbacks=[early_stopping_monitor],
                   epochs=50, shuffle=False, validation_split=self.validation_rate)
+
+        # Visualize the training history
+        if visualize is True:
+            pass
 
         return model
 
