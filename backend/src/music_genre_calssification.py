@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Christmas 2018
-
 @author: Akihiro Inui
 """
 
@@ -19,11 +18,10 @@ class MusicGenreClassification:
     """
     # Content-based music genre classification
     # 1. Frame based feature extraction
-    # 2. Data processing (Normalization, Encoding label(string to number))
-    # 3. Make data set (Shuffle order, train/test separation, write train.csv/test.csv in "feature" directory with time)
-    # 4. Train model / Save model (save trained model in "model" directory with time)
-    # 5. Test classifier (test.csv)
-    # 6. Make a prediction to a dummy data (dummy_data.csv)
+    # 2. Data processing (Normalization, Encoding class label(string to number))
+    # 3. Split into training data and test data (Shuffle order, train/test separation, write train.csv/test.csv in "feature" directory with time)
+    # 4. Train and save model (save trained model in "model" directory with time)
+    # 5. Test classifier prediction accuracy (to test.csv)
     """
 
     def __init__(self, audio_dataset_maker: classmethod, audio_feature_extraction: classmethod, classifier: classmethod, \
@@ -263,18 +261,15 @@ class MusicGenreClassification:
 
 def main():
 
-    # Case of loading pre-extracted features / pre-trained feature
-    pre_extracted_2d_feature_directory = '../feature/feature_2D/2019-05-17_18_36_31.283054'
+    # Case of loading pre-extracted features and/or pre-trained feature
+    pre_extracted_2d_feature_directory = '../feature/feature_2D/2019-06-02_03_45_40.702793'
     pre_extracted_3d_feature_directory = "../feature/feature_3D/2019-05-07_22_06_38.549108"
     pre_trained_model_file = "../model/2019-02-14_00:20:17.281506/mlp.h5"
 
-    # Evaluate one file
-    dummy_sample = "../dummy_data.csv"
-
     # Conditions
-    run_feature_extraction = True
+    run_feature_extraction = False
     run_training = True
-    use_2d_feature = True
+    use_2d_feature = True  # Extract low-level features if set to True. Extract mel-spectrogram if set to False
 
     # Instantiate mgc main class
     MGC = MusicGenreClassification(AudioDatasetMaker, AudioFeatureExtraction, Classifier,
@@ -297,17 +292,7 @@ def main():
     # Test model performance
     print("Start Testing \n")
     accuracy = MGC.test(model, test_data, test_label)
-    print("Final accuracy is {0}% \n".format(accuracy*100))
-
-    # Make prediction
-    print("Start prediction \n")
-    #dummy_dataframe = FileUtil.csv2dataframe(dummy_sample)
-    prediction_array = MGC.predict(model, test_data)
-    #max_class = np.argmax(prediction_array)
-    predict_list = []
-    for sample in list(prediction_array):
-        predict_list.append(list(sample).index(max(list(sample))))
-    print(predict_list)
+    print("Model prediction accuracy is {0}% \n".format(accuracy*100))
 
 
 if __name__ == "__main__":
