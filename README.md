@@ -1,12 +1,6 @@
-
-<p align="center">
-<img src="assets/AAG_Logo.jpg?raw=true" alt="MusicGenreClassification" width="1000">
-</p>
+# Content-based Music Genre Classification
 
 
-# Content-based Music Genre Classification *(Under construction to be updated soon)
-
-Academic research in the field of Music Information Retrieval, The University of Edinburgh
 
 ## Abstract
 
@@ -34,12 +28,7 @@ Details on the GTZAN Music Genre Dataset are presented in the table below. In GT
 <img src="assets/PreP.png?raw=true" alt="Pre-Processing" width="700">
 </p>
 
-First, the input signal is sent to a high pass filter. The pre-emphasis increases the relative energy of the high-frequency spectrum [2].
-The importance of pre-emphasis is often noted in speech processing, especially if the extracted features are MFCC, and 0.97 is usually chosen as the pre-emphasis coefficient [2]. The pre-emphasis compensates for the high-frequency formants which were suppressed during the sound production by instruments or the human voice. In this system, pre-emphasis was optionally selected and applied to the input signal.
-
-Second, the emphasised input audio signal is segmented into analysis windows of 46ms length with an overlap of half size of an analysis window. The number of samples in an analysis window is usually the equal power of two to facilitate the use of FFT. For the system, 2048 samples are framed for an analysis window.
-
-Finally, the framed signals are inputted into a matrix and the silence removal is applied to each analysis frame. As the silence in the audio signal can affect the FFT computation in the reproduction of the system produced by Chang et al. [3] and Sturm [4], an appropriate silence removal method was considered. For each analysis frame, the number of non-zero samples are counted and compared to the number of zeros. The silence removal only validates frames which have non-zero samples that are more than the half of an analysis window (1024). Hence, frames containing zeros more than 1024 samples are invalidated.
+The input audio signal is segmented into analysis windows of 46ms length with an overlap of half size of an analysis window. The number of samples in an analysis window is usually the equal power of two to facilitate the use of FFT. For the system, 2048 samples are framed for an analysis window.
 
 ## Feature Extraction
 <p align="center">
@@ -72,8 +61,9 @@ Multilayer Perceptron
 
 The multilayer Perceptron to this project consists of 3 layers with relu function. The training data is splitted into 10% for the validation and 90% for the training. It loads the data from "Data.csv".
 
+Logistic Regression
 
-To be updated.
+
 
 
 ## Results
@@ -84,17 +74,7 @@ MLP: 83.6%
 
 
 ### Dependency
-Python 3.6.5
-
-numpy  version 1.14.2
-
-pandas version 0.22.0
-
-scipy  version 1.0.1
-
-keras  version 2.1.3
-
-PIL    version 5.0.0
+Please see requirements.txt
 
 
 ## Complete Installation
@@ -105,8 +85,6 @@ PIL    version 5.0.0
 4. bash run_me_first.sh
 5. Run backend/src/data_process/audio_dataset_maker.py
 6. Run backend/src/music_genre_classification.py
-7. Change model file path in frontend/src/app.py
-7. Run frontend/src/app.py
 * You may need to install sox and/or ffmpeg if you do not have one. (Windows complains sometimes..) 
 
 For installing sox (Windows)
