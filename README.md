@@ -42,11 +42,10 @@ Over a texture window which consists of 64 analysis windows, short-term features
 
 
 ## Classifier
-Fuzzy k-NN
+k-NN
 
-This method uses Euclidean distance between training and testing data. Each test sample is classified depending on the k number of training samples that surround the test sample. In the case of dissimilarity ties, the class appearing most often among the k nearest training observations will be the predicted answer. However, only a class label is assigned the test sample, and it does not have information on the strength of membership in that class
+This method uses Euclidean distance between training and testing data. Each test sample is classified depending on the k number of training samples that surround the test sample. 
 
-Fuzzy k-NN, a combination of fuzzy logic and k-NN, was proposed to address the problem [5]. It has two steps: 1) fuzzy labelling, which computes fuzzy vectors of training data, and 2) fuzzy classification, which computes the fuzzy vectors of test data.
 
 Multilayer Perceptron
 
@@ -59,10 +58,8 @@ Logistic Regression
 
 ## Results
 k-NN: 62.0%
-
-
 MLP: 83.6%
-
+Logistic Regression: 70.3%
 
 ### Dependency
 Please see requirements.txt
