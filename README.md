@@ -8,7 +8,7 @@ The automatic classification system to the most widely used music dataset; the G
 
 ## Introduction
 
-Music Genre Classification to the most widely used dataset; GTZAN was implemented with a set of several low-level feature extraction and machine learning methods. 10 features are extracted from audio files and classified with 3 classifiers, k-NN, multilayer perceptron and convolutional neural network.
+Music Genre Classification to the most widely used dataset; GTZAN was implemented with a set of several low-level feature extraction and machine learning methods. 10 features are extracted from audio files and classified with serveral classifiers, k-NN, multilayer perceptron and logistic regression.
 
 For the further information about the feature extraction methods, please have a look the papers in the reference.
 
