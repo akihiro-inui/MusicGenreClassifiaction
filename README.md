@@ -25,7 +25,7 @@ Details on the GTZAN Music Genre Dataset are presented in the table below. In GT
 
 ## Pre-processing
 
-The input audio signal is segmented into analysis windows of 46ms length with an overlap of half size of an analysis window. The number of samples in an analysis window is usually the equal power of two to facilitate the use of FFT. For the system, 2048 samples are framed for an analysis window.
+The input audio signal is segmented into analysis windows of 46ms length with an overlap of half size of an analysis window. The number of samples in an analysis window is usually the equal power of two to facilitate the use of FFT. For the system, 2048 samples are framed for an analysis window. Also, hamm widow is applied to each analysis window.
 
 ## Feature Extraction
 <p align="center">
