@@ -79,7 +79,7 @@ Please see requirements.txt
 
 ## Complete Installation
 
-1. Install sox (see below)
+1. Install sox and/or ffmpeg (see below)
 2. Clone this project
 3. Go to the folder(MusicGenreClassification)
 4. bash run_me_first.sh
