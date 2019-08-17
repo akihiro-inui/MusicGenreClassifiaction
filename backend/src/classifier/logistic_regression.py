@@ -9,7 +9,6 @@ import os
 import torch
 import numpy as np
 from torch import nn, optim
-import torch.nn.functional as F
 import matplotlib.pyplot as plt
 
 
@@ -39,7 +38,6 @@ class LogisticRegression:
 
         # One hot encode
         onehot_train_label = torch.tensor(np.array(train_label), dtype=torch.long)
-        #onehot_train_label = torch.tensor(np.array(pd.get_dummies(train_label)), dtype=torch.long)
 
         # Define the model
         model = nn.Linear(train_data.shape[1], self.num_classes)
@@ -52,7 +50,7 @@ class LogisticRegression:
 
         # To log losses
         losses = []
-        for epoch in range(10000):
+        for epoch in range(30000):
             # Delete gradient value calculated in previous epoch
             optimizer.zero_grad()
 
@@ -94,19 +92,27 @@ class LogisticRegression:
         """
         torch.save(model.state_dict(), os.path.join(output_directory, "logistic_regression.prm"), pickle_protocol=4)
 
-    def test(self, model, test_data, test_label):
+    def test(self, model, test_data, test_label, is_classification=True):
         """
         Make a test for the given dataset
         :param  model: trained model
         :param  test_data: test data
         :param  test_label: test label
+        :param  is_classification: Bool
         :return result of test
         """
         # One hot encode
         onehot_test_label = torch.tensor(np.array(test_label), dtype=torch.long)
-        # Make predictions and output result
-        predicted = torch.max(model(torch.tensor(np.array(test_data), dtype=torch.float32)), 1)[1]
-        return (predicted == onehot_test_label).sum().item()/len(test_label)
+
+        # Make prediction
+        prediction = model(torch.tensor(np.array(test_data), dtype=torch.float32))
+
+        _, predicted_classes = torch.max(prediction, 1)
+
+        # Treat max value as predicted class
+        predicted_classes = torch.max(prediction, 1)[1]
+
+        return (predicted_classes == onehot_test_label).sum().item()/len(test_label)
 
     def predict(self, model, target_data):
         """

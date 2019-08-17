@@ -8,9 +8,9 @@ Created on Sat Mar 17 23:14:28 2018
 
 # Import libraries/modules
 from backend.src.classifier.kNN import kNN
-from backend.src.classifier.mlp import MLP
-from backend.src.classifier.cnn import CNN
-from backend.src.classifier.gru import GatedRecurrentUnit
+from backend.src.classifier.mlp import MultiLayerPerceptron as MLP
+from backend.src.classifier.resnet import ResNet
+from backend.src.data_process.data_process import DataProcess
 from backend.src.classifier.logistic_regression import LogisticRegression
 from backend.src.common.config_reader import ConfigReader
 from keras.models import load_model
@@ -60,16 +60,21 @@ class Classifier:
             classifier = kNN(self.k)
         elif self.selected_classifier == "mlp":
             classifier = MLP(self.validation_rate, self.num_classes)
-        elif self.selected_classifier == "cnn":
-            classifier = CNN(self.validation_rate, self.num_classes)
-        elif self.selected_classifier == "lstm":
-            classifier = GatedRecurrentUnit(self.validation_rate, self.num_classes)
-        elif self.selected_classifier == "gru":
-            classifier = GatedRecurrentUnit(self.validation_rate, self.num_classes)
+        elif self.selected_classifier == "resnet":
+            classifier = ResNet(self.validation_rate, self.num_classes)
         elif self.selected_classifier == "logistic_regression":
             classifier = LogisticRegression(self.validation_rate, self.num_classes)
         assert classifier is not None, "No classifier selected"
         return classifier
+
+    def make_dataset_loader(self, train_data_with_label, test_data_with_label, validation_rate):
+        """
+        Dataset loader for Torch
+        :return train loader, test loader
+        """
+        # Make Dataset loader
+        train_loader, validation_loader, test_loader = DataProcess.torch_data_loader(train_data_with_label, test_data_with_label, validation_rate)
+        return train_loader, validation_loader, test_loader
 
     def load_model(self, input_model_file_name: str):
         """
