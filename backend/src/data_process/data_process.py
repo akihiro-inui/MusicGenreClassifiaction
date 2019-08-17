@@ -7,6 +7,7 @@ Created on Tue Nov 6 2018
 """
 
 import os
+import torch
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -405,3 +406,20 @@ class DataProcess:
             else:
                 flat_list.append(feature)
         return flat_list
+
+    @staticmethod
+    def torch_data_loader(train_data_with_label, test_data_with_label, validation_rate: float):
+        """
+        Using torchvision Dataset class, this method will create train and test dataset loader
+        :param train_data_with_label: Training data with label
+        :param test_data_with_label:  Test data with label
+        :param validation_rate: Rate for validation dataset
+        """
+        # Split training data into train adn validation
+        train_data_with_label, validation_data_with_label = train_test_split(train_data_with_label, test_size=validation_rate)
+
+        # Make data loader with batch
+        train_loader = torch.utils.data.DataLoader(train_data_with_label, batch_size=int(len(train_data_with_label)/5)+1, shuffle=True)
+        validation_loader = torch.utils.data.DataLoader(validation_data_with_label, batch_size=int(len(validation_data_with_label)/3)+1, shuffle=False)
+        test_loader = torch.utils.data.DataLoader(test_data_with_label, batch_size=int(len(test_data_with_label)/3)+1, shuffle=False)
+        return train_loader, validation_loader, test_loader

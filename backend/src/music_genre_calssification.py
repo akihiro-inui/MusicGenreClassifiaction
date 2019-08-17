@@ -21,7 +21,7 @@ class MusicGenreClassification:
     # 2. Data processing (Normalization, Encoding class label(string to number))
     # 3. Split into training data and test data (Shuffle order, train/test separation, write train.csv/test.csv in "feature" directory with time)
     # 4. Train and save model (save trained model in "model" directory with time)
-    # 5. Test classifier prediction accuracy (to test.csv)
+    # 5. Test classifier to get prediction accuracy (to test.csv)
     """
 
     def __init__(self, audio_dataset_maker: classmethod, audio_feature_extraction: classmethod, classifier: classmethod, \
@@ -152,7 +152,7 @@ class MusicGenreClassification:
         processed_dataframe = dataframe.copy()
 
         # Centerize data and apply standardization to data frame
-        #processed_dataframe = DataProcess.normalize_dataframe(processed_dataframe, self.cfg.label_name)
+        # processed_dataframe = DataProcess.normalize_dataframe(processed_dataframe, self.cfg.label_name)
         centerized_dataframe, mean_list = DataProcess.centerize_dataframe(processed_dataframe, self.cfg.label_name)
         cleaned_dataframe, std_list = DataProcess.standardize_dataframe(centerized_dataframe, self.cfg.label_name)
 
@@ -262,9 +262,9 @@ class MusicGenreClassification:
 def main():
 
     # Case of loading pre-extracted features and/or pre-trained feature
-    pre_extracted_2d_feature_directory = '../feature/feature_2D/2019-06-02_03_45_40.702793'
+    pre_extracted_2d_feature_directory = '../feature/feature_2D/2019-08-06_21_47_07.802309'
     pre_extracted_3d_feature_directory = "../feature/feature_3D/2019-05-07_22_06_38.549108"
-    pre_trained_model_file = "../model/2019-02-14_00:20:17.281506/mlp.h5"
+    pre_trained_model_file = "../model/2019-08-06_06_37_17.286254/kNN.pickle"
 
     # Conditions
     run_feature_extraction = False
