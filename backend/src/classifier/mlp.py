@@ -27,7 +27,7 @@ class MultiLayerPerceptron:
 
     def training(self, train_data, train_label, visualize=None):
         """
-        Training for Gated Recurrent Unit
+        Training for Multi Layer Perceptron
         :param  train_data: training data
         :param  train_label: train label
         :param  visualize: True/False to visualize training history
@@ -99,7 +99,7 @@ class MultiLayerPerceptron:
         :param  model: trained model
         :param  output_directory: output directory path
         """
-        torch.save(model.state_dict(), os.path.join(output_directory, "logistic_regression.prm"), pickle_protocol=4)
+        torch.save(model.state_dict(), os.path.join(output_directory, "mlp.prm"), pickle_protocol=4)
 
     def test(self, model, test_data, test_label, is_classification=True):
         """
