@@ -164,20 +164,25 @@ class MusicGenreClassification:
         FileUtil.list2csv(std_list, "../std_list.csv")
         return cleaned_dataframe
 
-    def training(self, train_data, train_label, output_directory, visualize=None):
+    def training(self, run_training: bool, train_data, train_label,
+                 model_file=None, output_model_directory_path=None, visualize=True):
         """
-        Train model and save it in the output_directory
-        :param  train_data:  train data
-        :param  train_label: train label
-        :param  output_directory: output directory for model
-        :param  visualize: True/False to visualize training history
-        :return trained model
+        Top level wrapper for training model
+        :param run_training: True to run training model. If False, it loads pre-trained model
+        :param train_data: Training data
+        :param train_label: Training label
+        :param model_file: Pre-trained model file path to load
+        :param output_model_directory_path: Output directory to save trained model
+        :param visualize: Set True to viusalize training history
+        :return Trained/pre-trained model
         """
-        # Train classifier
-        model = self.CLF.training(train_data, train_label, visualize)
-
-        # Save mode with current time
-        self.CLF.save_model(model, os.path.join(output_directory, FileUtil.get_time().replace(":", "_")))
+        # Training model
+        if run_training is True:
+            model = self.CLF.training(train_data, train_label, visualize)
+            self.CLF.save_model(model, os.path.join(output_model_directory_path, FileUtil.get_time().replace(":", "_")))
+        # Load model
+        else:
+            model = self.CLF.load_model(model_file)
         return model
 
     def test(self, model, test_data, test_label) -> float:
@@ -216,7 +221,7 @@ class MusicGenreClassification:
         if run_feature_extraction is True:
 
             # Apply feature extraction to all audio files
-            print("Start feature extraction")
+            print("Extracting feature from audio files")
             feature_2d_dataframe, feature_3d_array, label_list = self.feature_extraction()
 
             # Apply data process to extracted feature
@@ -230,6 +235,8 @@ class MusicGenreClassification:
 
         # Load pre-extracted feature from directory
         else:
+            # Apply feature extraction to all audio files
+            print("Loading pre-extracted feature")
             if use_2d_feature is True:
                 # Load 2D feature
                 train_data, test_data, train_label, test_label = self.read_2D_dataset(pre_extracted_2d_feature_directory)
@@ -238,25 +245,6 @@ class MusicGenreClassification:
                 train_data, test_data, train_label, test_label = self.read_3D_dataset(pre_extracted_3d_feature_directory)
 
         return train_data, test_data, train_label, test_label
-
-    def training_selector(self, run_training: bool, train_data, train_label,
-                          model_file=None, output_model_directory_path=None):
-        """
-        Top level wrapper for training model
-        :param run_training: True to run training model. If False, it loads pre-trained model
-        :param train_data: Training data
-        :param train_label: Training label
-        :param model_file: Pre-trained model file path to load
-        :param output_model_directory_path: Output directory to save trained model
-        """
-        # Training model
-        if run_training is True:
-            model = self.training(train_data, train_label, output_model_directory_path, visualize=True)
-
-        # Load model
-        else:
-            model = self.CLF.load_model(model_file)
-        return model
 
 
 def main():
@@ -269,7 +257,7 @@ def main():
     # Conditions
     run_feature_extraction = False
     run_training = True
-    use_2d_feature = True  # Extract low-level features if set to True. Extract mel-spectrogram if set to False
+    use_2d_feature = True  # Extract expert low-level features if set to True. Extract mel-spectrogram if set to False
 
     # Instantiate mgc main class
     MGC = MusicGenreClassification(AudioDatasetMaker, AudioFeatureExtraction, Classifier,
@@ -287,7 +275,7 @@ def main():
                                                                                      output_3d_feature_directory="../feature/feature_3D")
 
     # Run training or load pre-trained model
-    model = MGC.training_selector(run_training, train_data, train_label, pre_trained_model_file, output_model_directory_path="../model")
+    model = MGC.training(run_training, train_data, train_label, pre_trained_model_file, output_model_directory_path="../model")
 
     # Test model performance
     print("Start Testing \n")
