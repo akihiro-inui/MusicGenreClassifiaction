@@ -66,7 +66,7 @@ class MultiLayerPerceptron:
             # Make prediction
             predicted_label = model(train_data)
 
-            # Calculate MSE loss
+            # Calculate Cross Entropy loss
             loss = loss_fn(predicted_label, onehot_train_label)
             loss.backward()
 
