@@ -18,7 +18,7 @@ from onnx_coreml import convert
 import matplotlib.pyplot as plt
 from torch.autograd import Variable
 from pytorch2keras.converter import pytorch_to_keras
-
+import tqdm
 
 class FlattenLayer(nn.Module):
     def forward(self, inputs):
@@ -26,98 +26,78 @@ class FlattenLayer(nn.Module):
         return inputs.view(sizes[0], -1)
 
 
-class CNN(nn.Module):
+class CNN:
     def __init__(self, validation_rate, num_classes):
-        super(CNN, self).__init__()
         self.validation_rate = validation_rate
         self.num_classes = num_classes
 
-        self.layer1 = nn.Sequential(
-            nn.Conv2d(1, 64, kernel_size=5, stride=1, padding=2),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.ReLU())
+        conv = nn.Sequential(
+            nn.Conv2d(1, 64, 5),
+            nn.MaxPool2d(2),
+            nn.ReLU(),
+            nn.BatchNorm2d(64),
+            nn.Dropout2d(0.25),
+            nn.Conv2d(64, 64, 5),
+            nn.MaxPool2d(2),
+            nn.ReLU(),
+            nn.BatchNorm2d(64),
+            nn.Dropout2d(0.25),
+            FlattenLayer()
+        )
 
-        self.layer2 = nn.Sequential(
-            nn.Conv2d(64, 64, kernel_size=5, stride=1, padding=2),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.ReLU())
+        mlp = nn.Sequential(
+            nn.Linear(10816, 200),
+            nn.ReLU(),
+            nn.BatchNorm1d(200),
+            nn.Dropout(0.25),
+            nn.Linear(200, num_classes),
+        )
 
-        self.drop_out = nn.Dropout()
-        self.fc1 = nn.Linear(1*128*128, 1000)
-        self.fc2 = nn.Linear(1000, 10)
+        self.model = nn.Sequential(conv, mlp)
 
-        self.optimizer = optim.Adam(self.parameters(), lr=0.001)
+        self.optimizer = optim.Adam(self.model.parameters(), lr=0.001)
         self.loss_function = nn.CrossEntropyLoss()
 
-    def forward(self, inputs):
-        inputs = self.layer1(inputs)
-        inputs = self.layer2(inputs)
-        inputs = inputs.reshape(inputs.size(0), -1)
-        inputs = self.drop_out(inputs)
-        inputs = self.fc1(inputs)
-        inputs = self.fc2(inputs)
-        return inputs
-
-    def torch_train(self, train_loader, validation_loader, visualize=True):
-        # Set to training mode
-        self.train()
+    def training(self, train_loader, validation_loader, visualize=True):
         # To log losses
         loss_history = []
+        accuracy_history = []
+        num = 0
+
         for epoch in range(1, 30):
             # Iteration for batch
-            for batch_idx, (data, label) in enumerate(train_loader):
+            batch_accuracy = 0
+            batch_loss = 0
+            for batch_idx, (data, label) in tqdm.tqdm(enumerate(train_loader)):
+                # Define hardware
+                data = data.to("cpu")
+                label = label.to("cpu")
+
+                # Forward data and calculate loss
+                data = data.unsqueeze(1)  # Make 3D array to 4D
+                output = self.model(data)
+                _, prediction = output.max(1)
+                loss = self.loss_function(output, label)
+
                 # Delete gradient value calculated in previous epoch
                 self.optimizer.zero_grad()
 
-                # Split training dataset into data and label
-                data, label = Variable(data), Variable(label)
-                label = torch.tensor(label, dtype=torch.long)
-
-                # Make prediction
-                data = data.unsqueeze(1)
-                output = self(data)
-
-                # Calculate loss
-                loss = self.loss_function(output, label)
-                loss.backward()
-
                 # Log loss
-                loss_history.append(loss.item())
+                batch_loss += loss.item()
+                loss.backward()
 
                 # Update optimizer
                 self.optimizer.step()
 
-                # Print training status
-                #if batch_idx % 10 == 0:
-                print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                        epoch, batch_idx * len(data), len(train_loader.dataset),
-                               100. * batch_idx / len(train_loader), loss.data))
+                num += len(data)
+                batch_accuracy += (label == prediction).float().sum().item()
 
-            # for batch_idx, (data, label) in enumerate(validation_loader):
-            #     # Delete gradient value calculated in previous epoch
-            #     self.optimizer.zero_grad()
-            #
-            #     # Split training dataset into data and label
-            #     data, label = Variable(data), Variable(label)
-            #     label = torch.tensor(label, dtype=torch.long)
-            #     # Make prediction
-            #     output = self(data)
-            #
-            #     # Calculate loss
-            #     loss = self.loss_function(output, label)
-            #     loss.backward()
-            #
-            #     # Log loss
-            #     losses.append(loss)
-            #
-            #     # Update optimizer
-            #     self.optimizer.step()
-            #
-            #     # Print training status
-            #     if batch_idx % 10 == 0:
-            #         print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-            #             epoch, batch_idx * len(data), len(train_loader.dataset),
-            #                    100. * batch_idx / len(train_loader), loss.data))
+            # Append accuracy and loss
+            accuracy_history.append(batch_accuracy/num)
+            loss_history.append(batch_loss/num)
+
+            # Print training status
+            print(loss_history[-1], accuracy_history[-1], flush=True)
 
         if visualize is True:
             plt.plot(loss_history)
@@ -129,8 +109,8 @@ class CNN(nn.Module):
             plt.show()
         return self
 
-    def torch_test(self, test_loader):
-        self.eval()
+    def test(self, test_loader):
+        self.model.eval()
         test_loss = 0
         correct = 0
         for data, target in test_loader:
@@ -138,7 +118,7 @@ class CNN(nn.Module):
             data, target = Variable(data, volatile=True), Variable(target)
 
             # Make prediction
-            output = self(data)
+            output = self.model(data)
 
             # Sum up batch loss
             test_loss += F.nll_loss(output, target, size_average=False).data

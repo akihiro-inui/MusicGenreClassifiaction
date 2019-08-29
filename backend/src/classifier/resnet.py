@@ -7,6 +7,7 @@ Created on sleepy midnight in June
 
 from __future__ import print_function
 import onnx
+import numpy as np
 import torch
 import torch.onnx
 import torch.nn as nn
@@ -31,7 +32,10 @@ class ResNet:
     4. confidence, predicted_class = model.torch_predict(image_data)
     """
 
-    def __init__(self, num_classes: int, image_size: int):
+    def __init__(self, validation_rate, num_classes):
+        # Rate for validation
+        self.validation_rate = validation_rate
+
         # Number of classes
         self.num_classes = num_classes
 
@@ -51,171 +55,89 @@ class ResNet:
         # Observe that all parameters are being optimized
         self.optimizer = optim.SGD(self.model.fc.parameters(), lr=0.001, momentum=0.9)
 
-        # Transformer
-        self.transform = transforms.Compose([
-            transforms.Resize((image_size, image_size)),
-            transforms.CenterCrop(224),
-            transforms.ToTensor(),
-            # transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-            transforms.Normalize([0.5], [0.5])
-        ])
-
-    def torch_train(self, epoch_num, train_loader, validation_loader, visualize_history=True):
+    def training(self, train_data, train_label, visualize=True):
         """
-        Training/Validation for ResNet
-        :param epoch_num: Number of total epoch
-        :param train_loader: Training Data loader
-        :param validation_loader: Validation Data loader
-        :param visualize_history: Set True to visualize loss and accuracy history
+        Training for ResNet
+        :param  train_data: training data
+        :param  train_label: train label
+        :param  visualize: True/False to visualize training history
+        :return model: trained model
         """
+        train_samples_num = train_data.shape[0]
+        data_width = train_data.shape[1]
+        data_height = train_data.shape[2]
+        train_data = train_data.reshape((train_samples_num, data_width, data_height, 1))
+        # Convert training data
+        train_data = torch.tensor(train_data, dtype=torch.float32)
 
-        # Keep history
-        training_loss_history = []
-        training_accuracy_history = []
-        validation_loss_history = []
-        validation_accuracy_history = []
+        # One hot encode
+        onehot_train_label = torch.tensor(train_label, dtype=torch.long)
 
         # For every epoch
-        for epoch in range(1, epoch_num + 1):
-
+        losses = []
+        for epoch in range(300):
             # Set model to training mode
             self.model.train()
 
-            # Initialize parameters
-            training_loss_history_epoch = []
-            training_accuracy_history_epoch = []
-
-            # For every batch from train loader
-            for batch_idx, data in enumerate(train_loader):
-                # Split Data/Label
-                image, label = data
-                image, label = Variable(image), Variable(label)
-
-                # zero the parameter gradients
-                self.optimizer.zero_grad()
-
-                # Make prediction
-                output = self.model(image)
-
-                # Calculate loss, store it as history
-                loss = self.loss_function(output, label)
-                training_loss_history_epoch.append(loss)
-
-                # Perform a backward pass, and update the weights.
-                loss.backward()
-                self.optimizer.step()
-
-                # Calculate training accuracy, store it as history
-                _, prediction = output.max(1)
-                accuracy = (label == prediction).float().sum().item() / len(label)
-                training_accuracy_history_epoch.append(accuracy)
-
-                # Print state of training
-                print('Train Epoch: {} [{}/{} ({:.0f}%)]\tTraining Loss: {:.6f}\tTraining Accuracy {:.6f}'.format(
-                    epoch, batch_idx * len(image), len(train_loader.dataset),
-                           100. * batch_idx / len(train_loader), loss.data, accuracy))
-
-            # Training loss and accuracy (Take average performance of this epoch)
-            training_loss_history.append(sum(training_loss_history_epoch) / len(training_loss_history_epoch))
-            training_accuracy_history.append(
-                sum(training_accuracy_history_epoch) / len(training_accuracy_history_epoch))
-
-            # Validation loss and accuracy (Take average performance of this epoch)
-            validation_accuracy_history_epoch, validation_loss_history_epoch = self.torch_validation(validation_loader)
-            validation_accuracy_history.append(
-                sum(validation_accuracy_history_epoch) / len(validation_accuracy_history_epoch))
-            validation_loss_history.append(sum(validation_loss_history_epoch) / len(validation_loss_history_epoch))
-
-        # Show loss and accuracy history
-        if visualize_history is True:
-            self.torch_visualize(training_loss_history, validation_loss_history, training_accuracy_history,
-                                 validation_accuracy_history)
-
-    def torch_validation(self, validation_loader):
-        """
-        Validation for ResNet
-        :param validation_loader: Validation Dataset loader
-        :return validation_accuracy_history_epoch: Validation accuracy in list
-        :return validation_loss_history_epoch: Validation loss in list
-        """
-        # Set model to evaluation mode
-        self.model.eval()
-
-        # To save history
-        validation_accuracy_history_epoch = []
-        validation_loss_history_epoch = []
-        for batch_idx, data in enumerate(validation_loader):
-            # Split validation data into image and label
-            image, label = data
-            image, label = Variable(image), Variable(label)
+            # zero the parameter gradients
+            self.optimizer.zero_grad()
 
             # Make prediction
-            output = self.model(image)
+            predicted_label = self.model(train_data)
 
-            # Calculate loss, store it as history
-            loss = self.loss_function(output, label)
-            validation_loss_history_epoch.append(loss)
+            # Calculate loss
+            loss = self.loss_function(predicted_label, onehot_train_label)
+            loss.backward()
 
-            # Predict class
-            with torch.no_grad():
-                _, prediction = self.model(image).max(1)
+            # Update gradient
+            self.optimizer.step()
 
-            # Append to list
-            validation_accuracy_history_epoch.append((label == prediction).float().sum().item() / len(label))
+            # Log loss
+            losses.append(loss.item())
 
-        return validation_accuracy_history_epoch, validation_loss_history_epoch
+        # Visualize losses
+        if visualize is True:
+            plt.plot(losses)
+            plt.show()
+        return self.model
 
-    def torch_test(self, test_loader):
+    def test(self, model, test_data, test_label, is_classification=True):
         """
-        Test for ResNet
-        :param test_loader: Test Dataset loader
+        Make a test for the given dataset
+        :param  model: trained model
+        :param  test_data: test data
+        :param  test_label: test label
+        :param  is_classification: Bool
+        :return result of test
         """
-        # Init param
-        test_loss = 0
-        correct = 0
+        # Reshape data
+        test_samples_num = test_data.shape[0]
+        data_width = test_data.shape[1]
+        data_height = test_data.shape[2]
+        test_data.reshape((test_samples_num, data_width, data_height, 1))
 
-        # Set model to evaluation mode
-        self.model.eval()
-        for (image, label) in test_loader:
-            # Split test dataset into data and label
-            image, target = Variable(image.float(), volatile=True), Variable(label)
+        # One hot encode
+        onehot_test_label = torch.tensor(test_label, dtype=torch.long)
 
-            # Make prediction
-            output = self.model(image)
+        # Make prediction
+        prediction = model(torch.tensor(test_data), dtype=torch.float32)
 
-            # Sum up batch loss
-            test_loss += self.loss_function(output, label).data
+        _, predicted_classes = torch.max(prediction, 1)
 
-            # Get the index of the max log-probability (predicted class)
-            pred = output.data.max(1, keepdim=True)[1]
+        # Treat max value as predicted class
+        predicted_classes = torch.max(prediction, 1)[1]
 
-            # Count correct predictions
-            correct += pred.eq(target.data.view_as(pred)).cpu().sum()
+        return (predicted_classes == onehot_test_label).sum().item()/len(test_label)
 
-        # Calculate test loss and accuracy
-        test_loss /= len(test_loader.dataset)
-        print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-            test_loss, correct, len(test_loader.dataset),
-            100. * correct / len(test_loader.dataset)))
-
-    def torch_predict(self, image_data):
+    def predict(self, model, target_data):
         """
-        Make prediction to one image file.
-        Feed into the model
-        :param image_data: PIL loaded image data
+        Make prediction to a given target data and return the prediction result with accuracy for each sample
+        :param  model: trained model
+        :param  target_data: target data without label
+        :return prediction array with probability
         """
-        # Set to evaluation mode
-        self.model.eval()
-
-        # Pass the image through our model with Softmax to get probability
-        output = self.model(image_data)
-        output = F.softmax(output, dim=1)
-
-        # Make prediction and get the highest confident class
-        confidence, highest_class = torch.topk(output, 1)
-        confidence = confidence.item()
-        highest_class = highest_class.item()
-        return confidence, highest_class
+        # Make prediction to the target data
+        return model(torch.tensor(np.array(target_data), dtype=torch.float32))
 
     def torch_save(self, param_file_path: str):
         """

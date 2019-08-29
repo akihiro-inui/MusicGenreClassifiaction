@@ -2,18 +2,21 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Nov 6 2018
-
 @author: Akihiro Inui
 """
 
 import os
 import torch
-import pandas as pd
 import numpy as np
+import pandas as pd
+from torch import Tensor
+import matplotlib.pyplot as plt
+from torchvision import transforms
+from torch.utils.data import DataLoader, TensorDataset
 from sklearn.model_selection import train_test_split
 from backend.src.utils.file_utils import FileUtil
 from backend.src.data_process.datacleaner import DataCleaner
-
+import torchvision
 
 class DataProcess:
 
@@ -224,7 +227,7 @@ class DataProcess:
         return label, data
 
     @staticmethod
-    def train_test_split(input_dataframe, label_name: str, test_size: float, shuffle: False):
+    def dataframe_train_test_split(input_dataframe, label_name: str, test_size: float, shuffle: False):
         """
         # Split data frame into data and label
         :param  input_dataframe: input pandas data frame
@@ -253,7 +256,7 @@ class DataProcess:
         return train_data, test_data, train_label, test_label
 
     @staticmethod
-    def make_2D_dataset(feature_2D_dataframe, label_name: str, test_size: float, shuffle: bool = False, output_directory: str = None):
+    def make_2d_dataset_from_dataframe(feature_2D_dataframe, label_name: str, test_size: float, shuffle: bool = False, output_directory: str = None):
         """
         Make data set and save the train/test data under output_directory
         1. Split label and data from the input dataframe
@@ -271,6 +274,10 @@ class DataProcess:
         :return test_data:   test data
         :return test_label:  test label
         """
+        # Make output directory if it does not exist
+        if not os.path.isdir(output_directory):
+            os.mkdir(output_directory)
+
         # Split data and label
         label, data = DataProcess.data_label_split(feature_2D_dataframe, label_name)
         # Train/Test separation
@@ -279,31 +286,26 @@ class DataProcess:
                                                                           test_size=test_size,
                                                                           shuffle=shuffle)
 
-        # Write out test and train data as csv files if output directory name is given
+        # Write out train and test data as csv files if output directory name is given
         if output_directory:
-            # Return error of the target directory already exist
-            assert os.path.exists(output_directory) is False, "Target output data folder already exist"
-            os.mkdir(FileUtil.replace_backslash(output_directory))
             FileUtil.dataframe2csv(pd.concat([train_data, train_label], axis=1),
                                    os.path.join(output_directory, "train.csv"))
             FileUtil.dataframe2csv(pd.concat([test_data, test_label], axis=1),
                                    os.path.join(output_directory, "test.csv"))
         else:
             print("Dataset is created but not saved")
-
         return train_data, test_data, train_label, test_label
 
     @staticmethod
-    def make_3D_dataset(feature_3D_array, label_list: list, test_size: float, shuffle: bool = False, output_directory: str = None):
+    def make_dataset_from_array(feature_array, label_array, test_size: float, shuffle: bool = False, output_directory: str = None):
         """
-        Make data set and save the train/test data under output_directory
-        1. Split label and data from the input dataframe
-        2. Split them into train/test data and train/test label
-        3. If output_directory is given, writes out them in csv format to the directory with current time
-        4. Data and label are respectively saved as "train.csv" and "test.csv"
+        Make 2D array data set and save the train/test data under output_directory
+        1. Split them into train/test data and train/test label
+        2. If output_directory is given, writes out them in .npy format to the directory with current time
+        3. Data and label are respectively saved as "train.npy" and "test.npy"
 
-        :param  feature_3D_array:   extracted feature in data frame
-        :param  label_name:  name of label column in data frame
+        :param  feature_array:  extracted feature in numpy array
+        :param  label_array:  labels in numpy array
         :param  test_size:   size of test data set
         :param  shuffle:     set True for randomisation
         :param  output_directory: output directory to save train and test data
@@ -312,38 +314,38 @@ class DataProcess:
         :return test_data:   test data
         :return test_label:  test label
         """
+        # Make output directory if it does not exist
+        if not os.path.isdir(output_directory):
+            os.mkdir(output_directory)
 
         # Train/Test separation
-        train_data, test_data, train_label, test_label = train_test_split(feature_3D_array,
-                                                                          label_list,
+        train_data, test_data, train_label, test_label = train_test_split(feature_array,
+                                                                          label_array,
                                                                           test_size=test_size,
                                                                           shuffle=shuffle)
 
-        # Write out test and train data as csv files if output directory name is given
+        # Write out train and test data as .npy files if output directory name is given
         if output_directory:
-            # Return error of the target directory already exist
-            assert os.path.exists(output_directory) is False, "Target output data folder already exist"
-            os.mkdir(FileUtil.replace_backslash(output_directory))
-            np.save(os.path.join(output_directory, "train_data.npy"), train_data)
-            np.save(os.path.join(output_directory, "train_label.npy"), train_label)
-            np.save(os.path.join(output_directory, "test_data.npy"), test_data)
-            np.save(os.path.join(output_directory, "test_label.npy"), test_label)
+            np.save(os.path.join(output_directory, "train_data"), train_data)
+            np.save(os.path.join(output_directory, "train_label"), train_label)
+            np.save(os.path.join(output_directory, "test_data"), train_data)
+            np.save(os.path.join(output_directory, "test_label"), train_label)
         else:
-            print("Data set is created but not saved")
+            print("Dataset is created but not saved")
         return train_data, test_data, train_label, test_label
 
     @staticmethod
-    def read_2D_dataset(input_data_directory_with_date: str, label_name: str):
+    def read_dataset_from_csv(input_data_directory: str, label_name: str):
         """
-        Read data set under the given directory, return data and label
-        :param  input_data_directory_with_date: input data directory with time where train.csv and test.csv exist
+        Read data set saved as csv under the given directory, return data and label
+        :param  input_data_directory: input data directory with time where train.csv and test.csv exist
         :param  label_name: name of label column in dataframe
         :return data: data in dataframe
         :return label: label in series
         """
         # Get file names
-        train_file_path = os.path.join(input_data_directory_with_date, "train.csv")
-        test_file_path = os.path.join(input_data_directory_with_date, "test.csv")
+        train_file_path = os.path.join(input_data_directory, "train.csv")
+        test_file_path = os.path.join(input_data_directory, "test.csv")
 
         # Check if the given data set exist
         FileUtil.is_valid_file(train_file_path)
@@ -360,31 +362,30 @@ class DataProcess:
         return train_data, test_data, train_label, test_label
 
     @staticmethod
-    def read_3D_dataset(input_data_directory_with_date: str, label_name: str):
+    def read_dataset_from_array(input_data_directory: str):
         """
-        Read data set under the given directory, return data and label
-        :param  input_data_directory_with_date: input data directory with time where train.csv and test.csv exist
-        :param  label_name: name of label column in numpy array
+        Read data set saved as numpy array under the given directory, return data and label
+        :param  input_data_directory: input data directory with time where train.csv and test.csv exist
         :return data: data in numpy array
-        :return label: label in series
+        :return label: label in numpy array
         """
         # Get file names
-        train_data_file_path = os.path.join(input_data_directory_with_date, "train_data.npy")
-        train_label_file_path = os.path.join(input_data_directory_with_date, "train_label.npy")
-        test_data_file_path = os.path.join(input_data_directory_with_date, "test_data.npy")
-        test_label_file_path = os.path.join(input_data_directory_with_date, "test_label.npy")
+        train_data_file_path = os.path.join(input_data_directory, "train_data.npy")
+        test_data_file_path = os.path.join(input_data_directory, "test_data.npy")
+        train_label_file_path = os.path.join(input_data_directory, "train_label.npy")
+        test_label_file_path = os.path.join(input_data_directory, "test_label.npy")
 
         # Check if the given data set exist
         FileUtil.is_valid_file(train_data_file_path)
-        FileUtil.is_valid_file(train_label_file_path)
         FileUtil.is_valid_file(test_data_file_path)
+        FileUtil.is_valid_file(train_label_file_path)
         FileUtil.is_valid_file(test_label_file_path)
 
-        # Read csv file
-        train_data = FileUtil.load_3D_array(train_data_file_path)
-        train_label = FileUtil.load_3D_array(train_label_file_path)
-        test_data = FileUtil.load_3D_array(test_data_file_path)
-        test_label = FileUtil.load_3D_array(test_label_file_path)
+        # Read npy file
+        train_data = np.load(train_data_file_path)
+        test_data = np.load(test_data_file_path)
+        train_label = np.load(train_label_file_path)
+        test_label = np.load(test_label_file_path)
 
         return train_data, test_data, train_label, test_label
 
@@ -408,18 +409,48 @@ class DataProcess:
         return flat_list
 
     @staticmethod
-    def torch_data_loader(train_data_with_label, test_data_with_label, validation_rate: float):
+    def torch_train_data_loader(data, label, validation_rate: float):
         """
-        Using torchvision Dataset class, this method will create train and test dataset loader
-        :param train_data_with_label: Training data with label
-        :param test_data_with_label:  Test data with label
-        :param validation_rate: Rate for validation dataset
+        Make Dataset loader
+        :param data:  data
+        :param label: label
+        :param validation_rate: rate for validation from training data
+        :return: train_loader: Torch Dataset loader for train
+        :return: validation_loader: Torch Dataset loader for validation
         """
         # Split training data into train adn validation
-        train_data_with_label, validation_data_with_label = train_test_split(train_data_with_label, test_size=validation_rate)
+        train_data, validation_data, train_label, validation_label = train_test_split(data, label, test_size=validation_rate)
+
+        # Resize array
+        train_data = np.stack([torch.from_numpy(np.resize(i, (64, 64))) for i in train_data])
+        validation_data = np.stack([torch.from_numpy(np.resize(i, (64, 64))) for i in validation_data])
+        train_label = torch.stack([torch.from_numpy(np.array(i)) for i in train_label])
+        validation_label = torch.stack([torch.from_numpy(np.array(i)) for i in validation_label])
+
+        train_data = torch.tensor(train_data, dtype=torch.float32)
+        validation_data = torch.tensor(validation_data, dtype=torch.float32)
+        train_label = torch.tensor(train_label, dtype=torch.int64)
+        validation_label = torch.tensor(validation_label, dtype=torch.int64)
 
         # Make data loader with batch
-        train_loader = torch.utils.data.DataLoader(train_data_with_label, batch_size=int(len(train_data_with_label)/5)+1, shuffle=True)
-        validation_loader = torch.utils.data.DataLoader(validation_data_with_label, batch_size=int(len(validation_data_with_label)/3)+1, shuffle=False)
-        test_loader = torch.utils.data.DataLoader(test_data_with_label, batch_size=int(len(test_data_with_label)/3)+1, shuffle=False)
-        return train_loader, validation_loader, test_loader
+        train_data = TensorDataset(train_data, train_label)
+        validation_data = TensorDataset(validation_data, validation_label)
+        train_loader = torch.utils.data.DataLoader(train_data, batch_size=int(len(train_data)/5)+1, shuffle=True)
+        validation_loader = torch.utils.data.DataLoader(validation_data, batch_size=int(len(validation_data)/3)+1, shuffle=False)
+        return train_loader, validation_loader
+
+    @staticmethod
+    def torch_test_data_loader(data, label):
+        """
+        Make Dataset loader
+        :param data:  data
+        :param label: label
+        :return: test_loader: Torch Dataset loader for test
+        """
+        # Resize array
+        data = np.stack([torch.from_numpy(np.resize(i, (64, 64))) for i in data])
+
+        # Make data loader with batch
+        test_dataset = TensorDataset(Tensor(data), Tensor(label))
+        test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=int(len(test_dataset)/3)+1, shuffle=False)
+        return test_loader

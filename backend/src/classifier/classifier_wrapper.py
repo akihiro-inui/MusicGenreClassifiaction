@@ -2,21 +2,21 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sat Mar 17 23:14:28 2018
-
-@author: akihiro inui
+@author: Akihiro Inui
 """
 
 # Import libraries/modules
+import os
+import pickle
+import matplotlib.pyplot as plt
 from backend.src.classifier.kNN import kNN
+from backend.src.classifier.cnn import CNN
 from backend.src.classifier.mlp import MultiLayerPerceptron as MLP
 from backend.src.classifier.resnet import ResNet
 from backend.src.data_process.data_process import DataProcess
 from backend.src.classifier.logistic_regression import LogisticRegression
 from backend.src.common.config_reader import ConfigReader
 from keras.models import load_model
-import pickle
-import matplotlib.pyplot as plt
-import os
 
 
 class Classifier:
@@ -58,13 +58,15 @@ class Classifier:
         # Initialize chosen classifier
         if self.selected_classifier == "knn":
             classifier = kNN(self.k)
-        elif self.selected_classifier == "mlp":
-            classifier = MLP(self.validation_rate, self.num_classes)
-        elif self.selected_classifier == "resnet":
-            classifier = ResNet(self.validation_rate, self.num_classes)
         elif self.selected_classifier == "logistic_regression":
             classifier = LogisticRegression(self.validation_rate, self.num_classes)
-        assert classifier is not None, "No classifier selected"
+        elif self.selected_classifier == "mlp":
+            classifier = MLP(self.validation_rate, self.num_classes)
+        elif self.selected_classifier == "cnn":
+            classifier = CNN(self.validation_rate, self.num_classes)
+        # elif self.selected_classifier == "resnet":
+        #    classifier = ResNet(self.validation_rate, self.num_classes)
+        assert classifier is not None, "No classifier selected. Please select one"
         return classifier
 
     def make_dataset_loader(self, train_data_with_label, test_data_with_label, validation_rate):
@@ -110,8 +112,15 @@ class Classifier:
         :param   visualize: True/False to visualize training history
         :return  model: trained   model
         """
-        # Train model
-        return self.classifier.training(train_data, train_label, visualize)
+        if self.selected_classifier == "cnn":
+            # Make Torch dataset loader for train
+            train_loader, validation_loader = DataProcess.torch_train_data_loader(train_data, train_label, self.validation_rate)
+            self.classifier.training(train_loader, validation_loader, visualize=visualize)
+            # Train model
+            return self.classifier.training(train_loader, validation_loader, visualize=visualize)
+        else:
+            # Train model
+            return self.classifier.training(train_data, train_label, visualize)
 
     def test(self, model, test_data, test_label) -> float:
         """
@@ -121,7 +130,13 @@ class Classifier:
         :param  test_label: test data
         :return Over all test score (accuracy)
         """
-        return self.classifier.test(model, test_data, test_label)
+        if self.selected_classifier == "cnn":
+            # Make Torch dataset loader for test
+            test_loader = DataProcess.torch_test_data_loader(test_data, test_label)
+            # Test model performance
+            return self.classifier.test(model, test_loader)
+        else:
+            return self.classifier.test(model, test_data, test_label)
 
     def predict(self, model, target_data) -> float:
         """

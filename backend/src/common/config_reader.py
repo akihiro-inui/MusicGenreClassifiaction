@@ -31,6 +31,7 @@ class ConfigReader:
         self.__init_audio_preprocess(cfg)
         self.__init_short_feature_selection(cfg)
         self.__init_long_feature_selection(cfg)
+        self.__init_file_feature_selection(cfg)
         self.__init_feature_extraction(cfg)
         self.__init_dataset(cfg)
         self.__init_classifier_selection(cfg)
@@ -52,7 +53,6 @@ class ConfigReader:
         self.rolloff = bool(cfg.get('short_feature_selection', 'rolloff'))
         self.flux = bool(cfg.get('short_feature_selection', 'flux'))
         self.osc = bool(cfg.get('short_feature_selection', 'osc'))
-        self.mel_spectrogram = bool(cfg.get('short_feature_selection', 'mel_spectrogram'))
 
     def __init_long_feature_selection(self, cfg):
         # Switch for long-term feature selection
@@ -60,6 +60,11 @@ class ConfigReader:
         self.omsc = bool(cfg.get('long_feature_selection', 'omsc'))
         self.mscm = bool(cfg.get('long_feature_selection', 'mscm'))
         self.msfm = bool(cfg.get('long_feature_selection', 'msfm'))
+
+    def __init_file_feature_selection(self, cfg):
+        # Switch for entire file feature selection
+        self.mel_spectrogram = bool(cfg.get('file_feature_selection', 'mel_spectrogram'))
+        self.num_mels = int(cfg.get('file_feature_selection', 'num_mels'))
 
     def __init_feature_extraction(self, cfg):
         # Parameters for feature extraction
@@ -83,8 +88,10 @@ class ConfigReader:
     def __init_classifier_selection(self, cfg):
         # Parameters for classifier selection
         self.kNN = bool(cfg.get('classifier_selection', 'knn'))
-        self.MLP = bool(cfg.get('classifier_selection', 'mlp'))
         self.Logistic_Regression = bool(cfg.get('classifier_selection', 'logistic_regression'))
+        self.MLP = bool(cfg.get('classifier_selection', 'mlp'))
+        self.CNN = bool(cfg.get('classifier_selection', 'cnn'))
+        self.ResNet = bool(cfg.get('classifier_selection', 'resnet'))
 
     def __init_classification(self, cfg):
         # Parameters for classification
