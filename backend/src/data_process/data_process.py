@@ -328,8 +328,8 @@ class DataProcess:
         if output_directory:
             np.save(os.path.join(output_directory, "train_data"), train_data)
             np.save(os.path.join(output_directory, "train_label"), train_label)
-            np.save(os.path.join(output_directory, "test_data"), train_data)
-            np.save(os.path.join(output_directory, "test_label"), train_label)
+            np.save(os.path.join(output_directory, "test_data"), test_data)
+            np.save(os.path.join(output_directory, "test_label"), test_label)
         else:
             print("Dataset is created but not saved")
         return train_data, test_data, train_label, test_label
@@ -367,7 +367,7 @@ class DataProcess:
         Read data set saved as numpy array under the given directory, return data and label
         :param  input_data_directory: input data directory with time where train.csv and test.csv exist
         :return data: data in numpy array
-        :return label: label in numpy array
+        :return label: label in numpy arrays
         """
         # Get file names
         train_data_file_path = os.path.join(input_data_directory, "train_data.npy")
@@ -411,7 +411,7 @@ class DataProcess:
     @staticmethod
     def torch_train_data_loader(data, label, validation_rate: float):
         """
-        Make Dataset loader
+        Make Dataset loader for training and validation
         :param data:  data
         :param label: label
         :param validation_rate: rate for validation from training data
@@ -440,17 +440,18 @@ class DataProcess:
         return train_loader, validation_loader
 
     @staticmethod
-    def torch_test_data_loader(data, label):
+    def torch_test_data_loader(test_data, test_label):
         """
-        Make Dataset loader
-        :param data:  data
-        :param label: label
+        Make Dataset loader for test
+        :param test_data: data for test
+        :param test_label: label for test
         :return: test_loader: Torch Dataset loader for test
         """
         # Resize array
-        data = np.stack([torch.from_numpy(np.resize(i, (64, 64))) for i in data])
+        test_data = np.stack([torch.from_numpy(np.resize(i, (64, 64))) for i in test_data])
 
         # Make data loader with batch
-        test_dataset = TensorDataset(Tensor(data), Tensor(label))
-        test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=int(len(test_dataset)/3)+1, shuffle=False)
-        return test_loader
+        test_data = torch.tensor(test_data, dtype=torch.float32)
+        test_label = torch.tensor(test_label, dtype=torch.int64)
+        test_data = TensorDataset(test_data, test_label)
+        return torch.utils.data.DataLoader(test_data, batch_size=int(len(test_data)/3)+1, shuffle=False)

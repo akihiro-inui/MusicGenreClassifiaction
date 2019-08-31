@@ -112,10 +112,10 @@ class Classifier:
         :param   visualize: True/False to visualize training history
         :return  model: trained   model
         """
+        print("Train Started")
         if self.selected_classifier == "cnn":
             # Make Torch dataset loader for train
             train_loader, validation_loader = DataProcess.torch_train_data_loader(train_data, train_label, self.validation_rate)
-            self.classifier.training(train_loader, validation_loader, visualize=visualize)
             # Train model
             return self.classifier.training(train_loader, validation_loader, visualize=visualize)
         else:
@@ -130,12 +130,14 @@ class Classifier:
         :param  test_label: test data
         :return Over all test score (accuracy)
         """
+        print("Test Started")
         if self.selected_classifier == "cnn":
             # Make Torch dataset loader for test
             test_loader = DataProcess.torch_test_data_loader(test_data, test_label)
             # Test model performance
             return self.classifier.test(model, test_loader)
         else:
+            # Test model performance
             return self.classifier.test(model, test_data, test_label)
 
     def predict(self, model, target_data) -> float:

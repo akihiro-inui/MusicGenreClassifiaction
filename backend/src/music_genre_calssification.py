@@ -168,43 +168,48 @@ class MusicGenreClassification:
 
 
 def main():
-    # TODO: add feature extraction wrapper, add feature normalization, implement CNN and RNN
     # Case of loading pre-extracted features and/or pre-trained feature
     pre_extracted_expert_feature_directory = "../feature/expert/2019-08-27_04_07_56.098135"
-    pre_extracted_2d_feature_directory = "../feature/mel_spectrogram/2019-08-26_11_41_10.790049"
+    pre_extracted_2d_feature_directory = "../feature/mel_spectrogram/2019-08-30_07_30_14.149285"
     pre_trained_model_file = "../model/2019-08-06_06_37_17.286254/kNN.pickle"
 
     # Conditions
-    run_feature_extraction = False
+    use_expert_feature = False
+    run_feature_extraction = True
     run_training = True
 
     # Instantiate mgc main class
     MGC = MusicGenreClassification(AudioDatasetMaker, AudioFeatureExtraction, Classifier,
-                                   music_dataset_path="../../processed_music_data",
+                                   music_dataset_path="../../original_processed_music_data",
                                    setting_file="../../config/master_config.ini")
 
     # Make label from genre names in processed_music_data
     MGC.make_label()
 
-    # Feature extraction/ Load pre-extracted featre
+    # Feature extraction/ Load pre-extracted feature
     if run_feature_extraction is True:
         directory_files_feature_dict, label_list = MGC.feature_extraction()
         # Data processing to extracted feature
-        expert_feature_2d_array, mel_spectrogram_3d_array, list_array = MGC.process_feature(directory_files_feature_dict, label_list)
+        expert_feature_array, mel_spectrogram_array, list_array = MGC.process_feature(directory_files_feature_dict, label_list)
 
         # Run feature extraction or load pre-extracted feature
-        train_data, test_data, train_label, test_label = MGC.make_dataset(expert_feature_2d_array, list_array, "../feature/expert")
-        # train_data, test_data, train_label, test_label = MGC.make_dataset(mel_spectrogram_3d_array, list_array, "../feature/mel_spectrogram")
+        if use_expert_feature is True:
+            train_data, test_data, train_label, test_label = MGC.make_dataset(expert_feature_array, list_array, "../feature/expert")
+        else:
+            train_data, test_data, train_label, test_label = MGC.make_dataset(mel_spectrogram_array, list_array, "../feature/mel_spectrogram")
     else:
         # Load pre-extracted feature
-        train_data, test_data, train_label, test_label = DataProcess.read_dataset_from_array(pre_extracted_2d_feature_directory)
+        if use_expert_feature is True:
+            train_data, test_data, train_label, test_label = DataProcess.read_dataset_from_array(pre_extracted_expert_feature_directory)
+        else:
+            train_data, test_data, train_label, test_label = DataProcess.read_dataset_from_array(pre_extracted_2d_feature_directory)
 
     # Run training or load pre-trained model
     model = MGC.training(run_training, train_data, train_label, pre_trained_model_file, output_model_directory_path="../model")
 
     # Test model performance
     accuracy = MGC.test(model, test_data, test_label)
-    print("Model prediction accuracy is {0}% \n".format(accuracy*100))
+    print("Test accuracy is {0}% \n".format(accuracy))
 
 
 if __name__ == "__main__":

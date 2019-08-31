@@ -58,8 +58,9 @@ class MultiLayerPerceptron:
         optimizer = optim.Adam(model.parameters())
 
         # To log losses
-        losses = []
-        for epoch in range(300):
+        train_loss_history = []
+        train_accuracy_history = []
+        for epoch in range(600):
             # Delete gradient value calculated in previous epoch
             optimizer.zero_grad()
 
@@ -73,14 +74,27 @@ class MultiLayerPerceptron:
             # Update gradient
             optimizer.step()
 
-            # Log loss
-            losses.append(loss.item())
+            # Append loss
+            train_loss_history.append(loss.item())
 
         # Visualize losses
         if visualize is True:
-            plt.plot(losses)
+            # plt.plot(train_accuracy_history)
+            # plt.plot(validation_accuracy_history)
+            plt.title('model accuracy')
+            plt.ylabel('accuracy')
+            plt.xlabel('epoch')
+            plt.legend(['train', 'validation'], loc='upper left')
             plt.show()
 
+            # Loss
+            plt.plot(train_loss_history)
+            # plt.plot(validation_loss_history)
+            plt.title('model loss')
+            plt.ylabel('loss')
+            plt.xlabel('epoch')
+            plt.legend(['train', 'validation'], loc='upper left')
+            plt.show()
         return model
 
     def load_model(self, model_file_name: str):
