@@ -87,8 +87,8 @@ class MusicGenreClassification:
         label_array = np.array(label_list)
 
         # Normalize expert feature
-        #if normalize is True:
-        #    expert_feature_array = DataProcess.min_max_normalize(expert_feature_array)
+        if normalize is True:
+            expert_feature_array = DataProcess.min_max_normalize(expert_feature_array)
         return expert_feature_array, mel_spectrogram_array, label_array
 
     def make_dataset(self, feature_array, label_array, output_directory: str):
@@ -158,12 +158,12 @@ class MusicGenreClassification:
 
 def main():
     # Case of loading pre-extracted features and/or pre-trained feature
-    pre_extracted_expert_feature_directory = "../feature/expert/genre"
+    pre_extracted_expert_feature_directory = "../feature/expert/2019-09-01_23_33_10.806024"
     pre_extracted_2d_feature_directory = "../feature/mel_spectrogram/2019-09-01_02_58_54.985744"
     pre_trained_model_file = ""
 
     # Set Conditions
-    use_expert_feature = False
+    use_expert_feature = True
     run_feature_extraction = False
     run_training = True
 
