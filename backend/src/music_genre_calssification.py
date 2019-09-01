@@ -13,7 +13,6 @@ from backend.src.common.config_reader import ConfigReader
 from backend.src.data_process.data_process import DataProcess
 from backend.src.feature_extraction.audio_feature_extraction import AudioFeatureExtraction
 from backend.src.data_process.audio_dataset_maker import AudioDatasetMaker
-import matplotlib.pyplot as plt
 
 
 class MusicGenreClassification:
@@ -21,9 +20,9 @@ class MusicGenreClassification:
     # Content-based music genre classification
     # 1. Frame based feature extraction
     # 2. Data processing (Normalization, Encoding class label(string to number))
-    # 3. Split into training data and test data (Shuffle order, train/test separation, write train.csv/test.csv in "feature" directory with time)
-    # 4. Train and save model (save trained model in "model" directory with time)
-    # 5. Test classifier to get prediction accuracy (to test.csv)
+    # 3. Split into training data and test data (Shuffle order, train/test separation in "feature" directory)
+    # 4. Train and save model (save trained model in "model" directory)
+    # 5. Test classifier to get prediction accuracy
     """
 
     def __init__(self, audio_dataset_maker: classmethod, audio_feature_extraction: classmethod, classifier: classmethod,
@@ -73,11 +72,24 @@ class MusicGenreClassification:
         assert len(label_list) == self.cfg.num_classes, "Number of the classes mismatch"
         FileUtil.list2csv(label_list, "../label.csv")
 
-    def process_feature(self, directory_files_feature_dict, label_list):
+    def process_feature(self, directory_files_feature_dict: dict, label_list: list, normalize: bool):
+        """
+
+        :param directory_files_feature_dict:
+        :param label_list:
+        :param normalize:
+        :return: expert_feature_2d_array: Extracted feature with expert system (Numpy 2D array)
+        :return mel_spectrogram_array: Extracted mel-spectrogram (Numpy 3D array)
+        :return list_array: Labels in numpy arrau
+        """
         # Convert extracted feature and label to numpy array
-        expert_feature_2d_array, mel_spectrogram_3d_array = self.AFE.dict2array(directory_files_feature_dict)
-        list_array = np.array(label_list)
-        return expert_feature_2d_array, mel_spectrogram_3d_array, list_array
+        expert_feature_array, mel_spectrogram_array = self.AFE.dict2array(directory_files_feature_dict)
+        label_array = np.array(label_list)
+
+        # Normalize expert feature
+        #if normalize is True:
+        #    expert_feature_array = DataProcess.min_max_normalize(expert_feature_array)
+        return expert_feature_array, mel_spectrogram_array, label_array
 
     def make_dataset(self, feature_array, label_array, output_directory: str):
         """
@@ -102,29 +114,6 @@ class MusicGenreClassification:
                                                                                   directory_name_with_time)
         return train_data, test_data, train_label, test_label
 
-    def data_process(self, dataframe):
-        """
-        Apply data process to features
-        :param  dataframe:            extracted feature in data frame
-        :param  label_name:           name of label column in data frame
-        :return processed_dataframe:  extracted feature in pandas data frame
-        """
-        # Make a copy of dataframe
-        processed_dataframe = dataframe.copy()
-
-        # Centerize data and apply standardization to data frame
-        # processed_dataframe = DataProcess.normalize_dataframe(processed_dataframe, self.cfg.label_name)
-        centerized_dataframe, mean_list = DataProcess.centerize_dataframe(processed_dataframe, self.cfg.label_name)
-        cleaned_dataframe, std_list = DataProcess.standardize_dataframe(centerized_dataframe, self.cfg.label_name)
-
-        # Factorize label
-        cleaned_dataframe = DataProcess.factorize_label(cleaned_dataframe, self.cfg.label_name)
-
-        # Write out mean values
-        FileUtil.list2csv(mean_list, "../mean_list.csv")
-        FileUtil.list2csv(std_list, "../std_list.csv")
-        return cleaned_dataframe
-
     def training(self, run_training: bool, train_data, train_label,
                  model_file=None, output_model_directory_path=None, visualize=True):
         """
@@ -135,7 +124,7 @@ class MusicGenreClassification:
         :param model_file: Pre-trained model file path to load
         :param output_model_directory_path: Output directory to save trained model
         :param visualize: Set True to visualize training history
-        :return Trained/pre-trained model
+        :return Trained or pre-trained model
         """
         # Training model
         if run_training is True:
@@ -168,43 +157,50 @@ class MusicGenreClassification:
 
 
 def main():
-    # TODO: add feature extraction wrapper, add feature normalization, implement CNN and RNN
     # Case of loading pre-extracted features and/or pre-trained feature
-    pre_extracted_expert_feature_directory = "../feature/expert/2019-08-27_04_07_56.098135"
-    pre_extracted_2d_feature_directory = "../feature/mel_spectrogram/2019-08-26_11_41_10.790049"
-    pre_trained_model_file = "../model/2019-08-06_06_37_17.286254/kNN.pickle"
+    pre_extracted_expert_feature_directory = "../feature/expert/genre"
+    pre_extracted_2d_feature_directory = "../feature/mel_spectrogram/2019-09-01_02_58_54.985744"
+    pre_trained_model_file = ""
 
-    # Conditions
+    # Set Conditions
+    use_expert_feature = False
     run_feature_extraction = False
     run_training = True
 
     # Instantiate mgc main class
     MGC = MusicGenreClassification(AudioDatasetMaker, AudioFeatureExtraction, Classifier,
-                                   music_dataset_path="../../processed_music_data",
+                                   music_dataset_path="../../processed_data_alphanote",
                                    setting_file="../../config/master_config.ini")
 
     # Make label from genre names in processed_music_data
     MGC.make_label()
 
-    # Feature extraction/ Load pre-extracted featre
+    # Feature extraction/ Load pre-extracted feature
     if run_feature_extraction is True:
+        # Apply feature extraction
         directory_files_feature_dict, label_list = MGC.feature_extraction()
-        # Data processing to extracted feature
-        expert_feature_2d_array, mel_spectrogram_3d_array, list_array = MGC.process_feature(directory_files_feature_dict, label_list)
+
+        # Apply data processing to extracted feature
+        expert_feature_array, mel_spectrogram_array, list_array = MGC.process_feature(directory_files_feature_dict, label_list, MGC.cfg.normalize)
 
         # Run feature extraction or load pre-extracted feature
-        train_data, test_data, train_label, test_label = MGC.make_dataset(expert_feature_2d_array, list_array, "../feature/expert")
-        # train_data, test_data, train_label, test_label = MGC.make_dataset(mel_spectrogram_3d_array, list_array, "../feature/mel_spectrogram")
+        if use_expert_feature is True:
+            train_data, test_data, train_label, test_label = MGC.make_dataset(expert_feature_array, list_array, "../feature/expert")
+        else:
+            train_data, test_data, train_label, test_label = MGC.make_dataset(mel_spectrogram_array, list_array, "../feature/mel_spectrogram")
     else:
         # Load pre-extracted feature
-        train_data, test_data, train_label, test_label = DataProcess.read_dataset_from_array(pre_extracted_2d_feature_directory)
+        if use_expert_feature is True:
+            train_data, test_data, train_label, test_label = DataProcess.read_dataset_from_array(pre_extracted_expert_feature_directory)
+        else:
+            train_data, test_data, train_label, test_label = DataProcess.read_dataset_from_array(pre_extracted_2d_feature_directory)
 
     # Run training or load pre-trained model
     model = MGC.training(run_training, train_data, train_label, pre_trained_model_file, output_model_directory_path="../model")
 
     # Test model performance
     accuracy = MGC.test(model, test_data, test_label)
-    print("Model prediction accuracy is {0}% \n".format(accuracy*100))
+    print("Test accuracy is {0}% \n".format(accuracy))
 
 
 if __name__ == "__main__":

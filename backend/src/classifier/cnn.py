@@ -6,19 +6,15 @@ Created on sleepy midnight in Aug
 """
 
 from __future__ import print_function
-import onnx
+import os
 import numpy as np
 import torch
 import torch.onnx
 import torch.nn as nn
 import torch.optim as optim
-import torch.nn.functional as F
-from onnx_tf.backend import prepare
-from onnx_coreml import convert
 import matplotlib.pyplot as plt
-from torch.autograd import Variable
-from pytorch2keras.converter import pytorch_to_keras
 import tqdm
+
 
 class FlattenLayer(nn.Module):
     def forward(self, inputs):
@@ -60,14 +56,18 @@ class CNN:
 
     def training(self, train_loader, validation_loader, visualize=True):
         # To log losses
-        loss_history = []
-        accuracy_history = []
-        num = 0
+        train_loss_history = []
+        train_accuracy_history = []
+        validation_loss_history = []
+        validation_accuracy_history = []
+        for epoch in range(1, 50):
+            # Set to train mode
+            self.model.train()
 
-        for epoch in range(1, 30):
             # Iteration for batch
             batch_accuracy = 0
             batch_loss = 0
+            sample_num = 0
             for batch_idx, (data, label) in tqdm.tqdm(enumerate(train_loader)):
                 # Define hardware
                 data = data.to("cpu")
@@ -89,50 +89,107 @@ class CNN:
                 # Update optimizer
                 self.optimizer.step()
 
-                num += len(data)
+                # Calculate batch accuracy
                 batch_accuracy += (label == prediction).float().sum().item()
 
-            # Append accuracy and loss
-            accuracy_history.append(batch_accuracy/num)
-            loss_history.append(batch_loss/num)
+                # Update counter
+                sample_num += len(data)
+
+            # Append train accuracy and loss
+            train_accuracy_history.append(100*batch_accuracy/sample_num)
+            train_loss_history.append(batch_loss/sample_num)
 
             # Print training status
-            print(loss_history[-1], accuracy_history[-1], flush=True)
+            print(train_loss_history[-1], train_accuracy_history[-1], flush=True)
+
+            # Validation
+            validation_loss, validation_accuracy = self.validation(self.model, validation_loader)
+            validation_accuracy_history.append(validation_accuracy)
+            validation_loss_history.append(validation_loss)
+            # Print validation status
+            print(validation_loss_history[-1], validation_accuracy_history[-1], flush=True)
 
         if visualize is True:
-            plt.plot(loss_history)
-            # plt.plot(validation_loss_history)
-            plt.title('Loss history')
-            plt.ylabel('Loss')
-            plt.xlabel('Epoch')
+            plt.plot(train_accuracy_history)
+            plt.plot(validation_accuracy_history)
+            plt.title('model accuracy')
+            plt.ylabel('accuracy')
+            plt.xlabel('epoch')
             plt.legend(['train', 'validation'], loc='upper left')
             plt.show()
-        return self
 
-    def test(self, test_loader):
-        self.model.eval()
-        test_loss = 0
-        correct = 0
-        for data, target in test_loader:
-            # Split test dataset into data and label
-            data, target = Variable(data, volatile=True), Variable(target)
+            # Loss
+            plt.plot(train_loss_history)
+            plt.plot(validation_loss_history)
+            plt.title('model loss')
+            plt.ylabel('loss')
+            plt.xlabel('epoch')
+            plt.legend(['train', 'validation'], loc='upper left')
+            plt.show()
 
-            # Make prediction
-            output = self.model(data)
+        return self.model
 
-            # Sum up batch loss
-            test_loss += F.nll_loss(output, target, size_average=False).data
+    def validation(self, model, validation_loader):
+        # Set to evaluation mode
+        model.eval()
 
-            # Get the index of the max log-probability (predicted class)
-            pred = output.data.max(1, keepdim=True)[1]
+        # Iteration for batch
+        batch_accuracy = 0
+        batch_loss = 0
+        sample_num = 0
+        for batch_idx, (data, label) in enumerate(validation_loader):
+            # Define hardware
+            data = data.to("cpu")
+            label = label.to("cpu")
 
-            # Count correct predictions
-            correct += pred.eq(target.data.view_as(pred)).cpu().sum()
+            # Forward data and calculate loss
+            data = data.unsqueeze(1)  # Make 3D array to 4D
+            with torch.no_grad():
+                output = model(data)
+                _, prediction = output.max(1)
+            loss = self.loss_function(output, label)
 
-        test_loss /= len(test_loader.dataset)
-        print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-            test_loss, correct, len(test_loader.dataset),
-            100. * correct / len(test_loader.dataset)))
+            # Log loss
+            batch_loss += loss.item()
+
+            # Calculate batch accuracy
+            batch_accuracy += (label == prediction).float().sum().item()
+
+            # Update counter
+            sample_num += len(data)
+
+        # Append accuracy and loss
+        validation_accuracy = 100*batch_accuracy/sample_num
+        validation_loss = batch_loss/sample_num
+        return validation_loss, validation_accuracy
+
+    def test(self, model, test_loader):
+
+        # Set to evaluation mode
+        model.eval()
+
+        # Iteration for batch
+        batch_accuracy = 0
+        sample_num = 0
+        for batch_idx, (data, label) in enumerate(test_loader):
+            # Define hardware
+            data = data.to("cpu")
+            label = label.to("cpu")
+
+            # Forward data and calculate loss
+            data = data.unsqueeze(1)  # Make 3D array to 4D
+            with torch.no_grad():
+                output = model(data)
+                _, prediction = output.max(1)
+
+            # Calculate batch accuracy
+            batch_accuracy += (label == prediction).float().sum().item()
+
+            # Update counter
+            sample_num += len(data)
+
+        test_accuracy = 100*batch_accuracy/sample_num
+        return test_accuracy
 
     def predict(self, model, target_data):
         """
@@ -144,104 +201,20 @@ class CNN:
         # Make prediction to the target data
         return model(torch.tensor(np.array(target_data), dtype=torch.float32))
 
-    def save_model(self, param_file_path: str):
+    def load_model(self, model_file_name: str):
         """
-        Save weights with .pth extension
-        :param param_file_path: Parameter file name to be saved
+        Load trained model
+        :param  model_file_name: name of model file to load
+        :return model: trained model
         """
-        # Save weight of the model
-        torch.save(self.state_dict(), param_file_path)
+        # Load model if it exists
+        assert os.path.exists(model_file_name), "Given model file does not exist"
+        return torch.load(model_file_name, map_location="cpu")
 
-    def torch_load(self, param_file_path: str):
+    def save_model(self, model, output_directory: str):
         """
-        Load weights with .pth extension
-        :param param_file_path: Parameter file name to be loaded
+        Save model
+        :param  model: trained model
+        :param  output_directory: output directory path
         """
-        # Save weight of the model
-        self.model.load_state_dict(torch.load(param_file_path))
-
-    @staticmethod
-    def torch_visualize(training_loss_history: list, validation_loss_history: list, training_accuracy_history: list,
-                        validation_accuracy_history: list):
-        """
-        Visualize loss and history of training and validation
-        :param training_loss_history: Loss of training in list
-        :param validation_loss_history: Loss of validation in list
-        :param training_accuracy_history: Accuracy of training in list
-        :param validation_accuracy_history: Accuracy of validation in list
-        """
-        plt.plot(training_loss_history)
-        plt.plot(validation_loss_history)
-        plt.title('Loss history')
-        plt.ylabel('Loss')
-        plt.xlabel('Epoch')
-        plt.legend(['train', 'validation'], loc='upper left')
-        plt.show()
-
-        plt.plot(training_accuracy_history)
-        plt.plot(validation_accuracy_history)
-        plt.title('Model Accuracy')
-        plt.ylabel('Accuracy')
-        plt.xlabel('Epoch')
-        plt.legend(['train', 'validation'], loc='upper left')
-        plt.show()
-
-    def export_onnx(self, onnx_model_file_name="resnet.onnx"):
-        """
-        Export to ONNX model format
-        """
-        # Input to the model (sample_batch_siz, channel, height, width)
-        input_shape = torch.randn(1, 3, 224, 224, requires_grad=True)
-
-        # Export ONNX model
-        onnx_model = torch.onnx.export(self.model,  # model being run
-                                       input_shape,  # model input (or a tuple for multiple inputs)
-                                       onnx_model_file_name,
-                                       # where to save the model (can be a file or file-like object)
-                                       export_params=True,
-                                       input_names=['input'], output_names=['output'])  # store the trained parameter weights inside the model file
-        return onnx_model
-
-    def export_coreml(self, onnx_file_name='resnet.onnx', coreml_model_file_name="resnet.mlmodel"):
-        """
-        Export to coreml model format
-        """
-        # Export the model
-        onnx_model = onnx.load(onnx_file_name)
-
-        # Export model to coreml model
-        coreml_model = convert(onnx_model)
-
-        # Export CoreML model
-        coreml_model.save(coreml_model_file_name)
-        return coreml_model
-
-    def export_h5(self, h5_model_file_name="resnet.h5"):
-        """
-        Export to h5 model format
-        """
-        # Input to the model (sample_batch_siz, channel, height, width)
-        input_shape = torch.randn(1, 3, 224, 224)
-
-        # Export model to h5 model
-        k_model = pytorch_to_keras(self.model, input_shape, [(3, None, None,)], verbose=True)
-        k_model.save(h5_model_file_name)
-
-    def export_pb(self, onnx_file_name='resnet.onnx', tf_model_file_name='resnet.pb'):
-        """
-        Export to pb format (tensorflow)
-        """
-
-        # Convert to ONNX once
-        onnx_model = onnx.load(onnx_file_name)
-        onnx.checker.check_model(onnx_model)
-
-        # Receive with tf
-        tf_rep = prepare(onnx_model)
-
-        # Print out tensors and placeholders in model (helpful during inference in TensorFlow)
-        #print(tf_rep.tensor_dict)
-
-        # Export model as .pb file
-        tf_rep.export_graph(tf_model_file_name)
-
+        torch.save(model.state_dict(), os.path.join(output_directory, "cnn.prm"), pickle_protocol=4)

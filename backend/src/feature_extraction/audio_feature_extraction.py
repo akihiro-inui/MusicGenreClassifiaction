@@ -2,17 +2,15 @@
 # -*- coding: utf-8 -*-
 """
 Created on Fri Mar 23 02:01:21 2018
-
 @author: Akihiro Inui
 """
 # Import libraries/modules
 import os
 import time
 import numpy as np
-import librosa
-import librosa.display
 from backend.src.common.config_reader import ConfigReader
 from backend.src.preprocess.audio_preprocess import AudioPreProcess
+from backend.src.feature_extraction.mel_spectrogram import mel_spectrogram
 from backend.src.feature_extraction.fft import FFT
 from backend.src.feature_extraction.zerocrossing import zerocrossing
 from backend.src.feature_extraction.mfcc import MFCC
@@ -154,12 +152,10 @@ class AudioFeatureExtraction:
         """
         Read audio file and extract Mel-spectrogram
         :param input_audio_file: Input audio file
-        :return: Mel-spectrogram: Mel-spectrogram in numpy 2D array
+        :return: Mel-spectrogram: Mel-spectrogram(currently) in numpy 2D array
         """
-        # Read audio file
-        audio_data, sampling_rate = librosa.load(input_audio_file)
-        return librosa.feature.melspectrogram(y=audio_data, sr=sampling_rate,
-                                              n_fft=self.fft_size, n_mels=self.cfg.num_mels)
+        # Read audio file and extract mel-spectrogram from entire audio signal
+        return mel_spectrogram(input_audio_file, self.fft_size, self.cfg.num_mels, normalize=True)
 
     def extract_file(self, input_audio_file: str):
         """
@@ -176,10 +172,7 @@ class AudioFeatureExtraction:
 
         # Extract Mel-spectrogram from the entire audio
         feature_dict['mel_spectrogram'] = self.extract_entire_audio(input_audio_file)
-        # plt.figure(figsize=(10, 4))
-        # librosa.display.specshow(librosa.power_to_db(feature_dict['mel_spectrogram'], ref=np.max), y_axis='mel', fmax=8000, x_axis='time')
-        # plt.colorbar(format='%+2.0f dB')
-        # plt.show()
+
         # Apply feature extraction to all frames and store into dictionary
         short_frame_number = 0
         long_frame_audio = []
