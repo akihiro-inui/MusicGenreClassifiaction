@@ -15,6 +15,7 @@ import torch.optim as optim
 import matplotlib.pyplot as plt
 import tqdm
 
+
 class FlattenLayer(nn.Module):
     def forward(self, inputs):
         sizes = inputs.size()
@@ -60,6 +61,9 @@ class CNN:
         validation_loss_history = []
         validation_accuracy_history = []
         for epoch in range(1, 50):
+            # Set to train mode
+            self.model.train()
+
             # Iteration for batch
             batch_accuracy = 0
             batch_loss = 0
@@ -99,7 +103,7 @@ class CNN:
             print(train_loss_history[-1], train_accuracy_history[-1], flush=True)
 
             # Validation
-            validation_loss, validation_accuracy = self.validation(validation_loader)
+            validation_loss, validation_accuracy = self.validation(self.model, validation_loader)
             validation_accuracy_history.append(validation_accuracy)
             validation_loss_history.append(validation_loss)
             # Print validation status
@@ -125,7 +129,10 @@ class CNN:
 
         return self.model
 
-    def validation(self, validation_loader):
+    def validation(self, model, validation_loader):
+        # Set to evaluation mode
+        model.eval()
+
         # Iteration for batch
         batch_accuracy = 0
         batch_loss = 0
@@ -138,7 +145,7 @@ class CNN:
             # Forward data and calculate loss
             data = data.unsqueeze(1)  # Make 3D array to 4D
             with torch.no_grad():
-                output = self.model(data)
+                output = model(data)
                 _, prediction = output.max(1)
             loss = self.loss_function(output, label)
 
@@ -157,6 +164,10 @@ class CNN:
         return validation_loss, validation_accuracy
 
     def test(self, model, test_loader):
+
+        # Set to evaluation mode
+        model.eval()
+
         # Iteration for batch
         batch_accuracy = 0
         sample_num = 0
@@ -168,7 +179,7 @@ class CNN:
             # Forward data and calculate loss
             data = data.unsqueeze(1)  # Make 3D array to 4D
             with torch.no_grad():
-                output = self.model(data)
+                output = model(data)
                 _, prediction = output.max(1)
 
             # Calculate batch accuracy

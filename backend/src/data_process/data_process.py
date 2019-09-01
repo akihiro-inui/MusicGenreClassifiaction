@@ -455,3 +455,15 @@ class DataProcess:
         test_label = torch.tensor(test_label, dtype=torch.int64)
         test_data = TensorDataset(test_data, test_label)
         return torch.utils.data.DataLoader(test_data, batch_size=int(len(test_data)/3)+1, shuffle=False)
+
+    @staticmethod
+    def min_max_normalize(input_array, axis=0):
+        """
+        Normalize numpy array with max min method
+        :param input_array: Input Numpy array (currently only 2D)
+        :param axis: 0 for column, 1 for row
+        :return: Normalized numpy array
+        """
+        output_array = input_array - input_array.mean(axis=axis)
+        output_array = output_array / np.abs(output_array).max(axis=axis)
+        return output_array
