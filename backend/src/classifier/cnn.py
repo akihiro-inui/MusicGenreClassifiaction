@@ -60,7 +60,7 @@ class CNN:
         train_accuracy_history = []
         validation_loss_history = []
         validation_accuracy_history = []
-        for epoch in range(1, 50):
+        for epoch in range(1, 20):
             # Set to train mode
             self.model.train()
 
