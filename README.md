@@ -6,7 +6,7 @@
 1. Install sox and/or ffmpeg (see below)
 2. Clone this project
 3. Go to the folder(MusicGenreClassification)
-4. bash run_me_first.sh
+4. bash run_me_first.sh (This process takes for a while as it downloads the entire dataset)
 5. Run backend/src/data_process/audio_dataset_maker.py
 6. Run backend/src/music_genre_classification.py
 * You may need to install sox and/or ffmpeg if you do not have one. (Windows complains sometimes..) 
