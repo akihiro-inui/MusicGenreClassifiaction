@@ -8,7 +8,7 @@ The automatic classification system to the most widely used music dataset; the G
 The system was implemented with a set of low-level features, mel-spectorogram and several supervised classification methods.
 
 
-## The Dataset
+## Dataset
 The GTZAN Music Genre Dataset, which is a collection of 1000 songs in 10 genres, is the most widely used dataset. 
 
 Although many studies have been conducted using GTZAN, several faults have been pointed out. Sturm[1], for example, identified and analysed the contents of GTZAN and provided a catalogue of its faults. As it is the most used dataset, however, the system performance of MGC in this project should first be evaluated with GTZAN in order to compare against other systems used in other studies.
@@ -20,7 +20,7 @@ Details on the GTZAN Music Genre Dataset are presented in the table below. In GT
 </p>
 
 ## Pre-processing
-All songs are converted to 44.1kHz, 32bit, .wav format with 10 seconds. 
+All songs are converted to 44.1kHz, 32bit, .wav format with 10 seconds.  
 (see backend/src/data_process/audio_dataset_maker.py)
 
 The input audio signal is segmented into analysis windows of 46ms (customizable) length with an overlap of half size of an analysis window. The number of samples in an analysis window is usually the equal power of two to facilitate the use of FFT. For the system, 2048 samples are framed for an analysis window. Also, hamm widow is applied to each analysis window.
