@@ -1,6 +1,29 @@
 # Content-based Music Genre Classification
 
 
+## Complete Installation
+
+1. Install sox and/or ffmpeg (see below)
+2. Clone this project
+3. Go to the folder(MusicGenreClassification)
+4. bash run_me_first.sh
+5. Run backend/src/data_process/audio_dataset_maker.py
+6. Run backend/src/music_genre_classification.py
+* You may need to install sox and/or ffmpeg if you do not have one. (Windows complains sometimes..) 
+
+For installing sox (Windows)
+https://sourceforge.net/projects/sox/
+
+For installing sox (Mac)
+http://macappstore.org/sox/
+
+For installing ffmpeg
+https://www.ffmpeg.org/download.html
+or 
+brew install ffmpeg
+
+* Make sure you are using Python3
+
 
 ## About
 
@@ -71,30 +94,6 @@ Logistic Regression: 70.3%
 
 ### Dependency
 Please see requirements.txt
-
-## Complete Installation
-
-1. Install sox and/or ffmpeg (see below)
-2. Clone this project
-3. Go to the folder(MusicGenreClassification)
-4. bash run_me_first.sh
-5. Run backend/src/data_process/audio_dataset_maker.py
-6. Run backend/src/music_genre_classification.py
-* You may need to install sox and/or ffmpeg if you do not have one. (Windows complains sometimes..) 
-
-For installing sox (Windows)
-https://sourceforge.net/projects/sox/
-
-For installing sox (Mac)
-http://macappstore.org/sox/
-
-For installing ffmpeg
-https://www.ffmpeg.org/download.html
-or 
-brew install ffmpeg
-
-* Make sure you are using Python3
-
 
 ## References
 [1] B. L.Sturm, "The GTZAN dataset: Its contents, its faults, their effects on evaluation, and its
