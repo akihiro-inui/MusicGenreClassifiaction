@@ -27,10 +27,10 @@ The input audio signal is segmented into analysis windows of 46ms (customizable)
 
 ## Feature Extraction
 
-In this project, 2 types of audio features are extracted; 
+In this project, 2 types of audio features are extracted.  
 1. Hand crafted low-level audio feature 2. Mel-spectrogram
 
-### Hand crafted low-level audio feature (Expert system)
+### 1. Hand crafted low-level audio feature (Expert system)
 <p align="center">
 <img src="assets/Ex.png?raw=true" alt="Feature Extraction" width="600">
 </p>
@@ -43,7 +43,7 @@ Ten types of low-level feature—six short-term and four long-term features—no
 
 Over a texture window which consists of 64 analysis windows, short-term features are integrated with mean values.
 
-### Mel-spectrogram
+### 2. Mel-spectrogram
 Also, mel-spectrogram is extracted from the entire audio.
 
 
