@@ -70,7 +70,7 @@ Over a texture window which consists of 64 analysis windows, short-term features
 Also, mel-spectrogram is extracted from the entire audio.
 
 <p align="center">
-<img src="assets/mel_spectrogram.png?raw=true" alt="Feature Extraction" width="300">
+<img src="assets/mel_spectrogram.png?raw=true" alt="Feature Extraction" width="800">
 </p>
 
 ## Classifier
