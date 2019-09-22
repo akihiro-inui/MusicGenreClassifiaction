@@ -2,15 +2,11 @@
 
 
 
-## Abstract
+## About
 
-The automatic classification system to the most widely used music dataset; the GTZAN Music Genre Dataset was implemented. The system was implemented with a set of low-level features and several supervised classification methods.
+The automatic classification system to the most widely used music dataset; the GTZAN Music Genre Dataset was implemented. 
+The system was implemented with a set of low-level features, mel-spectorogram and several supervised classification methods.
 
-## Introduction
-
-Music Genre Classification to the most widely used dataset; GTZAN was implemented with a set of several low-level feature extraction and machine learning methods. 10 features are extracted from audio files and classified with serveral classifiers, k-NN, multilayer perceptron and logistic regression.
-
-For the further information about the feature extraction methods, please have a look the papers in the reference.
 
 ## The Dataset
 The GTZAN Music Genre Dataset, which is a collection of 1000 songs in 10 genres, is the most widely used dataset. 
@@ -24,10 +20,17 @@ Details on the GTZAN Music Genre Dataset are presented in the table below. In GT
 </p>
 
 ## Pre-processing
+All songs are converted to 44.1kHz, 32bit, .wav format with 10 seconds. 
+(see backend/src/data_process/audio_dataset_maker.py)
 
-The input audio signal is segmented into analysis windows of 46ms length with an overlap of half size of an analysis window. The number of samples in an analysis window is usually the equal power of two to facilitate the use of FFT. For the system, 2048 samples are framed for an analysis window. Also, hamm widow is applied to each analysis window.
+The input audio signal is segmented into analysis windows of 46ms (customizable) length with an overlap of half size of an analysis window. The number of samples in an analysis window is usually the equal power of two to facilitate the use of FFT. For the system, 2048 samples are framed for an analysis window. Also, hamm widow is applied to each analysis window.
 
 ## Feature Extraction
+
+In this project, 2 types of audio features are extracted; 
+1. Hand crafted low-level audio feature 2. Mel-spectrogram
+
+### Hand crafted low-level audio feature (Expert system)
 <p align="center">
 <img src="assets/Ex.png?raw=true" alt="Feature Extraction" width="600">
 </p>
@@ -39,6 +42,9 @@ Ten types of low-level feature—six short-term and four long-term features—no
 </p>
 
 Over a texture window which consists of 64 analysis windows, short-term features are integrated with mean values.
+
+### Mel-spectrogram
+Also, mel-spectrogram is extracted from the entire audio.
 
 
 ## Classifier
@@ -54,6 +60,8 @@ The multilayer Perceptron to this project consists of 3 layers with relu functio
 Logistic Regression
 
 
+Convolutional Neural Network
+
 
 
 ## Results
@@ -63,7 +71,6 @@ Logistic Regression: 70.3%
 
 ### Dependency
 Please see requirements.txt
-
 
 ## Complete Installation
 
