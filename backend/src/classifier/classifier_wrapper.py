@@ -64,8 +64,8 @@ class Classifier:
             classifier = MLP(self.validation_rate, self.num_classes)
         elif self.selected_classifier == "cnn":
             classifier = CNN(self.validation_rate, self.num_classes)
-        # elif self.selected_classifier == "resnet":
-        #    classifier = ResNet(self.validation_rate, self.num_classes)
+        elif self.selected_classifier == "resnet":
+           classifier = ResNet(self.validation_rate, self.num_classes)
         assert classifier is not None, "No classifier selected. Please select one"
         return classifier
 
@@ -113,7 +113,7 @@ class Classifier:
         :return  model: trained   model
         """
         print("Train Started")
-        if self.selected_classifier == "cnn":
+        if self.selected_classifier == "cnn" or "resnet":
             # Make Torch dataset loader for train
             train_loader, validation_loader = DataProcess.torch_train_data_loader(train_data, train_label, self.validation_rate)
             # Train model
@@ -131,7 +131,7 @@ class Classifier:
         :return Over all test score (accuracy)
         """
         print("Test Started")
-        if self.selected_classifier == "cnn":
+        if self.selected_classifier == "cnn" or "resnet":
             # Make Torch dataset loader for test
             test_loader = DataProcess.torch_test_data_loader(test_data, test_label)
             # Test model performance

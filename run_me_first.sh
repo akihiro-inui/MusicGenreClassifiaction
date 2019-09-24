@@ -16,16 +16,15 @@ done
 echo "Converted au to wav"
 
 echo "Installing requirements..."
-pip install -r backend/requirements.txt
-pip install -r frontend/requirements.txt
+pip3 install -r backend/requirements.txt
 mkdir backend/feature
 mkdir backend/model
 echo "Requirements installed"
 
 echo "Creating Custom Dataset..."
-python backend/src/data_process/audio_dataset_maker.py
+python3 backend/src/data_process/audio_dataset_maker.py
 echo "Custom Dataset Created"
 
 echo "Starting Main Process..."
-python backend/src/music_genre_classification
+python3 backend/src/music_genre_classification.py
 echo "All Process Completed"

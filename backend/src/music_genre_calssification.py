@@ -159,11 +159,11 @@ class MusicGenreClassification:
 def main():
     # Case of loading pre-extracted features and/or pre-trained feature
     pre_extracted_expert_feature_directory = "../feature/expert/2019-09-01_23_33_10.806024"
-    pre_extracted_2d_feature_directory = "../feature/mel_spectrogram/2019-09-01_02_58_54.985744"
+    pre_extracted_2d_feature_directory = "../feature/mel_spectrogram/2019-09-21_23_28_49.163945"
     pre_trained_model_file = ""
 
     # Set Conditions
-    use_expert_feature = True
+    use_expert_feature = False
     run_feature_extraction = False
     run_training = True
 
