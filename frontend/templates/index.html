@@ -42,12 +42,27 @@
         }
         // draw pie chart
         new Chart(document.getElementById("chart").getContext("2d")).Pie(pieData, pieOptions);
-    </script>
 
-    <form method="post" action="/select" style="text-align: center; margin: 4vh 0" >
-        <input type="submit" class="btn btn-outline-info" value="Select Music" onclick="ProcessPredict()" id="predict">
+        function ProcessPredictionPython() {
+            $.ajax({
+                type:'POST',
+                url: "{{ url_for('predict')}}",
+                dataType:"file",
+                success: function(response){
+                    console.log(response)
+                    alert(response)
+                }
+            })
+        }
+        </script>
+
+<!--    <form method="post" action="/select" style="text-align: center; margin: 4vh 0" >-->
+<!--        <input type="submit" class="btn btn-outline-info" value="Select Music" id="select">-->
+<!--    </form>-->
+    <form method="post" enctype=multipart/form-data action="/predict">
+        <input type=file class="btn btn-primary btn-sm" name=file>
+        <input type=submit class="btn btn-outline-info" value=Predict>
     </form>
-
 </div>
 
 </body>
