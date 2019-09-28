@@ -27,7 +27,7 @@ class LogisticRegression:
 
     def training(self, train_data, train_label, visualize=None):
         """
-        Training for Gated Recurrent Unit
+        Training for Logistic Regression
         :param  train_data: training data
         :param  train_label: train label
         :param  visualize: True/False to visualize training history
@@ -112,7 +112,7 @@ class LogisticRegression:
         # Treat max value as predicted class
         predicted_classes = torch.max(prediction, 1)[1]
 
-        return (predicted_classes == onehot_test_label).sum().item()/len(test_label)
+        return (predicted_classes == onehot_test_label).sum().item()/len(test_label) * 100
 
     def predict(self, model, target_data):
         """

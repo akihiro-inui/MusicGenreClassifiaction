@@ -32,7 +32,7 @@ class MusicGenreClassification:
         :param  audio_dataset_maker:      audio dataset make class
         :param  audio_feature_extraction: audio feature extraction class
         :param  classifier:               classifier class
-        :param  music_dataset_path:             path to data set
+        :param  music_dataset_path:       path to data set
         :param  setting_file:             config file
         """
         self.ADM = audio_dataset_maker(setting_file)
@@ -70,17 +70,16 @@ class MusicGenreClassification:
         # Get folder names
         label_list = FileUtil.get_folder_names(self.dataset_path, sort=True)
         assert len(label_list) == self.cfg.num_classes, "Number of the classes mismatch"
-        FileUtil.list2csv(label_list, "../label.csv")
+        FileUtil.list2csv(label_list, "./label.csv")
 
-    def process_feature(self, directory_files_feature_dict: dict, label_list: list, normalize: bool):
+    def dict2array(self, directory_files_feature_dict: dict, label_list: list, normalize: bool):
         """
-
         :param directory_files_feature_dict:
         :param label_list:
         :param normalize:
         :return: expert_feature_2d_array: Extracted feature with expert system (Numpy 2D array)
         :return mel_spectrogram_array: Extracted mel-spectrogram (Numpy 3D array)
-        :return list_array: Labels in numpy arrau
+        :return list_array: Labels in numpy array
         """
         # Convert extracted feature and label to numpy array
         expert_feature_array, mel_spectrogram_array = self.AFE.dict2array(directory_files_feature_dict)
@@ -91,9 +90,31 @@ class MusicGenreClassification:
             expert_feature_array = DataProcess.min_max_normalize(expert_feature_array)
         return expert_feature_array, mel_spectrogram_array, label_array
 
+    def save_data(self, expert_feature_array, mel_spectrogram_array, label_array):
+        """
+        Save extracted feature into directories.
+        :param expert_feature_array: Extracted feature with expert system (Numpy 2D array)
+        :param mel_spectrogram_array: Extracted mel-spectrogram (Numpy 3D array)
+        :param label_array:
+        :return:
+        """
+        # Remove NaNs from array
+        expert_feature_array = DataProcess.remove_nan_from_array(expert_feature_array)
+
+        # Take stats from expert feature
+        DataProcess.take_dataset_stats(expert_feature_array, './expert_feature_mean_list.txt')
+
+        # Save data
+        np.save(os.path.join('../feature/expert', "data"), expert_feature_array)
+        np.save(os.path.join('../feature/expert', "label"), label_array)
+        np.save(os.path.join('../feature/mel_spectrogram', "data"), expert_feature_array)
+        np.save(os.path.join('../feature/mel_spectrogram', "label"), label_array)
+
+        return expert_feature_array, mel_spectrogram_array, label_array
+
     def make_dataset(self, feature_array, label_array, output_directory: str):
         """
-        Make data set
+        Take all data and label as input. Split into train/test dataset.
         :param  feature_array: extracted feature in 2D numpy array or 3D numpy array
         :param  label_array: labels in numpy array
         :param  output_directory: output directory to write out the train and test data
@@ -102,16 +123,16 @@ class MusicGenreClassification:
         :return test_data:   test data
         :return test_label:  test label
         """
+
         # Make directory if it does not exist
         if not os.path.isdir(output_directory):
             os.mkdir(output_directory)
 
-        # Get time and make a new directory name
-        directory_name_with_time = os.path.join(output_directory, FileUtil.get_time().replace(":", "_"))
-
-        train_data, test_data, train_label, test_label = DataProcess.make_dataset_from_array(feature_array, label_array,
-                                                                                  self.cfg.test_rate, self.cfg.shuffle,
-                                                                                  directory_name_with_time)
+        train_data, test_data, train_label, test_label = DataProcess.make_dataset_from_array(feature_array,
+                                                                                             label_array,
+                                                                                             self.cfg.test_rate,
+                                                                                             self.cfg.shuffle,
+                                                                                             output_directory)
         return train_data, test_data, train_label, test_label
 
     def training(self, run_training: bool, train_data, train_label,
@@ -130,7 +151,6 @@ class MusicGenreClassification:
         if run_training is True:
             model = self.CLF.training(train_data, train_label, visualize)
             self.CLF.save_model(model, os.path.join(output_model_directory_path, FileUtil.get_time().replace(":", "_")))
-        # Load model
         else:
             model = self.CLF.load_model(model_file)
         return model
@@ -158,18 +178,15 @@ class MusicGenreClassification:
 
 def main():
     # Case of loading pre-extracted features and/or pre-trained feature
-    pre_extracted_expert_feature_directory = "../feature/expert/2019-09-01_23_33_10.806024"
-    pre_extracted_2d_feature_directory = "../feature/mel_spectrogram/2019-09-21_23_28_49.163945"
     pre_trained_model_file = ""
 
     # Set Conditions
-    use_expert_feature = False
-    run_feature_extraction = False
+    run_feature_extraction = True
     run_training = True
 
     # Instantiate mgc main class
     MGC = MusicGenreClassification(AudioDatasetMaker, AudioFeatureExtraction, Classifier,
-                                   music_dataset_path="../../processed_data_alphanote",
+                                   music_dataset_path="../../processed_data_genre",
                                    setting_file="../../config/master_config.ini")
 
     # Make label from genre names in processed_music_data
@@ -181,22 +198,26 @@ def main():
         directory_files_feature_dict, label_list = MGC.feature_extraction()
 
         # Apply data processing to extracted feature
-        expert_feature_array, mel_spectrogram_array, list_array = MGC.process_feature(directory_files_feature_dict, label_list, MGC.cfg.normalize)
+        expert_feature_array, mel_spectrogram_array, label_array = MGC.dict2array(directory_files_feature_dict,
+                                                                                  label_list,
+                                                                                  MGC.cfg.normalize)
+
+        # Save extracted data
+        expert_feature_array, mel_spectrogram_array, label_array = MGC.save_data(expert_feature_array, mel_spectrogram_array, label_array)
 
         # Run feature extraction or load pre-extracted feature
-        if use_expert_feature is True:
-            train_data, test_data, train_label, test_label = MGC.make_dataset(expert_feature_array, list_array, "../feature/expert")
-        else:
-            train_data, test_data, train_label, test_label = MGC.make_dataset(mel_spectrogram_array, list_array, "../feature/mel_spectrogram")
+        MGC.make_dataset(expert_feature_array, label_array, "../feature/expert")
+        MGC.make_dataset(mel_spectrogram_array, label_array, "../feature/mel_spectrogram")
+
+    # Load pre-extracted feature
+    if MGC.CLF.selected_classifier == 'cnn' or MGC.CLF.selected_classifier == 'resnet':
+        train_data, test_data, train_label, test_label = DataProcess.read_dataset_from_array("../feature/mel_spectrogram")
     else:
-        # Load pre-extracted feature
-        if use_expert_feature is True:
-            train_data, test_data, train_label, test_label = DataProcess.read_dataset_from_array(pre_extracted_expert_feature_directory)
-        else:
-            train_data, test_data, train_label, test_label = DataProcess.read_dataset_from_array(pre_extracted_2d_feature_directory)
+        train_data, test_data, train_label, test_label = DataProcess.read_dataset_from_array("../feature/expert")
 
     # Run training or load pre-trained model
-    model = MGC.training(run_training, train_data, train_label, pre_trained_model_file, output_model_directory_path="../model")
+    model = MGC.training(run_training, train_data, train_label,
+                         pre_trained_model_file, output_model_directory_path="../model")
 
     # Test model performance
     accuracy = MGC.test(model, test_data, test_label)

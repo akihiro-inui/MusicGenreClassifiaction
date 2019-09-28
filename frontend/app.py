@@ -50,7 +50,7 @@ def prediction_process(input_audio_file_path: str):
     feature_dict = AFE.extract_file(input_audio_file_path)
 
     # Stats across frames
-    # stats_dict = AFE.get_feature_stats(feature_dict, "mean")
+    stats_dict = AFE.get_feature_stats(feature_dict, "mean")
 
     # Segment dictionary data
     # segmented_dict = DataProcess.segment_feature_dict(stats_dict)
