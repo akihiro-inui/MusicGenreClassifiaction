@@ -8,6 +8,7 @@ Created on Fri Mar 23 02:01:21 2018
 import os
 import time
 import numpy as np
+from tqdm import tqdm
 from backend.src.common.config_reader import ConfigReader
 from backend.src.preprocess.audio_preprocess import AudioPreProcess
 from backend.src.feature_extraction.mel_spectrogram import mel_spectrogram
@@ -23,6 +24,7 @@ from backend.src.feature_extraction.low_energy import low_energy
 from backend.src.feature_extraction.modulation_spectrum_feature import MSF
 from backend.src.utils.stats_tool import get_mean, get_std
 from backend.src.utils.file_utils import FileUtil
+from backend.src.data_process.data_process import DataProcess
 
 
 class AudioFeatureExtraction:
@@ -222,7 +224,7 @@ class AudioFeatureExtraction:
         start = time.time()
 
         # Extract each audio file
-        for count, audio_file in enumerate(file_names):
+        for count, audio_file in tqdm(enumerate(file_names)):
             # Extract features from one audio file
             file_feature_dict[audio_file] = self.extract_file(os.path.join(input_directory, audio_file))
 
@@ -248,7 +250,7 @@ class AudioFeatureExtraction:
 
         # Extract all features and store them into list
         directory_files_feature_dict = {}
-        for directory, audio_files in directory_files_dict.items():
+        for directory, audio_files in tqdm(directory_files_dict.items()):
             # Apply feature extraction to one directory
             directory_files_feature_dict[directory] = self.extract_directory(os.path.join(dataset_path, directory))
 

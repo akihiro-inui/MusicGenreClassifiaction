@@ -460,10 +460,32 @@ class DataProcess:
     def min_max_normalize(input_array, axis=0):
         """
         Normalize numpy array with max min method
-        :param input_array: Input Numpy array (currently only 2D)
+        :param input_array: Input Numpy array
         :param axis: 0 for column, 1 for row
         :return: Normalized numpy array
         """
         output_array = input_array - input_array.mean(axis=axis)
         output_array = output_array / np.abs(output_array).max(axis=axis)
         return output_array
+
+    @staticmethod
+    def take_dataset_stats(feature_array, output_text_file_path: str):
+        """
+        Take stats from dataset. Save it as text file
+        :param  feature_array: extracted feature in 2D numpy array
+        """
+        # Take mean value across data points
+        mean_list = np.mean(feature_array, axis=0)
+
+        # Write to text file
+        with open(output_text_file_path, "w") as filehandle:
+            for element in mean_list:
+                filehandle.write('%s\n' % element)
+
+    @staticmethod
+    def remove_nan_from_array(feature_array):
+        """
+        Remove rows contain NaN from numpy array
+        :param  feature_array: extracted feature in 2D numpy array
+        """
+        return feature_array[~np.isnan(feature_array).any(axis=1)]

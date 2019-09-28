@@ -113,7 +113,7 @@ class Classifier:
         :return  model: trained   model
         """
         print("Train Started")
-        if self.selected_classifier == "cnn" or "resnet":
+        if self.selected_classifier == "cnn" or self.selected_classifier == "resnet":
             # Make Torch dataset loader for train
             train_loader, validation_loader = DataProcess.torch_train_data_loader(train_data, train_label, self.validation_rate)
             # Train model
@@ -131,7 +131,7 @@ class Classifier:
         :return Over all test score (accuracy)
         """
         print("Test Started")
-        if self.selected_classifier == "cnn" or "resnet":
+        if self.selected_classifier == "cnn" or self.selected_classifier == "resnet":
             # Make Torch dataset loader for test
             test_loader = DataProcess.torch_test_data_loader(test_data, test_label)
             # Test model performance
