@@ -69,7 +69,8 @@ class MusicGenreClassification:
         """
         # Get folder names
         label_list = FileUtil.get_folder_names(self.dataset_path, sort=True)
-        assert len(label_list) == self.cfg.num_classes, "Number of the classes mismatch"
+        assert len(label_list) == self.cfg.num_classes, \
+            "Number of the classes mismatch. Change num_classes in master_config.ini"
         FileUtil.list2csv(label_list, "./label.csv")
 
     def dict2array(self, directory_files_feature_dict: dict, label_list: list, normalize: bool):
@@ -112,27 +113,21 @@ class MusicGenreClassification:
 
         return expert_feature_array, mel_spectrogram_array, label_array
 
-    def make_dataset(self, feature_array, label_array, output_directory: str):
+    def make_dataset_from_array(self, feature_array, label_array):
         """
         Take all data and label as input. Split into train/test dataset.
         :param  feature_array: extracted feature in 2D numpy array or 3D numpy array
         :param  label_array: labels in numpy array
-        :param  output_directory: output directory to write out the train and test data
         :return train_data:  train data
         :return train_label: train label
         :return test_data:   test data
         :return test_label:  test label
         """
 
-        # Make directory if it does not exist
-        if not os.path.isdir(output_directory):
-            os.mkdir(output_directory)
-
         train_data, test_data, train_label, test_label = DataProcess.make_dataset_from_array(feature_array,
                                                                                              label_array,
                                                                                              self.cfg.test_rate,
-                                                                                             self.cfg.shuffle,
-                                                                                             output_directory)
+                                                                                             self.cfg.shuffle)
         return train_data, test_data, train_label, test_label
 
     def training(self, run_training: bool, train_data, train_label,
@@ -186,7 +181,7 @@ def main():
 
     # Instantiate mgc main class
     MGC = MusicGenreClassification(AudioDatasetMaker, AudioFeatureExtraction, Classifier,
-                                   music_dataset_path="../../processed_data_genre",
+                                   music_dataset_path="../../processed_data_alphanote",
                                    setting_file="../../config/master_config.ini")
 
     # Make label from genre names in processed_music_data
@@ -205,19 +200,16 @@ def main():
         # Save extracted data
         expert_feature_array, mel_spectrogram_array, label_array = MGC.save_data(expert_feature_array, mel_spectrogram_array, label_array)
 
-        # Run feature extraction or load pre-extracted feature
-        MGC.make_dataset(expert_feature_array, label_array, "../feature/expert")
-        MGC.make_dataset(mel_spectrogram_array, label_array, "../feature/mel_spectrogram")
-
-    # Load pre-extracted feature
+    # Load pre-extracted feature. Train/Test separation
     if MGC.CLF.selected_classifier == 'cnn' or MGC.CLF.selected_classifier == 'resnet':
-        train_data, test_data, train_label, test_label = DataProcess.read_dataset_from_array("../feature/mel_spectrogram")
+        data_array, label_array = DataProcess.read_data_from_array("../feature/mel_spectrogram")
+        train_data, test_data, train_label, test_label = MGC.make_dataset_from_array(data_array, label_array)
     else:
-        train_data, test_data, train_label, test_label = DataProcess.read_dataset_from_array("../feature/expert")
+        data_array, label_array = DataProcess.read_data_from_array("../feature/expert")
+        train_data, test_data, train_label, test_label = MGC.make_dataset_from_array(data_array, label_array)
 
     # Run training or load pre-trained model
-    model = MGC.training(run_training, train_data, train_label,
-                         pre_trained_model_file, output_model_directory_path="../model")
+    model = MGC.training(run_training, train_data, train_label, pre_trained_model_file, output_model_directory_path="../model")
 
     # Test model performance
     accuracy = MGC.test(model, test_data, test_label)
