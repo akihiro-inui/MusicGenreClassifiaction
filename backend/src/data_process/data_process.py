@@ -297,7 +297,7 @@ class DataProcess:
         return train_data, test_data, train_label, test_label
 
     @staticmethod
-    def make_dataset_from_array(feature_array, label_array, test_size: float, shuffle: bool = False, output_directory: str = None):
+    def make_dataset_from_array(feature_array, label_array, test_size: float, shuffle: bool = False):
         """
         Make 2D array data set and save the train/test data under output_directory
         1. Split them into train/test data and train/test label
@@ -308,15 +308,11 @@ class DataProcess:
         :param  label_array:  labels in numpy array
         :param  test_size:   size of test data set
         :param  shuffle:     set True for randomisation
-        :param  output_directory: output directory to save train and test data
         :return train_data:  train data
         :return train_label: train label
         :return test_data:   test data
         :return test_label:  test label
         """
-        # Make output directory if it does not exist
-        if not os.path.isdir(output_directory):
-            os.mkdir(output_directory)
 
         # Train/Test separation
         train_data, test_data, train_label, test_label = train_test_split(feature_array,
@@ -325,13 +321,7 @@ class DataProcess:
                                                                           shuffle=shuffle)
 
         # Write out train and test data as .npy files if output directory name is given
-        if output_directory:
-            np.save(os.path.join(output_directory, "train_data"), train_data)
-            np.save(os.path.join(output_directory, "train_label"), train_label)
-            np.save(os.path.join(output_directory, "test_data"), test_data)
-            np.save(os.path.join(output_directory, "test_label"), test_label)
-        else:
-            print("Dataset is created but not saved")
+        print("Dataset is created")
         return train_data, test_data, train_label, test_label
 
     @staticmethod
@@ -362,7 +352,7 @@ class DataProcess:
         return train_data, test_data, train_label, test_label
 
     @staticmethod
-    def read_dataset_from_array(input_data_directory: str):
+    def read_train_test_data_from_array(input_data_directory: str):
         """
         Read data set saved as numpy array under the given directory, return data and label
         :param  input_data_directory: input data directory with time where train.csv and test.csv exist
@@ -388,6 +378,27 @@ class DataProcess:
         test_label = np.load(test_label_file_path)
 
         return train_data, test_data, train_label, test_label
+
+    @staticmethod
+    def read_data_from_array(input_data_directory: str):
+        """
+        Read data set saved as numpy array under the given directory, return data and label
+        :param  input_data_directory: input data directory with time where train.csv and test.csv exist
+        :return data: data in numpy array
+        :return label: label in numpy arrays
+        """
+        # Get file path
+        data_file_path = os.path.join(input_data_directory, "data.npy")
+        label_file_path = os.path.join(input_data_directory, "label.npy")
+
+        # Check if the given data set exist
+        FileUtil.is_valid_file(data_file_path)
+        FileUtil.is_valid_file(label_file_path)
+
+        # Read npy file
+        data_array = np.load(data_file_path)
+        label_array = np.load(label_file_path)
+        return data_array, label_array
 
     @staticmethod
     def flatten_list(input_list: list) -> list:
