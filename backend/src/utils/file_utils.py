@@ -236,3 +236,16 @@ class FileUtil:
         if not FileUtil.is_valid_file(input_text_file):
             assert "Not valid file path"
         return [line.rstrip('\n') for line in open(input_text_file)]
+
+    @staticmethod
+    def commatext2list(input_text_file: str):
+        """
+        Read new line separated text file into list
+        :param input_text_file: input text file
+        :return: list of elements
+        """
+        if not FileUtil.is_valid_file(input_text_file):
+            assert "Not valid file path"
+        with open(input_text_file, 'r') as f:
+            reader = csv.reader(f)
+            return list(reader)
