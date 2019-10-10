@@ -329,6 +329,7 @@ class AudioFeatureExtraction:
         feature_stat_dict = {}
 
         for feature_name, values in feature_frame_dict.items():
+            print(feature_name)
             if type(values[0]) is not list and values[0].ndim >= 2:
                 if stat_type == "mean":
                     feature_frame_dict[feature_name] = np.mean(values[:], axis=0) + 1e-8

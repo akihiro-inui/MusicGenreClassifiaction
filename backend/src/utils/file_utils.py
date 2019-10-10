@@ -226,3 +226,13 @@ class FileUtil:
         """
         return np.load(input_file_path)
 
+    @staticmethod
+    def text2list(input_text_file: str):
+        """
+        Read new line separated text file into list
+        :param input_text_file: input text file
+        :return: list of elements
+        """
+        if not FileUtil.is_valid_file(input_text_file):
+            assert "Not valid file path"
+        return [line.rstrip('\n') for line in open(input_text_file)]
