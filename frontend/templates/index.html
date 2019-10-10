@@ -2,10 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Music Genre Classification</title>
+    <title>Artist Classification</title>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js'></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <!--<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>-->
     <script src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js"></script>
     <script src='../node_modules/chart.js/dist/Chart.js'></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
@@ -16,7 +15,7 @@
 <div class="main_screen">
 
     <div class="cover" style="text-align: center; font-size: 12px; color: #005cbf; margin-top: 5vh;">
-        <h1>Music Genre Classification Demo</h1>
+        <h1>Artist Classification Demo</h1>
     </div>
 
     <div id="canvas-holder" style="width:100%">
@@ -34,9 +33,6 @@
         {% endfor %}
         ];
         // get pie chart canvas
-        // var mychart = document.getElementById("chart").getContext("2d");
-        // steps = 10
-        // max = {{ max }}
         var pieOptions = {
             animation : false,  // Edit: correction typo: from 'animated' to 'animation'
         }
@@ -56,10 +52,7 @@
         }
         </script>
 
-<!--    <form method="post" action="/select" style="text-align: center; margin: 4vh 0" >-->
-<!--        <input type="submit" class="btn btn-outline-info" value="Select Music" id="select">-->
-<!--    </form>-->
-    <form method="post" enctype=multipart/form-data action="/predict">
+    <form method="post" enctype=multipart/form-data action="/predict" style="padding-top: 20px">
         <input type=file class="btn btn-primary btn-sm" name=file>
         <input type=submit class="btn btn-outline-info" value=Predict>
     </form>

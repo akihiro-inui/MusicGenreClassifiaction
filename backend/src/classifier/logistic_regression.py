@@ -11,7 +11,6 @@ import numpy as np
 import cloudpickle
 from torch import nn, optim
 import matplotlib.pyplot as plt
-from torch.nn import functional as F
 
 
 class TorchLinearRegression(torch.nn.Module):
@@ -20,7 +19,7 @@ class TorchLinearRegression(torch.nn.Module):
         self.linear = torch.nn.Linear(input_size, output_size)
 
     def forward(self, x):
-        y_pred = F.sigmoid(self.linear(x))
+        y_pred = torch.sigmoid(self.linear(x))
         return y_pred
 
 
@@ -53,9 +52,8 @@ class LogisticRegression:
 
         # Define the model
         model = TorchLinearRegression(train_data.shape[1], self.num_classes)
-        # model = nn.Linear(train_data.shape[1], self.num_classes)
 
-        # Softmax Cross Entropy
+        # Cross Entropy
         loss_fn = nn.CrossEntropyLoss()
 
         # SGD
@@ -63,7 +61,7 @@ class LogisticRegression:
 
         # To log losses
         losses = []
-        for epoch in range(30000):
+        for epoch in range(100000):
             # Delete gradient value calculated in previous epoch
             optimizer.zero_grad()
 

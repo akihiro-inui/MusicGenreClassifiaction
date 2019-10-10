@@ -32,7 +32,7 @@ ALLOWED_EXTENSIONS = set(['wav', 'mp3'])
 # output_wav_file_name = "data/recording.wav"
 AFE = AudioFeatureExtraction("../config/master_config.ini")
 CLF = Classifier("../config/master_config.ini")
-model = CLF.load_model("../backend/model/2019-10-10_22_00_21.896549/logistic_regression.pkl")
+model = CLF.load_model("../backend/model/2019-10-10_22_45_47.542471/logistic_regression.pkl")
 # mean_list = "../backend/mean_list.csv"
 # std_list = "../backend/std_list.csv"
 
@@ -111,7 +111,7 @@ def predict():
     # Prediction to recording data
     prediction_list = prediction_process(file_path)
 
-    labels = ["Blues", "Classical", "Country", "Disco", "Hiphop", "Jazz", "Metal", "Pop", "Reggae", "Rock"]
+    labels = FileUtil.commatext2list('../backend/src/label.csv')[0]
     colors = ["#F7464A", "#46BFBD", "#FDB45C", "#FEDCBA", "#ABCDEF", "#DDDDDD", "#ABCABC", "#00FF80", "#FFFF99", "#FFCCFF"]
     return render_template('index.html', set=zip(prediction_list, labels, colors))
 

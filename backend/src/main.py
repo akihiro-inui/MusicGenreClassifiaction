@@ -182,7 +182,7 @@ def main():
     pre_trained_model_file = ""
 
     # Set Conditions
-    run_feature_extraction = True
+    run_feature_extraction = False
     run_training = True
 
     # Instantiate mgc main class
