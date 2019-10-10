@@ -111,10 +111,8 @@ def predict():
     # Prediction to recording data
     prediction_list = prediction_process(file_path)
 
-    labels = ["Blues", "Classical"]
-    colors = ["#F7464A", "#46BFBD"]
-    # labels = ["Blues", "Classical", "Country", "Disco", "Hiphop", "Jazz", "Metal", "Pop", "Reggae", "Rock"]
-    # colors = ["#F7464A", "#46BFBD", "#FDB45C", "#FEDCBA", "#ABCDEF", "#DDDDDD", "#ABCABC", "#00FF80", "#FFFF99", "#FFCCFF"]
+    labels = ["Blues", "Classical", "Country", "Disco", "Hiphop", "Jazz", "Metal", "Pop", "Reggae", "Rock"]
+    colors = ["#F7464A", "#46BFBD", "#FDB45C", "#FEDCBA", "#ABCDEF", "#DDDDDD", "#ABCABC", "#00FF80", "#FFFF99", "#FFCCFF"]
     return render_template('index.html', set=zip(prediction_list, labels, colors))
 
 
