@@ -14,3 +14,4 @@ onnx_coreml
 pytorch2keras
 onnx_tf
 torchvision
+cloudpickle

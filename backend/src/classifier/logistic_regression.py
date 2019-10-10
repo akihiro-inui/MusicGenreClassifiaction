@@ -8,8 +8,20 @@ Created on 17 May 2019
 import os
 import torch
 import numpy as np
+import cloudpickle
 from torch import nn, optim
 import matplotlib.pyplot as plt
+from torch.nn import functional as F
+
+
+class TorchLinearRegression(torch.nn.Module):
+    def __init__(self, input_size, output_size):
+        super(TorchLinearRegression, self).__init__()
+        self.linear = torch.nn.Linear(input_size, output_size)
+
+    def forward(self, x):
+        y_pred = F.sigmoid(self.linear(x))
+        return y_pred
 
 
 class LogisticRegression:
@@ -40,7 +52,8 @@ class LogisticRegression:
         onehot_train_label = torch.tensor(np.array(train_label), dtype=torch.long)
 
         # Define the model
-        model = nn.Linear(train_data.shape[1], self.num_classes)
+        model = TorchLinearRegression(train_data.shape[1], self.num_classes)
+        # model = nn.Linear(train_data.shape[1], self.num_classes)
 
         # Softmax Cross Entropy
         loss_fn = nn.CrossEntropyLoss()
@@ -90,7 +103,9 @@ class LogisticRegression:
         :param  model: trained model
         :param  output_directory: output directory path
         """
-        torch.save(model.state_dict(), os.path.join(output_directory, "logistic_regression.prm"), pickle_protocol=4)
+        with open(os.path.join(output_directory, "logistic_regression.pkl"), 'wb') as f:
+            cloudpickle.dump(model, f)
+        # torch.save(model.state_dict(), os.path.join(output_directory, "logistic_regression.prm"), pickle_protocol=4)
 
     def test(self, model, test_data, test_label, is_classification=True):
         """
@@ -122,4 +137,5 @@ class LogisticRegression:
         :return prediction array with probability
         """
         # Make prediction to the target data
-        return model(torch.tensor(np.array(target_data), dtype=torch.float32))
+        output = model(torch.tensor(target_data, dtype=torch.float32))
+        return np.array(output.data)

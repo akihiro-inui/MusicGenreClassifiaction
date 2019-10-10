@@ -88,7 +88,13 @@ class MusicGenreClassification:
 
         # Normalize expert feature
         if normalize is True:
+            # Remove NaNs from array
+            expert_feature_array = DataProcess.remove_nan_from_array(expert_feature_array)
+
+            # Take stats from expert feature
+            DataProcess.take_dataset_stats(expert_feature_array, './expert_feature_mean_list.txt')
             expert_feature_array = DataProcess.min_max_normalize(expert_feature_array)
+
         return expert_feature_array, mel_spectrogram_array, label_array
 
     def save_data(self, expert_feature_array, mel_spectrogram_array, label_array):
@@ -103,7 +109,7 @@ class MusicGenreClassification:
         expert_feature_array = DataProcess.remove_nan_from_array(expert_feature_array)
 
         # Take stats from expert feature
-        DataProcess.take_dataset_stats(expert_feature_array, './expert_feature_mean_list.txt')
+        DataProcess.take_dataset_stats(expert_feature_array, './normalized_expert_feature_mean_list.txt')
 
         # Save data
         np.save(os.path.join('../feature/expert', "data"), expert_feature_array)

@@ -8,6 +8,7 @@ Created on sleepy midnight in Aug
 from __future__ import print_function
 import os
 import numpy as np
+import cloudpickle
 import torch
 import torch.onnx
 import torch.nn as nn
@@ -217,4 +218,6 @@ class CNN:
         :param  model: trained model
         :param  output_directory: output directory path
         """
-        torch.save(model.state_dict(), os.path.join(output_directory, "cnn.prm"), pickle_protocol=4)
+        with open(os.path.join(output_directory, "cnn.prm"), 'wb') as f:
+            cloudpickle.dump(model, f)
+        # torch.save(model.state_dict(), os.path.join(output_directory, "cnn.prm"), pickle_protocol=4)

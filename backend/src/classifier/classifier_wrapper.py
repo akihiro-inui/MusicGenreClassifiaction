@@ -8,6 +8,8 @@ Created on Sat Mar 17 23:14:28 2018
 # Import libraries/modules
 import os
 import pickle
+import torch
+import cloudpickle
 import matplotlib.pyplot as plt
 from backend.src.classifier.kNN import kNN
 from backend.src.classifier.cnn import CNN
@@ -89,6 +91,12 @@ class Classifier:
         if input_model_file_name.endswith(".pickle"):
             with open(input_model_file_name, mode='rb') as fp:
                 loaded_model = pickle.load(fp)
+        elif input_model_file_name.endswith(".prm"):
+            loaded_model = torch.load(input_model_file_name)
+            loaded_model.eval()
+        elif input_model_file_name.endswith(".pkl"):
+            with open(input_model_file_name, 'rb') as f:
+                loaded_model = cloudpickle.load(f)
         else:
             loaded_model = load_model(input_model_file_name)
         return loaded_model
@@ -140,7 +148,7 @@ class Classifier:
             # Test model performance
             return self.classifier.test(model, test_data, test_label)
 
-    def predict(self, model, target_data) -> float:
+    def predict(self, model, target_data) -> list:
         """
         Make prediction to a given target data and return the prediction result with accuracy for each sample
         :param  model: trained model
