@@ -15,6 +15,7 @@ from backend.src.classifier.kNN import kNN
 from backend.src.classifier.cnn import CNN
 from backend.src.classifier.mlp import MultiLayerPerceptron as MLP
 from backend.src.classifier.resnet import ResNet
+from backend.src.classifier.rnn import CustomRNN
 from backend.src.data_process.data_process import DataProcess
 from backend.src.classifier.logistic_regression import LogisticRegression
 from backend.src.common.config_reader import ConfigReader
@@ -68,6 +69,8 @@ class Classifier:
             classifier = CNN(self.validation_rate, self.num_classes)
         elif self.selected_classifier == "resnet":
            classifier = ResNet(self.validation_rate, self.num_classes)
+        elif self.selected_classifier == "rnn":
+            classifier = CustomRNN(self.validation_rate, self.num_classes)
         assert classifier is not None, "No classifier selected. Please select one"
         return classifier
 
@@ -121,7 +124,7 @@ class Classifier:
         :return  model: trained   model
         """
         print("Train Started")
-        if self.selected_classifier == "cnn" or self.selected_classifier == "resnet":
+        if self.selected_classifier == "cnn" or self.selected_classifier == "resnet" or self.selected_classifier == "rnn":
             # Make Torch dataset loader for train
             train_loader, validation_loader = DataProcess.torch_train_data_loader(train_data, train_label, self.validation_rate)
             # Train model
@@ -139,7 +142,7 @@ class Classifier:
         :return Over all test score (accuracy)
         """
         print("Test Started")
-        if self.selected_classifier == "cnn" or self.selected_classifier == "resnet":
+        if self.selected_classifier == "cnn" or self.selected_classifier == "resnet" or self.selected_classifier == "rnn":
             # Make Torch dataset loader for test
             test_loader = DataProcess.torch_test_data_loader(test_data, test_label)
             # Test model performance
