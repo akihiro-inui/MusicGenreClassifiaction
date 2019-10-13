@@ -182,7 +182,7 @@ def main():
     pre_trained_model_file = ""
 
     # Set Conditions
-    run_feature_extraction = False
+    run_feature_extraction = True
     run_training = True
 
     # Instantiate mgc main class
@@ -207,7 +207,7 @@ def main():
         expert_feature_array, mel_spectrogram_array, label_array = MGC.save_data(expert_feature_array, mel_spectrogram_array, label_array)
 
     # Load pre-extracted feature. Train/Test separation
-    if MGC.CLF.selected_classifier == 'cnn' or MGC.CLF.selected_classifier == 'resnet':
+    if MGC.CLF.selected_classifier == 'cnn' or MGC.CLF.selected_classifier == 'resnet' or MGC.CLF.selected_classifier == 'rnn':
         data_array, label_array = DataProcess.read_data_from_array("../feature/mel_spectrogram")
         train_data, test_data, train_label, test_label = MGC.make_dataset_from_array(data_array, label_array)
     else:

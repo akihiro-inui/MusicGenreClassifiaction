@@ -92,6 +92,7 @@ class ConfigReader:
         self.MLP = bool(cfg.get('classifier_selection', 'mlp'))
         self.CNN = bool(cfg.get('classifier_selection', 'cnn'))
         self.ResNet = bool(cfg.get('classifier_selection', 'resnet'))
+        self.RNN = bool(cfg.get('classifier_selection', 'rnn'))
 
     def __init_classification(self, cfg):
         # Parameters for classification

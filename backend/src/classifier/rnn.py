@@ -15,42 +15,41 @@ import torch.nn as nn
 import torch.optim as optim
 import matplotlib.pyplot as plt
 import tqdm
+from torch.autograd import Variable
 
 
-class FlattenLayer(nn.Module):
-    def forward(self, inputs):
-        sizes = inputs.size()
-        return inputs.view(sizes[0], -1)
+class RNNModel(nn.Module):
+    def __init__(self, input_dim, hidden_dim, layer_dim, output_dim):
+        super(RNNModel, self).__init__()
+        # Number of hidden dimensions
+        self.hidden_dim = hidden_dim
+
+        # Number of hidden layers
+        self.layer_dim = layer_dim
+
+        # RNN
+        self.rnn = nn.RNN(input_dim, hidden_dim, layer_dim, batch_first=True,
+                          nonlinearity='relu')
+
+        # Readout layer
+        self.fc = nn.Linear(hidden_dim, output_dim)
+
+    def forward(self, x):
+        # Initialize hidden state with zeros
+        h0 = Variable(torch.zeros(self.layer_dim, x.size(0), self.hidden_dim))
+
+        # One time step
+        out, hn = self.rnn(x, h0)
+        out = self.fc(out[:, -1, :])
+        return out
 
 
-class CNN:
+class CustomRNN:
     def __init__(self, validation_rate, num_classes):
         self.validation_rate = validation_rate
         self.num_classes = num_classes
 
-        conv = nn.Sequential(
-            nn.Conv2d(1, 64, 5),
-            nn.MaxPool2d(2),
-            nn.ReLU(),
-            nn.BatchNorm2d(64),
-            nn.Dropout2d(0.25),
-            nn.Conv2d(64, 64, 5),
-            nn.MaxPool2d(2),
-            nn.ReLU(),
-            nn.BatchNorm2d(64),
-            nn.Dropout2d(0.25),
-            FlattenLayer()
-        )
-
-        mlp = nn.Sequential(
-            nn.Linear(10816, 200),
-            nn.ReLU(),
-            nn.BatchNorm1d(200),
-            nn.Dropout(0.25),
-            nn.Linear(200, num_classes),
-        )
-
-        self.model = nn.Sequential(conv, mlp)
+        self.model = RNNModel(input_dim=64, hidden_dim=10, layer_dim=10, output_dim=num_classes)
 
         self.optimizer = optim.Adam(self.model.parameters(), lr=0.001)
         self.loss_function = nn.CrossEntropyLoss()
@@ -61,9 +60,9 @@ class CNN:
         train_accuracy_history = []
         validation_loss_history = []
         validation_accuracy_history = []
-        for epoch in range(1, 20):
+        for epoch in range(1, 200):
             # Set to train mode
-            self.model.train()
+            # self.model.train()
 
             # Iteration for batch
             batch_accuracy = 0
@@ -75,8 +74,9 @@ class CNN:
                 label = label.to("cpu")
 
                 # Forward data and calculate loss
-                data = data.unsqueeze(1)  # Make 3D array to 4D
+                # data = data.unsqueeze(1)  # Make 3D array to 4D
                 output = self.model(data)
+
                 _, prediction = output.max(1)
                 loss = self.loss_function(output, label)
 
@@ -144,7 +144,7 @@ class CNN:
             label = label.to("cpu")
 
             # Forward data and calculate loss
-            data = data.unsqueeze(1)  # Make 3D array to 4D
+            # data = data.unsqueeze(1)  # Make 3D array to 4D
             with torch.no_grad():
                 output = model(data)
                 _, prediction = output.max(1)
@@ -178,7 +178,7 @@ class CNN:
             label = label.to("cpu")
 
             # Forward data and calculate loss
-            data = data.unsqueeze(1)  # Make 3D array to 4D
+            # data = data.unsqueeze(1)  # Make 3D array to 4D
             with torch.no_grad():
                 output = model(data)
                 _, prediction = output.max(1)
@@ -218,6 +218,6 @@ class CNN:
         :param  model: trained model
         :param  output_directory: output directory path
         """
-        with open(os.path.join(output_directory, "cnn.pkl"), 'wb') as f:
+        with open(os.path.join(output_directory, "rnn.pkl"), 'wb') as f:
             cloudpickle.dump(model, f)
 
