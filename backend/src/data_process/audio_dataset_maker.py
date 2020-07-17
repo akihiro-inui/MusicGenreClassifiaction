@@ -14,6 +14,8 @@ from backend.src.utils.file_utils import FileUtil
 from backend.src.utils.audio_util import AudioUtil
 from backend.src.common.config_reader import ConfigReader
 import matplotlib.pyplot as plt
+from tqdm import tqdm
+
 
 class AudioReaderError(Exception):
     pass
@@ -155,9 +157,9 @@ class AudioDatasetMaker:
 
 if __name__ == "__main__":
     # File path
-    setting_file = "../../../config/master_config.ini"
-    input_dataset_path = "../../../data"
-    output_dataset_path = "../../../processed_music_data"
+    setting_file = "config/master_config.ini"
+    input_dataset_path = "data"
+    output_dataset_path = "processed_music_data"
 
     # Instantiate class
     ADM = AudioDatasetMaker(setting_file)

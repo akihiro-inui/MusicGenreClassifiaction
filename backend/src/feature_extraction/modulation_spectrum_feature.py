@@ -76,8 +76,8 @@ class MSF:
             mod_spectrum = FFT.power_fft(zero_padded_bin_sum, mod_fft_size)
 
             # Calculate minimum and peak
-            peak = max(np.log10(mod_spectrum))
-            minimum = min(np.log10(mod_spectrum))
+            peak = max(np.log10(mod_spectrum+np.finfo(float).eps))
+            minimum = min(np.log10(mod_spectrum+np.finfo(float).eps))
 
             # Search valley from first half frame
             valley_array.append(min(np.log10(mod_spectrum[1:round(self.binstep / 2)])))

@@ -15,7 +15,7 @@ import torch.onnx
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
-from onnx_tf.backend import prepare
+# from onnx_tf.backend import prepare
 from onnx_coreml import convert
 import matplotlib.pyplot as plt
 from torchvision import transforms

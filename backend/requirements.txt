@@ -8,10 +8,11 @@ flask
 scikit-learn[alldeps]
 librosa
 torch
-tensorflow
+tensorflow==2.1.0
 pydub
 onnx_coreml
 pytorch2keras
 onnx_tf
 torchvision
 cloudpickle
+numba==0.48

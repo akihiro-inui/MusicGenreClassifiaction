@@ -92,7 +92,7 @@ class MusicGenreClassification:
             expert_feature_array = DataProcess.remove_nan_from_array(expert_feature_array)
 
             # Take stats from expert feature
-            DataProcess.take_dataset_stats(expert_feature_array, './expert_feature_mean_list.txt')
+            DataProcess.take_dataset_stats(expert_feature_array, 'backend/expert_feature_mean_list.txt')
             expert_feature_array = DataProcess.min_max_normalize(expert_feature_array)
 
         return expert_feature_array, mel_spectrogram_array, label_array
@@ -109,13 +109,13 @@ class MusicGenreClassification:
         expert_feature_array = DataProcess.remove_nan_from_array(expert_feature_array)
 
         # Take stats from expert feature
-        DataProcess.take_dataset_stats(expert_feature_array, './normalized_expert_feature_mean_list.txt')
+        DataProcess.take_dataset_stats(expert_feature_array, 'backend/normalized_expert_feature_mean_list.txt')
 
         # Save data
-        np.save(os.path.join('../feature/expert', "data"), expert_feature_array)
-        np.save(os.path.join('../feature/expert', "label"), label_array)
-        np.save(os.path.join('../feature/mel_spectrogram', "data"), expert_feature_array)
-        np.save(os.path.join('../feature/mel_spectrogram', "label"), label_array)
+        np.save(os.path.join('backend/feature/expert', "data"), expert_feature_array)
+        np.save(os.path.join('backend/feature/expert', "label"), label_array)
+        np.save(os.path.join('backend/feature/mel_spectrogram', "data"), expert_feature_array)
+        np.save(os.path.join('backend/feature/mel_spectrogram', "label"), label_array)
 
         return expert_feature_array, mel_spectrogram_array, label_array
 
@@ -187,8 +187,8 @@ def main():
 
     # Instantiate mgc main class
     MGC = MusicGenreClassification(AudioDatasetMaker, AudioFeatureExtraction, Classifier,
-                                   music_dataset_path="../../processed_data_alphanote",
-                                   setting_file="../../config/master_config.ini")
+                                   music_dataset_path="processed_music_data_small",
+                                   setting_file="config/master_config.ini")
 
     # Make label from genre names in processed_music_data
     MGC.make_label()
@@ -208,14 +208,14 @@ def main():
 
     # Load pre-extracted feature. Train/Test separation
     if MGC.CLF.selected_classifier == 'cnn' or MGC.CLF.selected_classifier == 'resnet' or MGC.CLF.selected_classifier == 'rnn':
-        data_array, label_array = DataProcess.read_data_from_array("../feature/mel_spectrogram")
+        data_array, label_array = DataProcess.read_data_from_array("backend/feature/mel_spectrogram")
         train_data, test_data, train_label, test_label = MGC.make_dataset_from_array(data_array, label_array)
     else:
-        data_array, label_array = DataProcess.read_data_from_array("../feature/expert")
+        data_array, label_array = DataProcess.read_data_from_array("backend/feature/expert")
         train_data, test_data, train_label, test_label = MGC.make_dataset_from_array(data_array, label_array)
 
     # Run training or load pre-trained model
-    model = MGC.training(run_training, train_data, train_label, pre_trained_model_file, output_model_directory_path="../model")
+    model = MGC.training(run_training, train_data, train_label, pre_trained_model_file, output_model_directory_path="backend/model")
 
     # Test model performance
     accuracy = MGC.test(model, test_data, test_label)
