@@ -8,7 +8,7 @@ flask
 scikit-learn[alldeps]
 librosa
 torch
-tensorflow==2.1.0
+tensorflow==2.1.2
 pydub
 onnx_coreml
 pytorch2keras
